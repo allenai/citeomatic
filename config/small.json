@@ -1,0 +1,16 @@
+{
+  "dense_dim": 25,
+  "author_dim": 5,
+  "embedding_type": "basic",
+  "use_dense": true,
+  "use_citations": false,
+  "use_authors": false,
+  "use_sparse": false,
+  "use_holographic": false,
+  "use_paper_id": false,
+  "use_attention": false,
+  "use_src_tgt_embeddings": false,
+  "dense_type": "dense",
+  "dense_config": "20, 20",
+  "model_name": "combined"
+}

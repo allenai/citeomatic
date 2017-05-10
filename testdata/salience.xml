@@ -1,0 +1,651 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<TEI xmlns="http://www.tei-c.org/ns/1.0" 
+xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+xsi:schemaLocation="http://www.tei-c.org/ns/1.0 /opt/grobid-home/schemas/xsd/Grobid.xsd"
+ xmlns:xlink="http://www.w3.org/1999/xlink">
+	<teiHeader xml:lang="en">
+		<encodingDesc>
+			<appInfo>
+				<application version="0.4.1" ident="GROBID" when="2016-12-02T19:44+0000">
+					<ref target="https://github.com/kermitt2/grobid">GROBID - A machine learning software for extracting information from scholarly documents</ref>
+				</application>
+			</appInfo>
+		</encodingDesc>
+		<fileDesc>
+			<titleStmt>
+				<title level="a" type="main">A Model of Saliency-based Visual Attention for Rapid Scene Analysis</title>
+			</titleStmt>
+			<publicationStmt>
+				<publisher/>
+				<availability status="unknown"><licence/></availability>
+			</publicationStmt>
+			<sourceDesc>
+				<biblStruct>
+					<analytic>
+						<author>
+							<persName>
+								<forename type="first">Laurent</forename>
+								<surname>Itti</surname>
+							</persName>
+						</author>
+						<author>
+							<persName>
+								<forename type="first">Christof</forename>
+								<surname>Koch</surname>
+							</persName>
+						</author>
+						<author>
+							<persName>
+								<forename type="first">Ernst</forename>
+								<surname>Niebur</surname>
+							</persName>
+						</author>
+						<title level="a" type="main">A Model of Saliency-based Visual Attention for Rapid Scene Analysis</title>
+					</analytic>
+					<monogr>
+						<imprint>
+							<date/>
+						</imprint>
+					</monogr>
+					<note>1</note>
+				</biblStruct>
+			</sourceDesc>
+		</fileDesc>
+		<profileDesc>
+			<textClass>
+				<keywords>
+					<term>Index terms: Visual attention</term>
+					<term>scene analysis</term>
+					<term>feature extrac- tion</term>
+					<term>target detection</term>
+					<term>visual search</term>
+				</keywords>
+			</textClass>
+			<abstract>
+				<p>{ A visual attention system, inspired by the behavior and the neuronal architecture of the early primate visual system, is presented. Multiscale image features are combined into a single topographical saliency map. A dynamical neu-ral network then selects attended locations in order of decreasing saliency. The system breaks down the complex problem of scene understanding by rapidly selecting, in a computationally eecient manner, conspicuous locations to be analyzed in detail.</p>
+			</abstract>
+		</profileDesc>
+	</teiHeader>
+	<text xml:lang="en">
+		<body>
+<div xmlns="http://www.tei-c.org/ns/1.0"><head>A Model of Saliency-based Visual Attention for Rapid Scene Analysis </head><p>Laurent Itti, Christof Koch and Ernst Niebur Abstract { A visual attention system, inspired by the behavior and the neuronal architecture of the early primate visual system, is presented. Multiscale image features are combined into a single topographical saliency map. A dynamical neural network then selects attended locations in order of decreasing saliency. The system breaks down the complex problem of scene understanding by rapidly selecting, in a computationally eecient manner, conspicuous locations to be analyzed in detail. </p><p> Index terms: Visual attention, scene analysis, feature extraction , target detection, visual search. </p></div>
+<div xmlns="http://www.tei-c.org/ns/1.0"><head>I. Introduction </head><p>Primates have a remarkable ability to interpret complex scenes in real time, despite the limited speed of the neuronal hardware available for such tasks. Intermediate and higher visual processes appear to select a subset of the available sensory information before further processing 1], most likely to reduce the complexity of scene <ref type="bibr" coords="1,139.80,353.05,43.12,16.90">analysis 2]</ref>. This selection appears to be implemented in the form of a spatially circumscribed region of the visual eld, the so-called \focus of attention," which scans the scene both in a rapid, bottom-up, saliency-driven and taskindependent manner as well as in a slower, top-down, volitioncontrolled and task-dependent manner 2] Models of attention include \dynamic routing" models, in which information from only a small region of the visual eld can progress through the cortical visual hierarchy. The attended region is selected through dynamic modiications of cortical connectivity , or through the establishment of speciic temporal patterns of activity, under both top-down (task-dependent) and bottom-up (scene-dependent</p><formula>) control 3], 2], 1]. </formula><p>The model proposed here (<ref type="figure" coords="1,171.94,490.30,28.58,19.24" target="#fig_1">Fig. 1</ref>) builds on a second biologically-plausible architecture, proposed by <ref type="bibr" coords="1,236.04,502.69,58.32,16.90;1,40.80,513.37,30.24,16.90">Koch and Ullman 4] </ref>and at the basis of several models 5], <ref type="bibr" coords="1,230.40,513.37,8.08,16.90" target="#b5">6]</ref>. It is related to the so-called \feature integration theory", proposed to explain human visual search strategies 7]. Visual input is rst decomposed into a set of topographic feature maps. Diierent spatial locations then compete for saliency within each map, such that only locations which locally stand out from their surround can persist. All feature maps feed, in a purely bottom-up manner, into a master \saliency map", which topographically codes for local conspicuity over the entire visual scene. In primates , such a map is believed to be located in the posterior L. Itti and C. Koch are with the Computation and Neural Systems Program , California Institute of Technology -139-74, Pasadena, CA 91125. E-mail: (itti,koch)@klab.caltech.edu | E. Niebur is with the Johns Hopkins University, Krieger Mind/Brain Institute, Baltimore, MD 21218. E-mail: niebur@jhu.edu parietal cortex 8] as well as in the various visual maps in the pulvinar nuclei of the thalamus 9]. The model's saliency map is endowed with internal dynamics which generate attentional shifts. This model consequently represents a complete account for bottom-up saliency, and does not require any top-down guidance to shift attention. This framework provides a massively parallel method for the fast selection of a small number of interesting image locations to be analyzed by more complex and time-consuming object recognition processes. Extending this approach, in \guided search" feedback from higher cortical areas (e.g., knowledge about targets to be found) was used to weight the importance of diierent features 10], such that only those with high weights could reach higher processing levels. </p><formula>| X | X | X | X | X | X | X | X | X | X | X | X | X | X | X | X | X | X | X | X | X | X | X | X | X | X | X | X | X | X | X | X | X | X | X | X | X | X | X | X | X | X | X | X | X | X | X | X | X | X | X | X | X | X | X | X | X | X | X | X | X | X | X | X | X | X | X | X | X | X | X | X | X | X | X | X | X | X | X | X | X | X | X | X | X | X | X | X | X | X | X | X | X | X | X | X | X | X | X | X | X | X | X | X | X | X | X | X | X | X | X | X | X | X | X | X | X | X | X | X | X | X | X | X | X | X | X | X | X | X | X | X | X | X | X | X | X | X | X | X | X | X | X | X </formula></div>
+<div xmlns="http://www.tei-c.org/ns/1.0"><head>II. Model </head><p>Input is provided in the form of static color images, usually digitized at 640480 resolution. Nine spatial scales are created using dyadic <ref type="bibr" coords="1,360.12,497.53,92.91,16.90">Gaussian pyramids 11]</ref> , which progressively lowpass lter and subsample the input image, yielding horizontal and vertical image reduction factors ranging from 1:1 (scale 0) to 1:256 (scale 8) in eight octaves. Each feature is computed by a set of linear \center-surround" operations akin to visual receptive elds (<ref type="figure" coords="1,477.93,551.38,24.94,19.24" target="#fig_1">Fig. 1</ref> ): Typical visual neurons are most sensitive in a small region of the visual space (the center), while stimuli presented in a broader, weaker antagonistic region concentric with the center (the surround) inhibit the neuronal response. Such architecture, sensitive to local spatial discontinuities, is particularly well-suited to detecting locations which locally stand out from their surround, and is a general computational principle in the retina, lateral geniculate nucleus and primary With r, g and b being the red, green and blue channels of the input image, an intensity image I is obtained as I = (r+g+b)=3. I is used to create a Gaussian pyramid I(), where 2 0<ref type="bibr" coords="2,278.76,89.89,15.36,16.90">::8] </ref>is the scale. The r, g and b channels are normalized by I in order to decouple hue from intensity. However, because hue variations are not perceivable at very low luminance (and hence are not salient), normalization is only applied at the locations where I is larger than 1=10 of its maximum over the entire image (other locations yield zero r; g and b). Four broadlytuned color channels are created: R = r ? (g + b)=2 for red, G = g ? (r + b)=2 for green, B = b ? (r + g)=2 for blue, and Y = (r + g)=2 ? jr ? gj=2 ? b for yellow (negative values are set to zero). Four Gaussian pyramids R(); G(); B() and Y () are created from these color channels. Center-surround diierences ( deened previously) between a \center" ne scale c and a \surround" coarser scale s yield the feature maps. The rst set of feature maps is concerned with intensity contrast, which in mammals is detected by neurons sensitive either to dark centers on bright surrounds, or to bright centers on dark surrounds 12]. Here, both types of sensitivities are simultaneously computed (using a rectiication) in a set of six maps I(c; s), with c 2 f2; 3; 4g and s = c + , 2 f3; 4g: </p><formula>I(c; s) = jI(c) I(s)j </formula><p>(1) A second set of maps is similarly constructed for the color channels, which in cortex are represented using a so-called \color double-opponent" system: In the center of their receptive eld, neurons are excited by one color (e.g., red) and inhibited by another (e.g., green), while the converse is true in the surround. Such spatial and chromatic opponency exists for the red/green, green/red, blue/yellow and yellow/blue color pairs in human primary visual cortex 13]. Accordingly, maps RG(c; s) are created in the model to simultaneously account for red/green and green/red double opponency (Eq. 2), and BY(c; s) for blue/yellow and yellow/blue double opponency (Eq. 3): RG(c; s) = j(R(c) ? G(c)) (G(s) ? R(s))j </p><formula>(2) BY(c; s) = j(B(c) ? Y (c)) (Y (s) ? B(s))j </formula><p>((4) In total, 42 feature maps are computed: Six for intensity, 12 for color and 24 for orientation. B. The Saliency Map The purpose of the saliency map is to represent the conspicuity | or \saliency" | at every location in the visual eld by a scalar quantity, and to guide the selection of attended locations, based on the spatial distribution of saliency. A combination of the feature maps provides bottom-up input to the saliency map, modeled as a dynamical neural network. One diiculty in combining diierent feature maps is that they represent a priori not comparable modalities, with diierent dynamic ranges and extraction mechanisms. Also, because all 42 x y x y x y x y </p></div>
+<div xmlns="http://www.tei-c.org/ns/1.0"><head>N (.) </head><p>Intensity map Orientation map </p></div>
+<div xmlns="http://www.tei-c.org/ns/1.0"><head>N (.) </head><p>Arbitrary units Arbitrary units x y Stimulus <ref type="figure" coords="2,359.76,184.07,19.44,14.30">Fig. 2</ref>. The normalization operator N(:). feature maps are combined, salient objects appearing strongly in only a few maps may be masked by noise or less salient objects present in a larger number of maps. In the absence of top-down supervision, we propose a map normalization operator, N(:), which globally promotes maps in which a small number of strong peaks of activity (conspicuous locations) is present, while globally suppressing maps which contain numerous comparable peak responses. N(:) consists of (<ref type="figure" coords="2,310.30,297.46,24.10,19.24">Fig. 2</ref>)compares responses associated with meaningful \activitation spots" in the map and ignores homogenous areas. Comparing the maximum activity in the entire map to the average over all activation spots measures how diierent the most active location is from the average. When this diierence is large, the most active location stands out, and we strongly promote the map. When the diierence is small, the map contains nothing unique and is suppressed. The biological motivation behind the design of N(:Feature maps are combined into three \conspicuity maps", I for intensity (Eq. 5), C for color (Eq. 6), and O orientation (Eq. 7), at the scale ( = 4) of the saliency map. They are obtained through across-scale addition, \", which consists of reduction of each map to scale 4 and point-by-point addition: </p><formula>I = 4 M c=2 c+4 M s=c+3 N(I(c; s)) </formula><formula>(5) C = 4 M c=2 c+4 M s=c+3 N (RG(c; s)) + N(BY(c; s))] (6) </formula><p>For orientation, four intermediary maps are rst created by combination of the six feature maps for a given , and are then combined into a single orientation conspicuity map: </p><formula>O = X 2f0 ;45 ;90 ;135 g N 4 M c=2 c+4 M s=c+3 N(O(c; s; )) ! (7) </formula><p>The motivation for the creation of three separate channels, I, C and O, and their individual normalization is the hypothesis that similar features compete strongly for saliency, while different modalities contribute independently to the saliency map. </p></div>
+<div xmlns="http://www.tei-c.org/ns/1.0"><head n="3"></head><p>The three conspicuity maps are normalized and summed into the nal input S to the saliency map: </p><formula>S = 1 3 ? N(I) + N(C) + N(O) (8) </formula><p>At any given time, the maximum of the saliency map (SM) deenes the most salient image location, to which the focus of attention (FOA) should be directed. We could now simply select the most active location as deening the point where the model should next attend to. However, in a neuronally-plausible implementation , we model the SM as a 2D layer of leaky integrateand--re neurons at scale 4. These model neurons consist of a single capacitance which integrates the charge delivered by synaptic input, of a leakage conductance, and of a voltage threshold. When threshold is reached, a prototypical spike is generated, and the capacitive charge is shunted to <ref type="bibr" coords="3,199.44,219.49,31.71,16.90">zero 14]</ref>. The SM feeds into a biologically-plausible 2D \winner-take-all" (WTA) neural network 4], 1] at scale = 4, in which synaptic interactions among units ensure that only the most active location remains, while all other locations are suppressed. The neurons in the SM receive excitatory inputs from S and are all independent. The potential of SM neurons at more salient locations hence increases faster (these neurons are used as pure integrators and do not re). Each SM neuron excites its corresponding WTA neuron. All WTA neurons also evolve independently of each other, until one (the \winner") rst reaches threshold and res. This triggers three simultaneous mechanisms (<ref type="figure" coords="3,71.50,346.06,25.42,19.24" target="#fig_2">Fig. 3</ref>): 1) The FOA is shifted to the location of the winner neuron; 2) the global inhibition of the WTA is triggered and completely inhibits (resets) all WTA neurons; 3) local inhibition is transiently activated in the SM, in an area with the size and new location of the FOA; this not only yields dynamical shifts of the FOA, by allowing the next most salient location to subsequently become the winner, but it also prevents the FOA from immediately returning to a previously attended location. Such an \inhibition of return" has been demonstrated in human visual psychophysics 16]. In order to slightly bias the model to subsequently jump to salient locations spatially close to the currently attended location, a small excitation is transiently activated in the SM, in a near surround of the FOA (\proximity preference" rule of <ref type="bibr" coords="3,118.21,486.37,82.38,16.90">Koch and Ullman 4]</ref>). Since we do not model any top-down attentional component, the FOA is a simple disk whose radius is xed to one sixth of the smaller of the input image width or height. The time constants, conductances, and ring thresholds of the simulated neurons were chosen (see ref. 17] for details) so that the FOA jumps from one salient location to the next in approximately 30{ 70 ms (simulated time), and that an attended area is inhibited for approximately 500{900 ms (<ref type="figure" coords="3,171.82,570.22,25.06,19.24" target="#fig_2">Fig. 3</ref>)After the inhibition-of-return feedback inhibits this location in the saliency map, the next most salient locations are successively selected. free-viewing. It was hence interesting to investigate whether our model would reproduce the ndings of Reinagel and Zador. </p><formula>4 (1) (2) (3) (a) (b) (c) </formula><p>(d) <ref type="figure" coords="4,40.80,348.35,20.04,14.30">Fig. 4</ref>. Examples of color images (a), the corresponding saliency map inputs (b), spatial frequency content (SFC) maps (c), locations at which input to the saliency map was higher than 98% of its maximum (d; yellow circles), and image patches for which the SFC was higher than 98% of its maximum (d; red squares). The saliency maps are very robust to noise, while SFC is not. </p><p> We constructed a simple measure of spatial frequency content (SFC): At a given image location, a 16 16 image patch is extracted from each I(2); R(2); G(2); B(2) and Y (2) map, and 2D Fast Fourier Transforms (FFTs) are applied to the patches. For each patch, a threshold is applied to compute the number of non-negligible FFT coeecients; the threshold corresponds to the FFT amplitude of a just perceivable grating (1% contrast). The SFC measure is the average of the numbers of non-negligible coeecients in the ve corresponding patches. The size and scale of the patches were chosen such that the SFC measure is sensitive to approximately the same frequency and resolution ranges as our model; also, our SFC measure is computed in the RGB channels as well as in intensity, like the model. Using this measure , an SFC map is created at scale 4 for comparison with the saliency map (<ref type="figure" coords="4,100.18,570.70,24.46,19.24">Fig. 4</ref>). </p></div>
+<div xmlns="http://www.tei-c.org/ns/1.0"><head>III. Results and discussion </head><p>Although the concept of a saliency map has been widely used in <ref type="bibr" coords="4,87.48,616.09,111.40,16.90">attention models 1], 3], 7]</ref>, little detail is usually provided about its construction and dynamics. Here we examine how the feedforward feature extraction stages, the map combination strategy, and the temporal properties of the saliency map all contribute to the overall system performance. A. General performance The model was extensively tested with artiicial images to ensure proper functioning. For example, several objects of same shape but varying contrast with the background were attended to in order of decreasing contrast. The model proved very robust to the addition of noise to such images (<ref type="figure" coords="4,210.46,732.58,25.42,19.24" target="#fig_3">Fig. 5</ref>), particularly found is shown as a function of noise density for 50 instantiations of the noise. The system is very robust to noise which does not directly interfere with the main feature of the target (left; intensity noise and color target). When the noise has similar properties to the target, it impairs the target's saliency and the system rst attends to objects salient for other features (here, coarse-scale variations of intensity). if the properties of the noise (e.g., its color) were not directly connicting with the main feature of the target. The model was able to reproduce human performance for a number of pop-out tasks 7], using images of the type shown in <ref type="figure" coords="4,317.28,464.62,25.86,19.24">Fig. 2</ref> . When a target diiered from an array of surrounding distractors by its unique orientation (like in <ref type="figure" coords="4,501.36,475.30,25.40,19.24">Fig. 2</ref>), color, intensity or size, it was always the rst attended location, irrespectively of the number of distractors. Contrarily, when the target diiered from the distractors only by a conjunction of features (e.g., it was the only red-horizontal bar in a mixed array of red-vertical and green-horizontal bars), the search time necessary to nd the target increased linearly with the number of distractors. Both results have been widely observed <ref type="bibr" coords="4,517.80,551.65,41.88,16.90;4,306.00,562.33,8.08,16.90">in humans 7]</ref>, and are discussed in Section III-B. </p><p> We also tested the model with real images, ranging from natural outdoor scenes to artistic paintings, and using N(:) to normalize the feature maps (<ref type="figure" coords="4,408.22,593.26,25.34,19.24" target="#fig_2">Fig. 3</ref><ref type="bibr" coords="4,436.20,594.97,45.41,16.90">and ref. 17]</ref>). With many such images, it is diicult to objectively evaluate the model, because no objective reference is available for comparison, and observers may disagree on which locations are the most salient. However, in all images studied, most attended locations were objects of interest, such as faces, ags, persons, buildings or vehicles. Model predictions were compared to the measure of local SFC, in an experiment similar to that of <ref type="bibr" coords="4,478.92,670.33,80.64,16.90;4,306.01,681.01,12.51,16.90">Reinagel and Zador 18]</ref>, using natural scenes with salient traac signs (90 images), red soda can (104 images), or vehicle's emergency triangle (64 images). Similar to Reinagel and Zador's ndings, the SFC at attended locations was signiicantly higher than the average SFC, by a factor decreasing from 2:50:05 at the rst attended location to 1:6 0:05 at the 8th attended location. Although this result does not necessarily indicate similarity between human eye xations and the model's attentional trajectories, it indicates that the model, like humans, is attracted to \informative" image locations, according to the common assumption that regions with richer spectral content are more informative. The SFC map was similar to the saliency map for most images (e.g., <ref type="figure" coords="5,63.96,116.38,33.41,19.24" target="#fig_1">Fig. 4.1</ref>). However, both maps diiered substantially for images with strong, extended variations of illumination or color (e.g., due to speckle noise): While such areas exhibited uniformly high SFC, they had low saliency because of their uniformity (Figs. 4.2, 4.3). In such images, the saliency map was usually in better agreement with our subjective perception of saliency. Quantitatively, for the 258 images studied here, the SFC at attended locations was signiicantly lower than the maximum SFC, by a factor decreasing from 0:90 0:02 at the rst attended location to 0:55 0:05 at the 8th attended location: While the model was attending to locations with high SFC, these were not necessarily the locations with highest SFC. It consequently seems that saliency is more than just a measure of local SFC. The model, which implements within-feature spatial competition captured subjective saliency better than the purely local SFC measure. B. Strengths and limitations We have proposed a model whose architecture and components mimic the properties of primate early vision. Despite its simple architecture and feedforward feature extraction mechanisms , the model is capable of strong performance with complex natural scenes. For example, it quickly detected salient traac signs of varied shapes (round, triangular, square, rectangular ), colors (red, blue, white, orange, black) and textures (letter markings, arrows, stripes, circles), although it had not been designed for this purpose. Such strong performance reinforces the idea that a unique saliency map, receiving input from early visual processes, could eeectively guide bottom-up attention <ref type="bibr" coords="5,286.68,422.89,7.68,16.90;5,40.81,433.57,102.88,16.90">in primates 4], 10], 5], 8]</ref>. From a computational viewpoint, the major strength of this approach lies in the massively parallel implementation, not only of the computationally expensive early feature extraction stages, but also of the attention focusing system. More than previous models based extensively on relaxation techniques 5], our architecture could easily allow for real-time operation on dedicated hardware. The type of performance which can be expected from this model critically depends on one factor: Only object features explicitely represented in at least one of the feature maps can lead to pop-out, that is, rapid detection independently of the number of distracting objects 7]. Without modifying the preattentive feature extraction stages, our model cannot detect conjunctions of features. While our system immediately detects a target which diiers from surrounding distractors by its unique size, intensity, color or orientation (properties which we have implemented because they have been very well characterized in primary visual cortex), it will fail at detecting targets salient for unimplemented feature types (e.g., T junctions or line terminators , for which the existence of speciic neural detectors remains controversial). For simplicity, we also have not implemented any recurrent mechanism within the feature maps, and hence cannot reproduce phenomena like contour completion and closure, important for certain types of human pop-out <ref type="bibr" coords="5,226.56,679.93,12.51,16.90" target="#b18">19]</ref>. In addition, at present our model does not include any magnocellular motion channel, known to play a strong role in human saliency 5]. A critical model component is the normalization N(:), which provided a general mechanism for computing saliency in any situation. The resulting saliency measure implemented by the model, although often related to local SFC, was closer to human saliency because it implemented spatial competition between salient locations. Our feed-forward implementation of N(:) is faster and simpler than previously proposed iterative schemes 5]. Neuronally, spatial competition eeects similar to N(:) have been observed in the non-classical receptive eld of cells in striate and extrastriate cortex 15]. In conclusion, we have presented a conceptually simple computational model for saliency-driven focal visual attention. The biological insight guiding its architecture proved eecient in reproducing some of the performances of primate visual systems. The eeciency of this approach for target detection critically depends on the features types implemented. The framework presented here can consequently be easily tailored to arbitrary tasks through the implementation of dedicated feature maps. </p></div><figure xmlns="http://www.tei-c.org/ns/1.0" xml:id="fig_0" coords="2,286.52,470.05,7.84,16.90;2,50.05,484.48,244.31,17.68;2,40.81,495.16,159.60,17.68;2,217.20,494.40,77.16,18.72;2,40.81,504.96,253.56,18.72;2,40.81,516.97,253.43,16.90;2,40.81,527.65,253.56,16.90;2,40.81,538.33,253.56,16.90;2,40.81,549.01,253.56,16.90;2,40.81,558.36,253.43,18.72;2,40.81,570.25,196.44,16.90;2,108.13,586.68,118.91,18.72"><head></head><figDesc>3) Local orientation information is obtained from I using oriented Gabor pyramids O(; ), where 2 0::8] represents the scale and 2 f0 ; 45 ; 90 ; 135 g is the preferred orientation 11]. (Gabor lters, which are the product of a cosine grating and a 2D Gaussian envelope, approximate the receptive eld sensitivity proole (impulse response) of orientationselective neurons in primary visual cortex 12].) Orientation feature maps, O(c; s; ), encode, as a group, local orientation contrast between the center and surround scales: O(c; s; ) = jO(c; ) O(s; )j </figDesc></figure>
+<figure xmlns="http://www.tei-c.org/ns/1.0" xml:id="fig_1" coords="2,338.20,297.46,221.24,19.24;2,306.00,309.73,253.55,16.90;2,306.00,320.41,253.92,16.90;2,306.00,330.52,253.67,17.68;2,306.00,340.44,180.60,18.72;2,486.60,340.78,3.60,13.00;2,490.68,341.77,2.52,16.90;2,315.24,351.12,244.32,18.72"><head>: 1) </head><figDesc>Normalizing the values in the map to a xed range 0::M], in order to eliminate modality-dependent amplitude differences ; 2) nding the location of the map's global maximum M and computing the average m of all its other local maxima; 3) globally multiplying the map by (M ? m) 2 . Only local maxima of activity are considered such that N(:) </figDesc></figure>
+<figure xmlns="http://www.tei-c.org/ns/1.0" xml:id="fig_2" coords="3,306.00,628.43,253.67,14.30;3,320.40,637.55,239.15,14.30;3,320.40,646.67,239.15,14.30;3,320.40,654.38,239.27,16.22;3,320.40,664.79,239.16,14.30;3,320.40,672.50,239.27,16.22"><head>Fig. 3. </head><figDesc>Fig. 3. Example of operation of the model with a natural image. Parallel feature extraction yields the three conspicuity maps for color contrasts (C), intensity contrasts (I), and orientation contrasts (O). These are combined to form input S to the saliency map (SM). The most salient location is the orange telephone box, which appeared very strongly in C; it becomes the rst attended location (92 ms simulated time). </figDesc></figure>
+<figure xmlns="http://www.tei-c.org/ns/1.0" xml:id="fig_3" coords="4,306.00,319.07,253.56,14.30;4,320.40,328.19,239.39,14.30;4,320.40,337.19,239.15,14.30"><head>Fig. 5. </head><figDesc>Fig. 5. Innuence of noise on detection performance, illustrated with a 768512 scene in which a target (two people) is salient by its unique color contrast. The mean S.E. of false detections before target </figDesc></figure>
+		</body>
+		<back>
+
+			<div type="acknowledgement">
+<div xmlns="http://www.tei-c.org/ns/1.0"><head>Acknowledgments </head><p>We thank Werner Ritter and Daimler-Benz for the traac sign images, Pietro Perona and both reviewers for excellent suggestions . Supported by the National Science Foundation and the OOce of Naval Research. </p></div>
+			</div>
+
+			<div type="references">
+
+				<listBibl>
+
+<biblStruct coords="5,318.85,301.42,240.83,13.00;5,318.85,309.58,240.71,13.00;5,318.85,317.62,114.36,13.00"  xml:id="b0">
+	<analytic>
+		<title level="a" type="main">\Modelling visual attention via selective tuning</title>
+		<author>
+			<persName>
+				<forename type="first">J</forename>
+				<forename type="middle">K</forename>
+				<surname>Tsotsos</surname>
+			</persName>
+		</author>
+		<author>
+			<persName>
+				<forename type="first">S</forename>
+				<forename type="middle">M</forename>
+				<surname>Culhane</surname>
+			</persName>
+		</author>
+		<author>
+			<persName>
+				<forename type="first">W</forename>
+				<forename type="middle">Y K</forename>
+				<surname>Wai</surname>
+			</persName>
+		</author>
+		<author>
+			<persName>
+				<forename type="first">Y</forename>
+				<forename type="middle">H</forename>
+				<surname>Lai</surname>
+			</persName>
+		</author>
+		<author>
+			<persName>
+				<forename type="first">N</forename>
+				<surname>Davis</surname>
+			</persName>
+		</author>
+		<author>
+			<persName>
+				<forename type="first">F</forename>
+				<surname>Nuuo</surname>
+			</persName>
+		</author>
+	</analytic>
+	<monogr>
+		<title level="j">Artiicial Intelligence</title>
+		<imprint>
+			<biblScope unit="volume">78</biblScope>
+			<biblScope unit="issue">12</biblScope>
+			<biblScope unit="page" from="507" to="545" />
+			<date type="published" when="1995-10" />
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct coords="5,318.85,325.78,240.72,13.00;5,318.85,333.94,240.84,13.00;5,318.85,341.98,46.68,13.00"  xml:id="b1">
+	<monogr>
+		<title level="m" type="main">\Computational architectures for attention The attentive brain</title>
+		<author>
+			<persName>
+				<forename type="first">E</forename>
+				<surname>Niebur</surname>
+			</persName>
+		</author>
+		<author>
+			<persName>
+				<forename type="first">C</forename>
+				<surname>Koch</surname>
+			</persName>
+		</author>
+		<editor>R. Parasuraman,</editor>
+		<imprint>
+			<date type="published" when="1998" />
+			<publisher>MIT Press</publisher>
+			<biblScope unit="page" from="163" to="186" />
+			<pubPlace>Cambridge, MA</pubPlace>
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct coords="5,318.85,350.14,240.72,13.00;5,318.85,358.30,240.72,13.00;5,318.85,366.34,240.47,13.00;5,318.85,374.50,53.04,13.00"  xml:id="b2">
+	<analytic>
+		<title level="a" type="main">\A neurobiological model of visual attention and invariant pattern recognition based on dynamic routing of information</title>
+		<author>
+			<persName>
+				<forename type="first">B</forename>
+				<forename type="middle">A</forename>
+				<surname>Olshausen</surname>
+			</persName>
+		</author>
+		<author>
+			<persName>
+				<forename type="first">C</forename>
+				<forename type="middle">H</forename>
+				<surname>Anderson</surname>
+			</persName>
+		</author>
+		<author>
+			<persName>
+				<forename type="first">Ch</forename>
+			</persName>
+		</author>
+		<author>
+			<persName>
+				<forename type="first">D</forename>
+				<forename type="middle">C</forename>
+				<surname>Van Essen</surname>
+			</persName>
+		</author>
+	</analytic>
+	<monogr>
+		<title level="j">J Neuroscience</title>
+		<imprint>
+			<biblScope unit="volume">13</biblScope>
+			<biblScope unit="issue">11</biblScope>
+			<biblScope unit="page" from="4700" to="4719" />
+			<date type="published" when="1993-11" />
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct coords="5,318.85,382.66,240.71,13.00;5,318.85,390.70,240.60,13.00"  xml:id="b3">
+	<analytic>
+		<title level="a" type="main">\Shifts in selective visual attention: towards the underlying neural circuitry</title>
+		<author>
+			<persName>
+				<forename type="first">C</forename>
+				<surname>Koch</surname>
+			</persName>
+		</author>
+		<author>
+			<persName>
+				<forename type="first">S</forename>
+				<surname>Ullman</surname>
+			</persName>
+		</author>
+	</analytic>
+	<monogr>
+		<title level="j">Human Neurobiology</title>
+		<imprint>
+			<biblScope unit="volume">4</biblScope>
+			<biblScope unit="page" from="219" to="227" />
+			<date type="published" when="1985" />
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct coords="5,318.85,398.86,240.72,13.00;5,318.85,406.90,240.48,13.00;5,318.85,415.06,34.20,13.00"  xml:id="b4">
+	<analytic>
+		<title level="a" type="main">\Attentive Mechanisms for Dynamic and Static Scene Analysis</title>
+		<author>
+			<persName>
+				<forename type="first">R</forename>
+				<surname>Milanese</surname>
+			</persName>
+		</author>
+		<author>
+			<persName>
+				<forename type="first">S</forename>
+				<surname>Gil</surname>
+			</persName>
+		</author>
+		<author>
+			<persName>
+				<forename type="first">T</forename>
+				<surname>Pun</surname>
+			</persName>
+		</author>
+	</analytic>
+	<monogr>
+		<title level="j">Optical Engineering</title>
+		<imprint>
+			<biblScope unit="volume">34</biblScope>
+			<biblScope unit="issue">8</biblScope>
+			<biblScope unit="page" from="2428" to="2434" />
+			<date type="published" when="1995-08" />
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct coords="5,318.85,423.22,240.72,13.00;5,318.85,431.26,240.72,13.00;5,318.85,439.42,189.96,13.00"  xml:id="b5">
+	<analytic>
+		<title level="a" type="main">\Expectation-based Selective Attention for Visual Monitoring and Control of a Robot Vehicle</title>
+		<author>
+			<persName>
+				<forename type="first">S</forename>
+				<surname>Baluja</surname>
+			</persName>
+		</author>
+		<author>
+			<persName>
+				<forename type="first">D</forename>
+				<forename type="middle">A</forename>
+				<surname>Pomerleau</surname>
+			</persName>
+		</author>
+	</analytic>
+	<monogr>
+		<title level="j">Robotics and Autonomous Systems</title>
+		<imprint>
+			<biblScope unit="volume">22</biblScope>
+			<biblScope unit="page" from="3" to="4" />
+			<date type="published" when="1997-12" />
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct coords="5,318.85,447.58,240.71,13.00;5,318.85,455.62,187.56,13.00"  xml:id="b6">
+	<analytic>
+		<title level="a" type="main">\A feature-integration theory of attention</title>
+		<author>
+			<persName>
+				<forename type="first">A</forename>
+				<forename type="middle">M</forename>
+				<surname>Treisman</surname>
+			</persName>
+		</author>
+		<author>
+			<persName>
+				<forename type="first">G</forename>
+				<surname>Gelade</surname>
+			</persName>
+		</author>
+	</analytic>
+	<monogr>
+		<title level="j">Cognitive Psychology</title>
+		<imprint>
+			<biblScope unit="volume">12</biblScope>
+			<biblScope unit="issue">1</biblScope>
+			<biblScope unit="page" from="97" to="136" />
+			<date type="published" when="1980-01" />
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct coords="5,318.85,463.78,240.84,13.00;5,318.85,471.94,240.84,13.00;5,318.85,479.98,61.56,13.00"  xml:id="b7">
+	<analytic>
+		<title level="a" type="main">\The representation of visual salience in monkey parietal cortex</title>
+		<author>
+			<persName>
+				<forename type="first">J</forename>
+				<forename type="middle">P</forename>
+				<surname>Gottlieb</surname>
+			</persName>
+		</author>
+		<author>
+			<persName>
+				<forename type="first">M</forename>
+				<surname>Kusunoki</surname>
+			</persName>
+		</author>
+		<author>
+			<persName>
+				<forename type="first">M</forename>
+				<forename type="middle">E</forename>
+				<surname>Goldberg</surname>
+			</persName>
+		</author>
+	</analytic>
+	<monogr>
+		<title level="j">Nature</title>
+		<imprint>
+			<biblScope unit="volume">391</biblScope>
+			<biblScope unit="issue">6666</biblScope>
+			<biblScope unit="page" from="481" to="484" />
+			<date type="published" when="1998-01" />
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct coords="5,318.85,488.14,240.72,13.00;5,318.85,496.30,179.16,13.00"  xml:id="b8">
+	<analytic>
+		<title level="a" type="main">\The pulvinar and visual salience</title>
+		<author>
+			<persName>
+				<forename type="first">D</forename>
+				<forename type="middle">L</forename>
+				<surname>Robinson</surname>
+			</persName>
+		</author>
+		<author>
+			<persName>
+				<forename type="first">S</forename>
+				<forename type="middle">E</forename>
+				<surname>Peterson</surname>
+			</persName>
+		</author>
+	</analytic>
+	<monogr>
+		<title level="j">Trends in Neurosciences</title>
+		<imprint>
+			<biblScope unit="volume">15</biblScope>
+			<biblScope unit="issue">4</biblScope>
+			<biblScope unit="page" from="127" to="132" />
+			<date type="published" when="1992-04" />
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct coords="5,322.45,504.34,236.99,13.00;5,318.85,512.50,156.00,13.00"  xml:id="b9">
+	<analytic>
+		<title level="a" type="main">0: a revised model of visual search</title>
+		<author>
+			<persName>
+				<forename type="first">J</forename>
+				<forename type="middle">M</forename>
+				<surname>Wolfe</surname>
+			</persName>
+		</author>
+	</analytic>
+	<monogr>
+		<title level="j">Psychonomic Bulletin Review</title>
+		<imprint>
+			<biblScope unit="volume">1</biblScope>
+			<biblScope unit="issue">2</biblScope>
+			<biblScope unit="page" from="202" to="238" />
+			<date type="published" when="1994" />
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct coords="5,322.45,520.66,237.23,13.00;5,318.85,528.70,240.84,13.00;5,318.86,536.86,240.72,13.00;5,318.86,545.02,129.72,13.00"  xml:id="b10">
+	<analytic>
+		<title level="a" type="main">\Overcomplete steerable pyramid lters and rotation invariance</title>
+		<author>
+			<persName>
+				<forename type="first">H</forename>
+				<surname>Greenspan</surname>
+			</persName>
+		</author>
+		<author>
+			<persName>
+				<forename type="first">S</forename>
+				<surname>Belongie</surname>
+			</persName>
+		</author>
+		<author>
+			<persName>
+				<forename type="first">R</forename>
+				<surname>Goodman</surname>
+			</persName>
+		</author>
+		<author>
+			<persName>
+				<forename type="first">P</forename>
+				<surname>Perona</surname>
+			</persName>
+		</author>
+		<author>
+			<persName>
+				<forename type="first">S</forename>
+				<surname>Rakshit</surname>
+			</persName>
+		</author>
+		<author>
+			<persName>
+				<forename type="first">C</forename>
+				<forename type="middle">H</forename>
+				<surname>Anderson</surname>
+			</persName>
+		</author>
+	</analytic>
+	<monogr>
+		<title level="m">Proc. IEEE Computer Vision and Pattern Recognition (CVPR)</title>
+		<meeting>. IEEE Computer Vision and Pattern Recognition (CVPR)<address><addrLine>Seattle , Washington</addrLine></address></meeting>
+		<imprint>
+			<date type="published" when="1994-06" />
+			<biblScope unit="page" from="222" to="228" />
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct coords="5,322.46,553.06,237.23,13.00;5,318.86,561.22,177.00,13.00"  xml:id="b11">
+	<monogr>
+		<title level="m" type="main">The Neural Basis of Visual Function (Vision and Visual Dysfunction</title>
+		<author>
+			<persName>
+				<forename type="first">A</forename>
+				<forename type="middle">G</forename>
+			</persName>
+		</author>
+		<imprint>
+			<date type="published" when="1991" />
+			<publisher>CRC Press</publisher>
+			<pubPlace>Boca Raton, FL</pubPlace>
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct coords="5,322.46,569.38,237.00,13.00;5,318.86,577.42,240.71,13.00;5,318.86,585.58,85.80,13.00"  xml:id="b12">
+	<analytic>
+		<title level="a" type="main">\Colour tuning in human visual cortex measured with functional magnetic resonance imaging</title>
+		<author>
+			<persName>
+				<forename type="first">S</forename>
+				<surname>Engel</surname>
+			</persName>
+		</author>
+		<author>
+			<persName>
+				<forename type="first">X</forename>
+				<surname>Zhang</surname>
+			</persName>
+		</author>
+		<author>
+			<persName>
+				<forename type="first">B</forename>
+				<surname>Wandell</surname>
+			</persName>
+		</author>
+	</analytic>
+	<monogr>
+		<title level="j">Nature</title>
+		<imprint>
+			<biblScope unit="volume">388</biblScope>
+			<biblScope unit="issue">6637</biblScope>
+			<biblScope unit="page" from="68" to="71" />
+			<date type="published" when="1997-07" />
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct coords="5,322.46,593.74,237.24,13.00;5,318.86,601.78,146.40,13.00"  xml:id="b13">
+	<monogr>
+		<title level="m" type="main">\Biophysics of Computation: Information Processing in Single Neurons</title>
+		<author>
+			<persName>
+				<forename type="first">C</forename>
+				<surname>Koch</surname>
+			</persName>
+		</author>
+		<imprint>
+			<publisher>Oxford University Press</publisher>
+		</imprint>
+	</monogr>
+	<note>in. press</note>
+</biblStruct>
+
+<biblStruct coords="5,322.46,609.94,237.11,13.00;5,318.86,618.10,240.72,13.00;5,318.86,626.14,83.52,13.00"  xml:id="b14">
+	<analytic>
+		<title level="a" type="main">\A Model for Inhibitory Lateral Interaction EEects in Perceived Contrast</title>
+		<author>
+			<persName>
+				<forename type="first">M</forename>
+				<forename type="middle">W</forename>
+				<surname>Cannon</surname>
+			</persName>
+		</author>
+		<author>
+			<persName>
+				<forename type="first">S</forename>
+				<forename type="middle">C</forename>
+				<surname>Fullenkamp</surname>
+			</persName>
+		</author>
+	</analytic>
+	<monogr>
+		<title level="j">Vision Research</title>
+		<imprint>
+			<biblScope unit="volume">36</biblScope>
+			<biblScope unit="issue">8</biblScope>
+			<biblScope unit="page" from="1115" to="1125" />
+			<date type="published" when="1996-04" />
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct coords="5,322.46,634.30,237.11,13.00;5,318.86,642.46,240.83,13.00;5,318.86,650.50,81.72,13.00"  xml:id="b15">
+	<analytic>
+		<title level="a" type="main">\Components of visual orienting</title>
+		<author>
+			<persName>
+				<forename type="first">M</forename>
+				<forename type="middle">I</forename>
+				<surname>Posner</surname>
+			</persName>
+		</author>
+		<author>
+			<persName>
+				<forename type="first">Y</forename>
+				<surname>Cohen</surname>
+			</persName>
+		</author>
+	</analytic>
+	<monogr>
+		<title level="m">Hilldale, NJ:L. Erlbaum</title>
+		<editor>Performance X, (H. Bouma, D.G. Bouwhuis eds</editor>
+		<imprint>
+			<date type="published" when="1984" />
+			<biblScope unit="page" from="531" to="556" />
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct coords="5,322.46,658.66,237.12,13.00;5,318.86,666.82,240.72,13.00;5,318.86,678.43,141.48,8.11"  xml:id="b16">
+	<monogr>
+		<title level="m" type="main">The C++ implementation of the model and numerous examples of attentional predictions on natural and synthetic images can be retrieved from http</title>
+		<imprint/>
+	</monogr>
+</biblStruct>
+
+<biblStruct coords="5,322.46,683.02,237.11,13.00;5,318.86,691.18,240.72,13.00;5,318.86,699.22,16.56,13.00"  xml:id="b17">
+	<analytic>
+		<title/>
+		<author>
+			<persName>
+				<forename type="first">P</forename>
+				<surname>Reinagel</surname>
+			</persName>
+		</author>
+		<author>
+			<persName>
+				<forename type="first">A</forename>
+				<forename type="middle">M</forename>
+				<surname>Zador</surname>
+			</persName>
+		</author>
+	</analytic>
+	<monogr>
+		<title level="m">\The EEect of Gaze on Natural Scene Statistics Neural information and coding workshop</title>
+		<meeting><address><addrLine>Snowbird, Utah</addrLine></address></meeting>
+		<imprint>
+			<date type="published" when="1997-03" />
+			<biblScope unit="page" from="16" to="20" />
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct coords="5,322.46,707.38,237.23,13.00;5,318.86,715.54,240.71,13.00;5,318.86,723.58,198.84,13.00"  xml:id="b18">
+	<analytic>
+		<title level="a" type="main">\A closed curve is much more than an incomplete one: eeect of closure in gure-ground segmentation</title>
+		<author>
+			<persName>
+				<forename type="first">I</forename>
+				<surname>Kovacs</surname>
+			</persName>
+		</author>
+		<author>
+			<persName>
+				<forename type="first">B</forename>
+				<surname>Julesz</surname>
+			</persName>
+		</author>
+	</analytic>
+	<monogr>
+		<title level="m">Proc. Nat&apos;l Academy of Sciences</title>
+		<editor>U.S.A.</editor>
+		<meeting>. Nat&apos;l Academy of Sciences</meeting>
+		<imprint>
+			<date type="published" when="1993-08" />
+			<biblScope unit="page" from="7495" to="7497" />
+		</imprint>
+	</monogr>
+</biblStruct>
+
+				</listBibl>
+			</div>
+		</back>
+	</text>
+</TEI>

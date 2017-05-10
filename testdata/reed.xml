@@ -1,0 +1,1247 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<TEI xmlns="http://www.tei-c.org/ns/1.0" 
+xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+xsi:schemaLocation="http://www.tei-c.org/ns/1.0 /opt/grobid-home/schemas/xsd/Grobid.xsd"
+ xmlns:xlink="http://www.w3.org/1999/xlink">
+	<teiHeader xml:lang="en">
+		<encodingDesc>
+			<appInfo>
+				<application version="0.4.1" ident="GROBID" when="2016-12-08T20:03+0000">
+					<ref target="https://github.com/kermitt2/grobid">GROBID - A machine learning software for extracting information from scholarly documents</ref>
+				</application>
+			</appInfo>
+		</encodingDesc>
+		<fileDesc>
+			<titleStmt>
+				<title level="a" type="main">Optimizing Cauchy Reed-Solomon Codes for Fault-Tolerant Network Storage Applications Optimizing Cauchy Reed-Solomon Codes for Fault-Tolerant Network Storage Applications</title>
+			</titleStmt>
+			<publicationStmt>
+				<publisher/>
+				<availability status="unknown"><licence/></availability>
+				<date type="published" when="2006-07">July, 2006</date>
+			</publicationStmt>
+			<sourceDesc>
+				<biblStruct>
+					<analytic>
+						<author>
+							<persName>
+								<forename type="first">James</forename>
+								<forename type="middle">S</forename>
+								<surname>Plank</surname>
+							</persName>
+							<email>plank@cs.utk.edu</email>
+							<affiliation key="aff0">
+								<orgName type="department" key="dep1">Department of Computer Science Department of Computer Science</orgName>
+								<orgName type="department" key="dep2">Department of Computer Science Department of Computer Science</orgName>
+								<orgName type="institution">University of Tennessee Wayne State University</orgName>
+								<address>
+									<addrLine>203 Claxton Complex, 5143 Cass Avenue Knoxville</addrLine>
+									<postCode>37996, 48202</postCode>
+									<settlement>Detroit</settlement>
+									<region>TN, MI</region>
+								</address>
+							</affiliation>
+						</author>
+						<author>
+							<persName>
+								<forename type="first">Lihao</forename>
+								<surname>Xu</surname>
+							</persName>
+							<affiliation key="aff0">
+								<orgName type="department" key="dep1">Department of Computer Science Department of Computer Science</orgName>
+								<orgName type="department" key="dep2">Department of Computer Science Department of Computer Science</orgName>
+								<orgName type="institution">University of Tennessee Wayne State University</orgName>
+								<address>
+									<addrLine>203 Claxton Complex, 5143 Cass Avenue Knoxville</addrLine>
+									<postCode>37996, 48202</postCode>
+									<settlement>Detroit</settlement>
+									<region>TN, MI</region>
+								</address>
+							</affiliation>
+						</author>
+						<author>
+							<persName>
+								<forename type="first">James</forename>
+								<forename type="middle">S</forename>
+								<surname>Plank</surname>
+							</persName>
+							<email>plank@cs.utk.edu</email>
+							<affiliation key="aff1">
+								<orgName type="institution" key="instit1">University of Tennessee</orgName>
+								<orgName type="institution" key="instit2">Wayne State University Knoxville</orgName>
+								<address>
+									<postCode>37996, 48202</postCode>
+									<settlement>Detroit</settlement>
+									<region>TN, MI</region>
+								</address>
+							</affiliation>
+						</author>
+						<author>
+							<persName>
+								<forename type="first">Lihao</forename>
+								<surname>Xu</surname>
+							</persName>
+							<affiliation key="aff1">
+								<orgName type="institution" key="instit1">University of Tennessee</orgName>
+								<orgName type="institution" key="instit2">Wayne State University Knoxville</orgName>
+								<address>
+									<postCode>37996, 48202</postCode>
+									<settlement>Detroit</settlement>
+									<region>TN, MI</region>
+								</address>
+							</affiliation>
+						</author>
+						<title level="a" type="main">Optimizing Cauchy Reed-Solomon Codes for Fault-Tolerant Network Storage Applications Optimizing Cauchy Reed-Solomon Codes for Fault-Tolerant Network Storage Applications</title>
+					</analytic>
+					<monogr>
+						<title level="m">The 5th IEEE International Symposium on Network Computing and Applications (IEEE NCA06</title>
+						<meeting> <address><addrLine>Cambridge, MA</addrLine></address>
+						</meeting>
+						<imprint>
+							<date type="published" when="2006-07">July, 2006</date>
+						</imprint>
+					</monogr>
+					<note>NOTE: NCA&apos;s page limit is rather severe: 8 pages. As a result, the final paper is pretty much a hatchet job of the original submission. I would recommend reading the technical report version of this paper, because it presents the material with some accompanying tutorial material, and is easier to read. The technical report is available at: Please cite this paper, however. If this work get journalized, I will put a link to that on the above web sites.</note>
+				</biblStruct>
+			</sourceDesc>
+		</fileDesc>
+		<profileDesc>
+			<abstract>
+				<p>In the past few years, all manner of storage applications , ranging from disk array systems to distributed and wide-area systems, have started to grapple with the reality of tolerating multiple simultaneous failures of storage nodes. Unlike the single failure case, which is optimally handled with RAID Level-5 parity, the multiple failure case is more difficult because optimal general purpose strategies are not yet known. Erasure Coding is the field of research that deals with these strategies, and this field has blossomed in recent years. Despite this research, the decades-old Reed-Solomon erasure code remains the only space-optimal (MDS) code for all but the smallest storage systems. The best performing implementations of Reed-Solomon coding employ a variant called Cauchy Reed-Solomon coding, developed in the mid 1990&apos;s [4]. In this paper, we present an improvement to Cauchy Reed-Solomon coding that is based on optimizing the Cauchy distribution matrix. We detail an algorithm for generating good matrices and then evaluate the performance of encoding using all implementations Reed-Solomon codes, plus the best MDS codes from the literature. The improvements over the original Cauchy Reed-Solomon codes are as much as 83% in realistic scenarios, and average roughly 10% over all cases that we tested.</p>
+			</abstract>
+		</profileDesc>
+	</teiHeader>
+	<text xml:lang="en">
+		<body>
+<div xmlns="http://www.tei-c.org/ns/1.0"><head n="1">Introduction</head><p>Erasure codes have profound uses in applications that involve distributed or networked storage. These include disk array systems, wide-area storage platforms, peerto-peer storage platforms and grid storage platforms. An erasure code may be defined as follows. </p><p>We are given n storage nodes with B bytes of data each. To these, we add m storage nodes, also with B bytes of storage capacity. Any of these nodes may fail, which results in its stored data being inaccessible. Node failures are recognized by the storage system and are termed erasures. An erasure code defines how to encode the Bn bytes of data on the collection of n + m nodes such that upon failure of up to m nodes from the collection, the Bn bytes of data may be recovered from the non-failed nodes. Erasure codes have been employed for faulttolerance and improved performance in single-site <ref type="bibr" coords="2,524.28,390.45,15.69,9.96" target="#b11">[12,</ref><ref type="bibr" coords="2,318.00,402.45,12.45,9.96" target="#b13"> 14,</ref><ref type="bibr" coords="2,332.88,402.45,11.86,9.96" target="#b30"> 31]</ref>, archival <ref type="bibr" coords="2,385.32,402.45,15.81,9.96" target="#b12">[13,</ref><ref type="bibr" coords="2,403.68,402.45,11.86,9.96" target="#b27"> 28]</ref>, wide-area <ref type="bibr" coords="2,463.68,402.45,10.89,9.96" target="#b0">[1,</ref><ref type="bibr" coords="2,477.00,402.45,7.53,9.96"> 7,</ref><ref type="bibr" coords="2,487.08,402.45,13.28,9.96" target="#b31"> 32] </ref> and peerto-peer storage systems <ref type="bibr" coords="2,416.04,414.33,15.69,9.96" target="#b34">[35,</ref><ref type="bibr" coords="2,435.00,414.33,12.45,9.96" target="#b17"> 18,</ref><ref type="bibr" coords="2,450.60,414.33,12.45,9.96" target="#b18"> 19,</ref><ref type="bibr" coords="2,466.20,414.33,7.26,9.96" target="#b8"> 9]</ref> . They have additional uses in content distribution systems <ref type="bibr" coords="2,496.20,426.33,10.77,9.96" target="#b4">[5,</ref><ref type="bibr" coords="2,509.64,426.33,13.28,9.96" target="#b22"> 23] </ref>and applications with fault-tolerant data structures <ref type="bibr" coords="2,505.56,438.33,15.34,9.96" target="#b19">[20]</ref>. As the number of components in these systems grow and as they continue to employ failure-prone interconnection networks, the need for erasure codes will continue to grow in the future. There are three dimensions of performance of an erasure code. Space overhead is defined in one of two ways – either by the number of (redundant) coding nodes required to achieve a baseline of fault- tolerance <ref type="bibr" coords="2,357.12,547.29,15.81,9.96" target="#b15">[16,</ref><ref type="bibr" coords="2,375.60,547.29,11.86,9.96" target="#b14"> 15]</ref>, or by the average number of failures tolerated by a given number of coding nodes <ref type="bibr" coords="2,508.08,559.29,15.69,9.96" target="#b20">[21,</ref><ref type="bibr" coords="2,527.52,559.29,12.45,9.96" target="#b29"> 30,</ref><ref type="bibr" coords="2,318.00,571.17,11.86,9.96" target="#b26"> 27]</ref>. Regardless of the evaluation methodology, space optimality may be achieved when the number of coding nodes is equal to the number of failures that may be tolerated . These codes are called Maximum Distance Separable codes <ref type="bibr" coords="2,371.16,619.05,15.24,9.96" target="#b21">[22]</ref>, denoted as " (n + m,m) MDS codes. " Clearly, they are desirable. Encoding performance is the time/computation complexity of creating the m coding nodes from the n data nodes. A related metric is the update performance of a code, which is the number of blocks on coding nodes that must be updated when a data node block is updated. Finally, decoding performance is the time/computation complexity of recovering data from the surviving data and coding nodes. </p><p>In this paper we focus solely on MDS codes, because of their space optimality. Moreover, discussions are limited to the encoding (and update) performance. Decoding performance is a far more complex problem and will be addressed in future work. </p></div>
+<div xmlns="http://www.tei-c.org/ns/1.0"><head>The Current State of the Art </head><p> We focus first on MDS codes. There are two trivial classes of MDS codes: the repetition code (where n = 1) and the single parity code (where m = 1). These are used in RAID-1 (or mirroring) and RAID-5 <ref type="bibr" coords="3,268.20,210.09,11.60,9.96" target="#b5">[6] </ref>respectively . Obviously both codes achieve their optimal time complexity. It is well known in coding theory that besides the above two classes of codes, there are no other binary MDS codes <ref type="bibr" coords="3,122.76,270.45,44.99,9.96">[22, Ch.11]</ref>. In other words, any (n + m, m) MDS code where m ≥ 2 must define its codeword symbols over a finite field other than (binary) GF (2). It is also well known that a dual code of an (n + m,m) MDS code is also MDS <ref type="bibr" coords="3,169.68,318.33,44.15,9.96">[22, Ch.11]</ref>. In other words, an (n + m,n) MDS code can be easily constructed from an (n + m,m) MDS code. Thus one only needs to focus on (n + m, m) MDS codes with m ≤ n. Most research effort on time-efficient MDS codes has been on array codes, a class of 2-dimensional MDS codes whose encoding and decoding operations can be performed using binary XORs, which can be computed very efficiently in hardware and/or software. See <ref type="bibr" coords="3,277.44,414.57,16.64,9.96" target="#b16">[17] </ref>for a complete list of references on array codes. Most of these array codes are for m = 2, including EVEN- ODD <ref type="bibr" coords="3,96.00,450.45,10.60,9.96" target="#b1">[2]</ref>, X-Code <ref type="bibr" coords="3,146.40,450.45,15.34,9.96" target="#b33">[34]</ref>, B-Code <ref type="bibr" coords="3,201.36,450.45,15.24,9.96" target="#b32">[33]</ref>, and RDP <ref type="bibr" coords="3,261.36,450.45,10.60,9.96" target="#b7">[8]</ref>. The latter codes achieve optimal performance along all dimensions . For m = 3, there are a generalized EVEN- ODD code <ref type="bibr" coords="3,122.04,486.33,10.69,9.96" target="#b2">[3]</ref>, its recent variation <ref type="bibr" coords="3,225.12,486.33,15.34,9.96" target="#b16">[17]</ref> , and an array code derived from the (n + 3, 3) Reed-Solomon code <ref type="bibr" coords="3,94.32,510.21,15.34,9.96" target="#b9">[10]</ref> . None of these achieves optimal time complexity , though all are quite close. For m ≥ 4, some MDS array codes do exist <ref type="bibr" coords="3,178.44,534.09,15.34,9.96" target="#b10">[11]</ref> , but their time complexity is not optimal either. Apart from these codes, the only known MDS codes are the Reed-Solomon codes, which have existed for decades <ref type="bibr" coords="3,105.72,582.57,16.64,9.96" target="#b21">[22] </ref>and are widely used in communication and storage systems. Reed-Solomon codes are very powerful as they can be defined for any value of n and m. However, they have a drawback of requiring n Galois Field multiplications per coding block, and since coding blocks are typically smaller than a machine's word size, they can require 2n to 8n multiplications per machine word. Thus, Reed-Solomon codes are expensive. However, they remain the only MDS coding alternative in a large number of storage applications <ref type="bibr" coords="3,237.00,690.09,15.81,9.96" target="#b19">[20,</ref><ref type="bibr" coords="3,255.24,690.09,12.45,9.96" target="#b27"> 28,</ref><ref type="bibr" coords="3,270.24,690.09,7.18,9.96"> 7]</ref>. <ref type="bibr" coords="3,84.00,702.69,210.20,9.96">In 1995, Blomer et al presented Cauchy Reed</ref>Solomon (CRS) coding <ref type="bibr" coords="3,167.88,714.69,11.60,9.96" target="#b3">[4] </ref> which improved the performance of Reed-Solomon codes. To date, CRS coding is the state of the art for general MDS erasure coding. Since MDS codes can be expensive, recent research has relaxed space optimality in order to improve the computation performance. Low-Density Parity-Check (LDPC) codes have received much recent attention as high-performance alternatives to MDS codes. See <ref type="bibr" coords="3,524.28,146.85,15.69,9.96" target="#b26">[27,</ref><ref type="bibr" coords="3,318.00,158.85,13.28,9.96" target="#b24"> 25] </ref> for tutorial material on LDPC codes and for citations . While LDPC codes are asymptotically MDS, they have significant space overhead penalties for the values of n and m that many storage applications require . When the ratio of networking performance to CPU speed is high enough, LDPC codes do outperform their MDS alternatives. However, when that ratio is lower, MDS codes perform better <ref type="bibr" coords="3,453.96,242.49,15.81,9.96" target="#b26">[27,</ref><ref type="bibr" coords="3,472.20,242.49,7.26,9.96"> 7]</ref>. A second class of non-MDS codes are the recentlydeveloped HoVer and WEAVER codes <ref type="bibr" coords="3,479.88,267.09,15.69,9.96" target="#b14">[15,</ref><ref type="bibr" coords="3,499.08,267.09,11.86,9.96" target="#b15"> 16]</ref>. Both are array codes for small m that have time-optimal characteristics , but are only MDS in two cases: (n = 2, m = 2 and n = 3, m = 3). </p></div>
+<div xmlns="http://www.tei-c.org/ns/1.0"><head>The Contribution of This Paper </head><p>As described above, currently known time-efficient MDS codes are limited to small m (in fact, mostly m = 2 and m = 3). As storage systems increase in size, (i.e. as the number of storage nodes grows) so does the probability of concurrent multiple-node failures. This calls for MDS codes with large m, which at present means Reed-Solomon codes. This paper improves the encoding performance of Cauchy Reed-Solomon codes, and by so doing improves the state of the art in MDS erasure codes. CRS coding employs a Cauchy distribution matrix to perform encoding (and upon failure, decoding). Any Cauchy matrix will suffice, and the number of Cauchy matrices for given values of n and m is exponential in n and m. The original work on CRS coding treats all Cauchy matrices as equivalent and specifies an arbitrary construction. The authors quantify the matrix's impact on performance as a factor of O(log 2 (m + n)) <ref type="bibr" coords="3,525.84,558.69,10.69,9.96" target="#b3">[4]</ref>. While this is true, big-O notation treats constant factors as equal, and in these applications, constant factors can have a significant performance impact. In this paper, we show that two Cauchy matrices for the same values of n and m can differ in performance by over 81%. Moreover , we give an algorithm for constructing Cauchy matrices that have excellent performance. Additionally, we compare the performance of our Reed-Solomon coding to Cauchy Reed-Solomon coding as originally described <ref type="bibr" coords="3,423.84,678.81,10.60,9.96" target="#b3">[4]</ref>, classical " Vandermonde " Reed-Solomon coding <ref type="bibr" coords="3,411.00,690.81,15.34,9.96" target="#b23">[24]</ref>, and the parity-based MDS codes <ref type="bibr" coords="3,343.92,702.69,10.77,9.96" target="#b1">[2,</ref><ref type="bibr" coords="3,357.96,702.69,12.45,9.96" target="#b33"> 34,</ref><ref type="bibr" coords="3,373.68,702.69,12.45,9.96" target="#b16"> 17,</ref><ref type="bibr" coords="3,389.28,702.69,12.45,9.96" target="#b14"> 15,</ref><ref type="bibr" coords="3,405.00,702.69,12.45,9.96" target="#b9"> 10,</ref><ref type="bibr" coords="3,420.72,702.69,11.86,9.96" target="#b10"> 11]</ref> . As such, this paper provides a useful reference for the performance of various <ref type="figure" coords="4,99.52,95.98,55.04,8.47;4,99.52,108.68,42.34,8.47" target="#tab_1">1 5 2 7 4   5 1 3 4</ref><ref type="figure" coords="4,72.00,194.37,32.94,9.96">Figure 1</ref>: Cauchy Reed-Solomon coding example with n = 5, m = 2, and w = 3. The Cauchy distribution matrix is selected with X = {1, 2} and Y = {0, 3, 4, 5, 6}. MDS codes. </p></div>
+<div xmlns="http://www.tei-c.org/ns/1.0"><head n="2">Cauchy Reed-Solomon Coding</head><p>The mechanics of Reed-Solomon Coding, both regular and Cauchy variants, are well understood and presented in tutorial form in a variety of sources <ref type="bibr" coords="4,232.56,342.93,10.77,9.96" target="#b3">[4,</ref><ref type="bibr" coords="4,246.60,342.93,12.45,9.96" target="#b23"> 24,</ref><ref type="bibr" coords="4,262.44,342.93,12.45,9.96" target="#b25"> 26,</ref><ref type="bibr" coords="4,278.28,342.93,11.86,9.96" target="#b28"> 29]</ref>. The presentation in <ref type="bibr" coords="4,152.64,354.93,16.64,9.96" target="#b24">[25] </ref>is most germaine to this paper and is recommended for readers who desire to implement this scheme. <ref type="figure" coords="4,84.00,391.05,34.26,9.96">Figure 1</ref> summarizes the mechanics of CRS encoding , using an example with n = 5 and m = 2. A word size w ≥ log 2 (n + m) is selected (w = 3 in <ref type="figure" coords="4,254.40,414.93,32.43,9.96">Figure 1</ref>), and the data/coding devices are each partitioned into w packets of size B/w bytes. The wn data packets are arranged as 8B/w column vectors of one bit each. A Cauchy distribution matrix is defined over the Galois Field GF (2 w ) in the following way. Let X = {x 1 , . . . , x m } and Y = {y 1 , . . . , y n } be defined such that each x i and y i is a distinct element of GF (2 w ), and X ∩ Y = ∅. Then the Cauchy matrix defined by X and Y has 1/(x i + y j ) in element i, j. For example, <ref type="figure" coords="4,277.44,522.81,16.64,9.96;4,72.00,534.81,20.58,9.96">Fig- ure 1</ref>displays the Cauchy distribution matrix over over GF (2 3 ), where X = {1, 2} and Y = {0, 3, 4, 5, 6}. The m × n Cauchy distribution matrix over GF (2 w ) is next converted into a wm × wm binary distribution matrix using a projection defined by GF (2 w )'s primitive polynomial <ref type="bibr" coords="4,137.88,594.81,10.60,9.96" target="#b3">[4]</ref>. With this matrix, addition is XOR and multiplication is binary AND, and thus instead of encoding using standard matrix multiplication, one may create a coding packet as the XOR of all data packets whose corresponding columns of the binary distribution matrix have ones in the coding packet's row. Note that this is a big improvement over standard Reed-Solomon coding, because the Galois Field arithmetic over portions of 32 or 64 bit words is replaced by XOR's, each of which may be executed by one machine instruction. Let o be the average number of ones per row in the distribution matrix. Then the number of XORs to produce a word in each coding packet is equal to o − 1. For example, in the distribution matrix of <ref type="figure" coords="4,478.32,98.37,33.77,9.96">Figure 1</ref>, there are 47 ones. Since there are six rows, o = 47/6, and thus the average number of XORs per coding word is o − 1 = 47/6 − 1 = 6.83. Compared to standard Reed-Solomon coding, where each coding word would require 4 XORs plus 20 multiplications over GF (2 8 ), this is an improvement indeed, and is why, for example, OceanStore <ref type="bibr" coords="4,366.72,182.13,16.52,9.96" target="#b27">[28] </ref> uses Cauchy Reed-Solomon coding instead of standard Reed-Solomon coding. </p></div>
+<div xmlns="http://www.tei-c.org/ns/1.0"><head>All Cauchy Matrices Are Not Equal </head><p>In <ref type="bibr" coords="4,333.84,241.41,10.69,9.96" target="#b3">[4]</ref>, the performance of CRS is reported to be O(nlog(n + m)) per coding word. This is because o is O(w), and w is O(log(n+ m)). Since all Cauchy matrices have the property that o is O(w), the authors give an arbitrary Cauchy matrix construction: X equals the first m elements of GF (2 w ) and Y equals the next n elements . For our example scenario where n = 5 and m = 2, this yields a matrix which has 54 ones, as opposed to the 47 ones when X = {1, 2} and Y = {0, 3, 4, 5, 6}. The impact on performance is significant: 54/6 − 1 = 8 XORs per word, or a 17% decrease in performance over the matrix in <ref type="figure" coords="4,370.92,372.93,32.09,9.96">Figure 1</ref> . This observation fuels the exploration in the remainder of the paper. </p></div>
+<div xmlns="http://www.tei-c.org/ns/1.0"><head n="3">Enumerating Cauchy Matrices</head><p>The simplest way to discover optimal Cauchy Matrices is to enumerate them. Given n, m, and w, the number of ways to partition the 2 w elements into the sets X and Y is </p><formula>2 w n+m n+m n </formula><p>, which is clearly exponential in n and m. However, for w ≤ 4, and in 107 of the 225 possible combinations of n and m when w = 5, we have enumerated all Cauchy matrices and determined the best and worst distribution matrices. 1 We plot the results for w ≤ 4 in <ref type="figure" coords="4,406.44,536.61,33.29,9.96" target="#fig_0">Figure 2</ref>. Instead of plotting the number of XORs, we plot the factor over optimal coding , where optimal is defined as n − 1 XORs per coding word <ref type="bibr" coords="4,340.32,572.49,15.69,9.96" target="#b33">[34,</ref><ref type="bibr" coords="4,357.96,572.49,11.86,9.96" target="#b15"> 16]</ref>. Thus, for example, our exploration shows that the Cauchy matrix of <ref type="figure" coords="4,423.96,584.49,33.90,9.96">Figure 1</ref> indeed has the minimal number of ones. Since matrix requires 6.83 XORs per coding word, and optimal coding would require 4, its factor is 6.83/4 = 1.71, which is plotted in the rightmost graph of <ref type="figure" coords="4,375.84,632.25,33.42,9.96" target="#fig_0">Figure 2</ref>at n = 5, m = 2. There are three features of <ref type="figure" coords="4,440.52,644.25,34.14,9.96" target="#fig_0">Figure 2</ref> worth mentioning . First, there is a significant difference in the performance of the minimum and maximum Cauchy matrices <ref type="figure" coords="5,254.81,238.69,117.52,9.00" target="#fig_0">2 3 4 5 6 7 8 9 10 11 12</ref>for these values. This difference is most pronounced when n is small, because that is when there is a greater variety of possible values in the Cauchy matrix. Second, the performance of CRS coding gets worse as n grows. This is to be expected, again because as the Cauchy matrix grows, it must contain more values from GF (2 w ). The elements of GF (2 w ) vary in their number of ones, from exactly w (element 1) to close to w 2 . Therefore, small matrices can be populated with elements that have have O(w) ones. The larger matrices must include elements with O(w 2 ) ones, and thus they perform worse. The third feature is perhaps unexpected. This is that for the same values of n and m, the best matrices for w = 4 perform better than those for w = 3 and w = 2. For example, consider n = 2, m = 2. When w = 2, the best matrix has 10 ones, which means 10/4 − 1 = 1.5 XORs per coding word. When w = 3, the best matrix has 14 ones, which means 1.33 XORs per coding word, and when w = 4, the best matrix has 18 ones, which means 1.25 XORs per coding word. We explore this phenomenon further in <ref type="bibr" coords="5,214.92,555.81,15.34,9.96" target="#b24">[25]</ref>. </p></div>
+<div xmlns="http://www.tei-c.org/ns/1.0"><head> 4 Generating Good Cauchy Matrices for Larger w </head><p>For larger w, it is impractical to use exhaustive search to find optimal Cauchy matrices. Therefore, we have developed the following algorithm to construct good Cauchy matrices. We call the matrices that it produces GC matrices (for " Good Cauchy " ), and parameterize GC with n, m, and w. The GC(n, m, w) matrices where n = m are optimal in all cases that we have corroborated by enumeration. When n = m,  some GC(n, m, w) matrices are slightly worse than optimal . We measure this effect below. To construct a GC(m, n, w) matrix, we first construct a 2 w × 2 w matrix ON ES(w). ON ES(w) i,j contains the number of ones in the bit matrix M (1/(i + j)). Obviously, ON ES(w) i,i is always undefined. The matrix ON ES(3) is shown in <ref type="figure" coords="5,428.76,558.57,32.18,9.96" target="#fig_3">Figure 3</ref>(a). We may define a Cauchy matrix by selecting m columns, X 1 , . . . X m , and n rows, Y 1 , . . . Y n , of ON ES(w), such that no X j = Y i . We define the weight, W (w, X, Y ) of a Cauchy matrix to be: </p><formula>W (w, X, Y ) = n i=1 m j=1 ON ES(w) Yi ,Xj . </formula><p>The weight is equal to the number of ones in the Cauchy distribution matrix, and thus may be used to measure the encoding performance of the matrix. For example , in <ref type="figure" coords="5,346.20,702.69,32.66,9.96" target="#fig_3">Figure 3</ref>(b), we show the Cauchy matrix of <ref type="figure" coords="5,523.44,702.69,16.64,9.96;5,318.00,714.69,19.61,9.96">Fig- ure 1</ref>, where X = {1, 2} is represented by the shaded columns, and Y = {0, 3, 4, 5, 6} is represented by the shaded rows. The weight of this Cauchy matrix is equal to the sum of the black squares, 47, which indeed is the number of ones in the matrix. Our goal, therefore is to define X and Y such that W (w, X, Y ) is minimal or close to minimal. First, note that ON ES(w) has an extremely high degree of symmetry . There are only 2 w values in ON ES(w), which correspond to the number of ones in M (1/e) for each element e ∈ GF (2 w ). Each of these values occurs exactly once in each row of ON ES(w) and in each column of ON ES(w). Moreover, when n = m is a power of two, it is possible to choose X and Y such that </p><formula>W (w, n, m) = n n i=1 ON ES(w) Yi ,X1 . </formula><p>In other words, for each column X j of ON ES(w), the values where X j intersects Y are the same as the values where the first column X 1 intersections Y . They are simply permuted. We call such a Cauchy matrix a balanced Cauchy matrix. We show two such matrices for w = 3 in <ref type="figure" coords="6,110.40,337.41,32.33,9.96">Figure 4</ref>. </p><formula>5: (a): GC(3, 3, 3), (b): GC(3, 4, 3). </formula><p>Finally, we define GC(n, m, w), where n = m to be the minimum weight supermatrix of GC(min(n, m), min(n, m), w). Suppose n &gt; m. One constructs GC(n, m, w) by first constructing GC(m, m, w), then sorting the weights of the rows that can potentially be added to GC(m, m, w) to create GC(n, m, w), and then adding the n − m smallest of these rows. The construction when m &gt; n is analogous, except columns are added rather than rows. For example, GC(3, 4, 3) is pictured in <ref type="figure" coords="6,475.80,442.29,32.18,9.96">Figure 5</ref>(b), and is constructed by adding column 7 (rather than column 6) to GC(3, 3, 3). The running time complexity of constructing GC(n, m, w) is a very detailed calculation, which is outside the scope of this paper. However O(2 2w+1 ) is a succinct upper bound. While that is exponential in n and m (since n + m ≤ 2 w ), it grows much more slowly that the number of possible Cauchy matrices, detailed in Section 3, and allows us to construct good matrices for larger values of n and m. </p></div>
+<div xmlns="http://www.tei-c.org/ns/1.0"><head n="5">Performance of GC Matrices</head><p>Our first evaluation of GC matrices is to compare them to the best Cauchy matrices generated from our exhaustive search. All GC matrices for w ≤ 3 are optimal Cauchy matrices. For w = 4 and w = 5, the GC matrices are all optimal when n = m. Overall, in the 166 cases where we were able to determine the optimal Cauchy matrix, 53 of them matched the GC matrix. In the other 113 cases, the maximum performance difference was for GC(10, 2, 5), which differed by 7.9% from the optimal matrix in the number of XORs per coding word. On average, the performance difference between the GC matrix and the optimal matrix over all cases was 1.78%. In terms of their performance as n and m grow, we present two studies – one for small m, and one where n and m both grow. In both studies, we compare the following MDS coding techniques: @BULLET WEAVER: There are two MDS WEAVER codes <ref type="bibr" coords="7,118.68,188.61,16.52,9.96" target="#b14">[15] </ref>— one for m = 2, n = 2, and one for m = 3, n = 3. Both perform optimally. This uses BC, or " Bad Cauchy " matrices, by employing the GC algorithm , but starting with columns 1 and 3, and finding maximum weight matrices rather than minimum weight matrices. @BULLET Standard RS Coding: This uses distribution matrices based on the Vandermonde matrix, and arithmetic over GF (2 w ) as outlined in <ref type="bibr" coords="7,229.92,489.09,15.81,9.96" target="#b25">[26,</ref><ref type="bibr" coords="7,248.16,489.09,12.45,9.96" target="#b23"> 24,</ref><ref type="bibr" coords="7,263.16,489.09,11.86,9.96" target="#b28"> 29]</ref>. The metric for comparison is the factor over optimal coding, as in <ref type="figure" coords="7,128.28,523.29,33.29,9.96" target="#fig_0">Figure 2</ref>. For the XOR-based codes (all but standard Reed-Solomon coding), this is the number of XORs per coding word, divided by n − 1. As noted above, the X-Code and the two WEAVER codes attain this bound. Standard Reed-Solomon coding uses Galois Field multiplication in addition to XOR. To enable a comparison of it to the XOR-based codes, we measured the bandwidth of XOR operations (B ⊕ ), and of multiplication in GF </p><formula>(2 8 ) (B * )</formula><p>, which covers values of n + m ≤ 256. For maximum performance, we implemented multiplication using a 256 × 256 multiplication table. This is faster than either using log and anti-log tables (as in <ref type="bibr" coords="7,99.00,678.81,14.94,9.96" target="#b23">[24]</ref>), or than simulating polynomial arithmetic over GF (2) using XOR and bit-shifting <ref type="bibr" coords="7,247.44,690.81,15.34,9.96" target="#b21">[22]</ref>. This was done on a Dell Precision Workstation with a 3.40 GHz Intel Pentium 4 processor. The measurements are: Regular Reed-Solomon Cauchy Reed-Solomon (BC) Cauchy Reed-Solomon (Original) Cauchy Reed-Solomon (GC) </p><formula>m = 2 0 25 50 n 0 2 4 6 8 m = 3 0 25 50 n 0 2 4 6 8 </formula><formula>n 0 2 4 6 8 m = 5 </formula><p>Figure 6: Performance comparison of MDS codes for 2 ≤ m ≤ 5. <ref type="figure" coords="8,72.00,408.21,28.98,9.96" target="#tab_1">Table 1</ref>: Weights and factors of GC and BC matrices for m = 3, n = 29, and w ranging from 5 to 10. </p><formula>rates R = n n+m : 1 2 (m = n), 2 3 (2m = n), and 4 5 (4m = n</formula><p>). These are rates that are popular in coding studies and implementations <ref type="bibr" coords="8,192.36,494.97,15.69,9.96" target="#b20">[21,</ref><ref type="bibr" coords="8,212.04,494.97,12.45,9.96" target="#b29"> 30,</ref><ref type="bibr" coords="8,228.48,494.97,11.86,9.96" target="#b26"> 27]</ref> . For example , OceanStore has employed (n, m) pairs of (64, 16), (32, 32) and (16, 16) in various installations. For these values of n and m, Reed-Solomon coding is the only MDS coding technique. </p><p>The only real difference between Figures 6 and 7 is that the GC matrices for R = 1 2 exhibit minor performance jumps when n + m crosses a power of two. With respect solely to Cauchy Reed-Solomon coding, the GC matrices are a significant improvement over the others in nearly all cases. This effect is summarized in <ref type="figure" coords="8,261.48,619.05,28.85,9.96" target="#tab_2">Table 2</ref>, which shows the maximum, minimum and average performance improvement of GC matrices versus the original constructions. The greatest improvements come for small values of n, which are the most frequently implemented cases. The smallest improvements typically come when n + m equals a power of two. In terms of averages, the GC matrices show roughly a 10% improvement over the original constructions in all cases. </p><formula>R = 4/5 </formula><p>Figure 7: Performance of Reed-Solomon coding for higher values of n and m </p></div>
+<div xmlns="http://www.tei-c.org/ns/1.0"><head n="6">Additional Resources/Results</head><p>For brevity, we omit some further explorations on how codes with larger w can perform better than those with smaller w. The reader is referred to <ref type="bibr" coords="8,461.88,525.69,15.24,9.96" target="#b24">[25]</ref> , which also includes the the optimal and GC matrices generated for this paper, so that those who need to implement this technique may do so easily. </p></div>
+<div xmlns="http://www.tei-c.org/ns/1.0"><head n="7">Conclusions and Future Work</head><p>In this paper, we have shown that the construction of the distribution matrix in Cauchy Reed-Solomon coding impacts the encoding performance. In particular, our desire is to construct Cauchy matrices with a minimal number of ones. We have enumerated optimal matrices for small cases, and given an algorithm for constructing good matrices in larger cases. The performance difference between good and bad matrices is significant, averaging roughly 10% across all cases, with a maxi- Test Maximum Minimum Average m = 2 81.8% (n = 2) 6.1% (n = 100) 17.3% m = 3 42.9% (n = 6) 1.2% (n = 61) 11.3% m = 4 56.8% (n = 5) 1.8% (n = 60) 10.8% m = 5 51.4% (n = 5) 1.2% (n = 59) 9.4% <ref type="figure" coords="9,72.00,180.33,28.98,9.96" target="#tab_2">Table 2</ref> : The improvement in performance of GC matrices , compared to the original Cauchy constructions. mum of 83% in the best case. The work is significant, because for m &gt; 3, these are the best MDS codes currently known. Additionally, we have put the performance of Cauchy Reed-Solomon coding into perspective, comparing its performance to standard Reed-Solomon coding, and to special-purpose MDS algorithms for small numbers of failures. The main conclusion to draw here is that the special-purpose algorithms vastly outperform Reed- Solomon codes, and that more research should be performed on broadening these algorithms for larger numbers of failures. The recent work by Hafner <ref type="bibr" coords="9,246.00,366.57,15.81,9.96" target="#b14">[15,</ref><ref type="bibr" coords="9,264.12,366.57,13.28,9.96" target="#b15"> 16] </ref>and Feng <ref type="bibr" coords="9,94.44,378.57,15.69,9.96" target="#b9">[10,</ref><ref type="bibr" coords="9,112.68,378.57,13.28,9.96" target="#b10"> 11] </ref>are promising in this direction. In this work, we have not studied decoding performance , nor have we included non-MDS codes for comparison . Both are topics for the future. Finally, we note the rather counter-intuitive result that Cauchy Reed-Solomon coding can perform better for larger values of w while holding the other parameters constant. This is because larger Galois Fields may have more elements with proportionally fewer ones than smaller Galois Fields. It is a subject of future work to explore this phenomenon and construct Cauchy matrices for large fields that perform well. w = 28 and w = 29 are interesting candidates here, as they both have primitive polynomials with only three non-zero coefficients. </p></div><figure xmlns="http://www.tei-c.org/ns/1.0" xml:id="fig_0" coords="5,141.36,274.19,329.49,10.18"><head>Figure 2: </head><figDesc>Figure 2: Minimum and maximum Cauchy matrices for w ≤ 4 (i.e., n + m ≤ 16). </figDesc></figure>
+<figure xmlns="http://www.tei-c.org/ns/1.0" xml:id="fig_3" coords="5,318.00,434.01,222.18,9.96;5,318.00,446.01,131.97,9.96"><head>Figure 3: </head><figDesc>Figure 3: (a): ON ES(3). (b): The optimal Cauchy matrix for n = 5, m = 2, w = 3. </figDesc></figure>
+<figure xmlns="http://www.tei-c.org/ns/1.0" xml:id="fig_4" coords="6,341.16,300.45,175.65,9.96"><head>Figure </head><figDesc>Figure 5: (a): GC(3, 3, 3), (b): GC(3, 4, 3). </figDesc></figure>
+<figure xmlns="http://www.tei-c.org/ns/1.0" xml:id="fig_5" coords="7,81.96,212.51,212.22,10.18;7,91.92,224.61,114.33,9.96;7,81.96,236.51,212.10,10.18;7,91.92,248.73,202.14,9.96;7,91.92,260.73,33.09,9.96;7,81.96,272.63,212.24,10.18;7,91.92,284.85,77.97,9.96;7,81.96,296.75,212.22,10.18;7,91.92,308.97,114.09,9.96;7,81.96,320.87,212.22,10.18;7,91.92,332.97,202.14,9.96;7,91.92,344.97,149.73,9.96;7,81.96,356.87,212.29,10.18;7,91.92,369.09,202.28,9.96;7,91.92,381.09,202.28,9.96;7,91.92,392.97,111.09,9.96;7,81.96,404.99,96.97,10.18"><head></head><figDesc>@BULLET X-Code: The optimal X-Code [34] is defined for m = 2 and n + 2 prime . @BULLET EVENODD: This is defined for m = 2 and all n [2]. Its performance is slightly worse than optimal. @BULLET STAR: This is an extrapolation of EVENODD coding for m = 3 [17]. @BULLET FENG: These are the recently-defined MDS array codes by Feng et al [10, 11]. @BULLET CRS Coding (GC): This uses the matrices defined above for all values of w between 2 and 10, and selects the one that performs the best. @BULLET CRS Coding (Original): This uses the original matrix construction as defined in [4], where X consists of the first m elements in the field, and Y consists of the next n elements. @BULLET CRS Coding (BC): </figDesc></figure>
+<figure xmlns="http://www.tei-c.org/ns/1.0" type="table" xml:id="tab_0" validated="false" coords="4,80.35,71.84,216.76,110.08"><figDesc coords="4,150.33,108.68,4.23,8.47">7</figDesc><table coords="4,80.35,71.84,216.76,110.08">Binary Distribution Matrix 
+
+Cauchy Distribution 
+Matrix over GF(8) 
+
+* 
+= 
+
+D5 
+
+D4 
+
+D3 
+
+D2 
+
+D1 
+
+8B/w bits 
+1 bit 
+
+Data 
+Coding 
+
+C2 
+
+C1 
+
+</table></figure>
+
+			<note place="foot" n="1"> While this is roughly half of the combinations of n and m for w = 5, it is only 3.7% of the work required to calculate all of the combinations of n and m. We are continuing to enumerate optimal matrices for the remainder of these cases.</note>
+
+			<note place="foot">B ⊕ = 2992 MB/s and B * = 787.9 MB/s. Note, we measure both in terms of their bandwidth (megabytes per second), which accounts for the fact that XORs may be done over 32-bit words, while multiplication over GF (2 8 ) operates on 8-bit quantities. Reed-Solomon coding requires n multiplications and n − 1 XORs per coding word. Thus, we calculate the factor of Reed-Solomon coding as: n − 1 B ⊕ + n B * / n − 1 B ⊕ . The results for small m are in Figure 6. Handling small numbers of failures is the most common case for disk controllers and medium-scale storage systems. The most glaring feature of these graphs is that the specialpurpose codes (EVENODD, X-Code, etc.) drastically outperform the Reed-Solomon codes. Thus, in applications which need resilience to two and three failures, these should be used in all cases. Note, this is not a new result; it simply reaffirms the original research on special-purpose codes, and fuels the search for good MDS codes for higher values of m. Focusing solely on the Reed-Solomon codes, we draw a few conclusions from Figure 6. First, Cauchy Reed-Solomon coding in all cases outperforms standard Reed-Solomon coding. Although it appears that the two techniques will converge as n grows larger, it must be noted that when n + m becomes greater than 256, standard Reed-Solomon coding must use multiplication over GF (2 16 ), which is much slower than over GF (2 8 ) (we measured B * = 148.5 MB/sec). Second, not only do the GC matrices outperform the other constructions, but their performance decreases gradually as n increases, rather than exhibiting jumps at the points where n + m crosses a power of two. We illuminate this as follows. If one holds n and m constant and increases w, the range of weights of Cauchy matrices (and therefore factors over optimal) increases drastically; however, the minimum factors stay roughly the same. For example, in Table 1, we show the weights of the GC and BC matrices for m = 3, n = 29, and w ranging from 5 to 10. Note then when w = 5, the difference between the GC and BC matrices is slight, whereas when w = 10, the difference is more than a factor of two. This means that when a value of w becomes unusable (for example, when m = 3 and n = 30, one cannot use w = 5), there is far less of a performance penalty in using the GC matrix for the next value of w than using the BC matrix. The &quot; Original &quot; matrices split the difference between the two. Our second case study is for larger values of n and m, which is applicable to wide-area storage systems and content distribution systems. In Figure 7, we show the performance of the Reed-Solomon codes for three</note>
+		</body>
+		<back>
+			<div type="references">
+
+				<listBibl>
+
+<biblStruct coords="9,91.92,586.49,201.94,6.97;9,91.92,594.53,202.10,6.97;9,91.92,602.45,137.94,6.97"  xml:id="b0">
+	<analytic>
+		<title level="a" type="main">Fault-tolerance in the network storage stack</title>
+		<author>
+			<persName>
+				<forename type="first">S</forename>
+				<surname>Atchley</surname>
+			</persName>
+		</author>
+		<author>
+			<persName>
+				<forename type="first">S</forename>
+				<surname>Soltesz</surname>
+			</persName>
+		</author>
+		<author>
+			<persName>
+				<forename type="first">J</forename>
+				<forename type="middle">S</forename>
+				<surname>Plank</surname>
+			</persName>
+		</author>
+		<author>
+			<persName>
+				<forename type="first">M</forename>
+				<surname>Beck</surname>
+			</persName>
+		</author>
+		<author>
+			<persName>
+				<forename type="first">T</forename>
+				<surname>Moore</surname>
+			</persName>
+		</author>
+	</analytic>
+	<monogr>
+		<title level="j">IEEE Workshop on Fault-Tolerant Parallel &amp; Dist. Systems</title>
+		<imprint>
+			<date type="published" when="2002-04" />
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct coords="9,91.92,610.97,202.10,6.97;9,91.92,619.01,202.14,6.97;9,91.92,626.93,102.18,6.97"  xml:id="b1">
+	<analytic>
+		<title level="a" type="main">EVENODD: An efficient scheme for tolerating double disk failures in RAID architectures</title>
+		<author>
+			<persName>
+				<forename type="first">M</forename>
+				<surname>Blaum</surname>
+			</persName>
+		</author>
+		<author>
+			<persName>
+				<forename type="first">J</forename>
+				<surname>Brady</surname>
+			</persName>
+		</author>
+		<author>
+			<persName>
+				<forename type="first">J</forename>
+				<surname>Bruck</surname>
+			</persName>
+		</author>
+		<author>
+			<persName>
+				<forename type="first">J</forename>
+				<surname>Menon</surname>
+			</persName>
+		</author>
+	</analytic>
+	<monogr>
+		<title level="j">IEEE Trans. Comp</title>
+		<imprint>
+			<biblScope unit="volume">44</biblScope>
+			<biblScope unit="issue">2</biblScope>
+			<biblScope unit="page" from="192" to="202" />
+			<date type="published" when="1995" />
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct coords="9,91.92,635.45,202.10,6.97;9,91.92,643.49,167.82,6.97"  xml:id="b2">
+	<analytic>
+		<title level="a" type="main">MDS array codes with independent parity symbols</title>
+		<author>
+			<persName>
+				<forename type="first">M</forename>
+				<surname>Blaum</surname>
+			</persName>
+		</author>
+		<author>
+			<persName>
+				<forename type="first">J</forename>
+				<surname>Bruck</surname>
+			</persName>
+		</author>
+		<author>
+			<persName>
+				<forename type="first">A</forename>
+				<surname>Vardy</surname>
+			</persName>
+		</author>
+	</analytic>
+	<monogr>
+		<title level="j">IEEE Trans. Inf. Thy</title>
+		<imprint>
+			<biblScope unit="volume">42</biblScope>
+			<biblScope unit="issue">2</biblScope>
+			<biblScope unit="page" from="529" to="542" />
+			<date type="published" when="1996" />
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct coords="9,91.92,652.01,202.12,6.97;9,91.92,660.05,202.10,6.97;9,91.92,667.97,188.82,6.97"  xml:id="b3">
+	<monogr>
+		<title level="m" type="main">An XOR-based erasure-resilient coding scheme</title>
+		<author>
+			<persName>
+				<forename type="first">J</forename>
+				<surname>Blomer</surname>
+			</persName>
+		</author>
+		<author>
+			<persName>
+				<forename type="first">M</forename>
+				<surname>Kalfane</surname>
+			</persName>
+		</author>
+		<author>
+			<persName>
+				<forename type="first">M</forename>
+				<surname>Karpinski</surname>
+			</persName>
+		</author>
+		<author>
+			<persName>
+				<forename type="first">R</forename>
+				<surname>Karp</surname>
+			</persName>
+		</author>
+		<author>
+			<persName>
+				<forename type="first">M</forename>
+				<surname>Luby</surname>
+			</persName>
+		</author>
+		<author>
+			<persName>
+				<forename type="first">D</forename>
+				<surname>Zuckerman</surname>
+			</persName>
+		</author>
+		<imprint>
+			<date type="published" when="1995-08" />
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct coords="9,91.92,676.49,202.09,6.97;9,91.92,684.53,202.24,6.97;9,91.92,692.45,91.02,6.97"  xml:id="b4">
+	<analytic>
+		<title level="a" type="main">A digital fountain approach to reliable distribution of bulk data</title>
+		<author>
+			<persName>
+				<forename type="first">J</forename>
+				<surname>Byers</surname>
+			</persName>
+		</author>
+		<author>
+			<persName>
+				<forename type="first">M</forename>
+				<surname>Luby</surname>
+			</persName>
+		</author>
+		<author>
+			<persName>
+				<forename type="first">M</forename>
+				<surname>Mitzenmacher</surname>
+			</persName>
+		</author>
+		<author>
+			<persName>
+				<forename type="first">A</forename>
+				<surname>Rege</surname>
+			</persName>
+		</author>
+	</analytic>
+	<monogr>
+		<title level="m">ACM SIGCOMM &apos;98</title>
+		<meeting><address><addrLine>Vancouver</addrLine></address></meeting>
+		<imprint>
+			<date type="published" when="1998-08" />
+			<biblScope unit="page" from="56" to="67" />
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct coords="9,91.92,700.97,202.02,6.97;9,91.92,709.01,202.09,6.97;9,91.92,716.93,100.14,6.97"  xml:id="b5">
+	<analytic>
+		<title level="a" type="main">RAID: High-performance, reliable secondary storage</title>
+		<author>
+			<persName>
+				<forename type="first">P</forename>
+				<forename type="middle">M</forename>
+				<surname>Chen</surname>
+			</persName>
+		</author>
+		<author>
+			<persName>
+				<forename type="first">E</forename>
+				<forename type="middle">K</forename>
+				<surname>Lee</surname>
+			</persName>
+		</author>
+		<author>
+			<persName>
+				<forename type="first">G</forename>
+				<forename type="middle">A</forename>
+				<surname>Gibson</surname>
+			</persName>
+		</author>
+		<author>
+			<persName>
+				<forename type="first">R</forename>
+				<forename type="middle">H</forename>
+				<surname>Katz</surname>
+			</persName>
+		</author>
+		<author>
+			<persName>
+				<forename type="first">D</forename>
+				<forename type="middle">A</forename>
+				<surname>Patterson</surname>
+			</persName>
+		</author>
+	</analytic>
+	<monogr>
+		<title level="j">ACM Computing Surveys</title>
+		<imprint>
+			<biblScope unit="volume">26</biblScope>
+			<biblScope unit="issue">2</biblScope>
+			<biblScope unit="page" from="145" to="185" />
+			<date type="published" when="1994-06" />
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct coords="9,322.68,76.73,217.39,6.97;9,337.92,84.65,202.26,6.97;9,337.92,92.69,48.90,6.97"  xml:id="b6">
+	<analytic>
+		<title level="a" type="main">Assessing the performance of erasure codes in the wide-area</title>
+		<author>
+			<persName>
+				<forename type="first">]</forename>
+				<forename type="middle">R L</forename>
+				<surname>Collins</surname>
+			</persName>
+		</author>
+		<author>
+			<persName>
+				<forename type="first">J</forename>
+				<forename type="middle">S</forename>
+				<surname>Plank</surname>
+			</persName>
+		</author>
+	</analytic>
+	<monogr>
+		<title level="m">DSN-05: Int. Conf. on Dependable Sys. and Networks</title>
+		<meeting><address><addrLine>Yokohama</addrLine></address></meeting>
+		<imprint>
+			<date type="published" when="2005" />
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct coords="9,337.92,100.97,202.02,6.97;9,337.92,108.89,181.98,6.97"  xml:id="b7">
+	<analytic>
+		<title level="a" type="main">Row diagonal parity for double disk failure correction</title>
+		<author>
+			<persName>
+				<forename type="first">P</forename>
+				<surname>Corbett</surname>
+			</persName>
+		</author>
+	</analytic>
+	<monogr>
+		<title level="m">4th Usenix Conf. on File and Storage Tech</title>
+		<meeting><address><addrLine>San Francisco</addrLine></address></meeting>
+		<imprint>
+			<date type="published" when="2004" />
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct coords="9,337.92,117.17,202.12,6.97;9,337.92,125.21,202.14,6.97;9,337.92,133.13,70.98,6.97"  xml:id="b8">
+	<analytic>
+		<title level="a" type="main">Content-access QoS in peer-to-peer networks using a fast MDS erasure code</title>
+		<author>
+			<persName>
+				<forename type="first">L</forename>
+				<surname>Dairaine</surname>
+			</persName>
+		</author>
+		<author>
+			<persName>
+				<forename type="first">J</forename>
+				<surname>Lacan</surname>
+			</persName>
+		</author>
+		<author>
+			<persName>
+				<forename type="first">L</forename>
+				<surname>Lancérica</surname>
+			</persName>
+		</author>
+		<author>
+			<persName>
+				<forename type="first">J</forename>
+				<surname>Fimes</surname>
+			</persName>
+		</author>
+	</analytic>
+	<monogr>
+		<title level="j">Comp. Comm</title>
+		<imprint>
+			<biblScope unit="volume">28</biblScope>
+			<biblScope unit="issue">15</biblScope>
+			<biblScope unit="page" from="1778" to="1790" />
+			<date type="published" when="2005" />
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct coords="9,338.88,141.41,201.19,6.97;9,337.92,149.45,202.00,6.97;9,337.92,157.37,141.06,6.97"  xml:id="b9">
+	<analytic>
+		<title level="a" type="main">New efficient MDS array codes for RAID part I: Reed-Solomon-like codes for tolerating three disk failures</title>
+		<author>
+			<persName>
+				<forename type="first">G</forename>
+				<surname>Feng</surname>
+			</persName>
+		</author>
+		<author>
+			<persName>
+				<forename type="first">R</forename>
+				<surname>Deng</surname>
+			</persName>
+		</author>
+		<author>
+			<persName>
+				<forename type="first">F</forename>
+				<surname>Bao</surname>
+			</persName>
+		</author>
+		<author>
+			<persName>
+				<forename type="first">J</forename>
+				<surname>Shen</surname>
+			</persName>
+		</author>
+	</analytic>
+	<monogr>
+		<title level="j">IEEE Trans. Comp</title>
+		<imprint>
+			<biblScope unit="volume">54</biblScope>
+			<biblScope unit="issue">9</biblScope>
+			<biblScope unit="page" from="1071" to="1080" />
+			<date type="published" when="2005" />
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct coords="9,338.88,165.65,201.19,6.97;9,337.92,173.69,202.09,6.97;9,337.92,181.61,153.78,6.97"  xml:id="b10">
+	<analytic>
+		<title level="a" type="main">New efficient MDS array codes for RAID part II: Rabin-like codes for tolerating multiple (≥ 4) disk failures</title>
+		<author>
+			<persName>
+				<forename type="first">G</forename>
+				<surname>Feng</surname>
+			</persName>
+		</author>
+		<author>
+			<persName>
+				<forename type="first">R</forename>
+				<surname>Deng</surname>
+			</persName>
+		</author>
+		<author>
+			<persName>
+				<forename type="first">F</forename>
+				<surname>Bao</surname>
+			</persName>
+		</author>
+		<author>
+			<persName>
+				<forename type="first">J</forename>
+				<surname>Shen</surname>
+			</persName>
+		</author>
+	</analytic>
+	<monogr>
+		<title level="j">IEEE Trans. Comp</title>
+		<imprint>
+			<biblScope unit="volume">54</biblScope>
+			<biblScope unit="issue">12</biblScope>
+			<biblScope unit="page" from="1473" to="1483" />
+			<date type="published" when="2005" />
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct coords="9,338.88,189.89,201.16,6.97;9,337.92,197.93,202.09,6.97;9,337.92,205.85,133.74,6.97"  xml:id="b11">
+	<analytic>
+		<title level="a" type="main">A decentralized algorithm for erasure-coded virtual disks</title>
+		<author>
+			<persName>
+				<forename type="first">S</forename>
+				<surname>Frolund</surname>
+			</persName>
+		</author>
+		<author>
+			<persName>
+				<forename type="first">A</forename>
+				<surname>Merchant</surname>
+			</persName>
+		</author>
+		<author>
+			<persName>
+				<forename type="first">Y</forename>
+				<surname>Saito</surname>
+			</persName>
+		</author>
+		<author>
+			<persName>
+				<forename type="first">S</forename>
+				<surname>Spence</surname>
+			</persName>
+		</author>
+		<author>
+			<persName>
+				<forename type="first">A</forename>
+				<surname>Veitch</surname>
+			</persName>
+		</author>
+	</analytic>
+	<monogr>
+		<title level="m">DSN-04: Int. Conf. on Dependable Sys. and Networks</title>
+		<meeting><address><addrLine>Florence</addrLine></address></meeting>
+		<imprint>
+			<date type="published" when="2004" />
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct coords="9,338.88,214.13,201.16,6.97;9,337.92,222.17,176.34,6.97"  xml:id="b12">
+	<monogr>
+		<title level="m" type="main">Towards an archival intermemory ADL- 98: IEEE Adv</title>
+		<author>
+			<persName>
+				<forename type="first">A</forename>
+				<surname>Goldberg</surname>
+			</persName>
+		</author>
+		<author>
+			<persName>
+				<forename type="first">P</forename>
+				<forename type="middle">N</forename>
+				<surname>Yianilos</surname>
+			</persName>
+		</author>
+		<editor>Dig. Libr., Santa Barbara</editor>
+		<imprint>
+			<date type="published" when="1998" />
+			<biblScope unit="page" from="147" to="156" />
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct coords="9,338.88,230.45,201.14,6.97;9,337.92,238.37,202.12,6.97;9,337.92,246.41,125.58,6.97"  xml:id="b13">
+	<analytic>
+		<title level="a" type="main">Efficient byzantine-tolerant erasure-coded storage</title>
+		<author>
+			<persName>
+				<forename type="first">G</forename>
+				<forename type="middle">R</forename>
+				<surname>Goodson</surname>
+			</persName>
+		</author>
+		<author>
+			<persName>
+				<forename type="first">J</forename>
+				<forename type="middle">J</forename>
+				<surname>Wylie</surname>
+			</persName>
+		</author>
+		<author>
+			<persName>
+				<forename type="first">G</forename>
+				<forename type="middle">R</forename>
+				<surname>Ganger</surname>
+			</persName>
+		</author>
+		<author>
+			<persName>
+				<forename type="first">M</forename>
+				<forename type="middle">K</forename>
+				<surname>Reiter</surname>
+			</persName>
+		</author>
+	</analytic>
+	<monogr>
+		<title level="m">DSN-04: Int. Conf. on Dependable Sys. and Networks</title>
+		<meeting><address><addrLine>Florence</addrLine></address></meeting>
+		<imprint>
+			<date type="published" when="2004" />
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct coords="9,338.88,254.69,201.04,6.97;9,337.92,262.61,202.14,6.97;9,337.92,270.65,96.78,6.97"  xml:id="b14">
+	<analytic>
+		<title level="a" type="main">WEAVER Codes: Highly fault tolerant erasure codes for storage systems</title>
+		<author>
+			<persName>
+				<forename type="first">J</forename>
+				<forename type="middle">L</forename>
+				<surname>Hafner</surname>
+			</persName>
+		</author>
+	</analytic>
+	<monogr>
+		<title level="m">FAST-2005: 4th Usenix Conf. on File and Storage Tech</title>
+		<meeting><address><addrLine>San Francisco</addrLine></address></meeting>
+		<imprint>
+			<date type="published" when="2005" />
+			<biblScope unit="page" from="211" to="224" />
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct coords="9,338.88,278.93,201.13,6.97;9,337.92,286.85,144.18,6.97"  xml:id="b15">
+	<analytic>
+		<title level="a" type="main">HoVer erasure codes for disk arrays</title>
+		<author>
+			<persName>
+				<forename type="first">J</forename>
+				<forename type="middle">L</forename>
+				<surname>Hafner</surname>
+			</persName>
+		</author>
+	</analytic>
+	<monogr>
+		<title level="m">DSN-06: Int. Conf. on Dependable Sys. and Networks</title>
+		<meeting><address><addrLine>Philadelphia</addrLine></address></meeting>
+		<imprint>
+			<date type="published" when="2006" />
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct coords="9,338.88,295.13,201.01,6.97;9,337.92,303.17,202.09,6.97;9,337.92,311.09,137.94,6.97"  xml:id="b16">
+	<analytic>
+		<title level="a" type="main">STAR: An efficient coding scheme for correcting triple storage node failures</title>
+		<author>
+			<persName>
+				<forename type="first">C</forename>
+				<surname>Huang</surname>
+			</persName>
+		</author>
+		<author>
+			<persName>
+				<forename type="first">L</forename>
+				<surname>Xu</surname>
+			</persName>
+		</author>
+	</analytic>
+	<monogr>
+		<title level="m">FAST-2005: 4th Usenix Conf. on File and Storage Tech</title>
+		<meeting><address><addrLine>San Francisco</addrLine></address></meeting>
+		<imprint>
+			<date type="published" when="2005" />
+			<biblScope unit="page" from="197" to="210" />
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct coords="9,338.88,319.37,201.10,6.97;9,337.92,327.41,202.12,6.97;9,337.92,335.33,68.46,6.97"  xml:id="b17">
+	<monogr>
+		<title level="m" type="main">PeerStreaming: A practical receiver-driven peer-to-peer media streaming system</title>
+		<author>
+			<persName>
+				<forename type="first">J</forename>
+				<surname>Li</surname>
+			</persName>
+		</author>
+		<imprint>
+			<date type="published" when="2004-09" />
+			<pubPlace>Microsoft Research</pubPlace>
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct coords="9,338.88,343.61,201.18,6.97;9,337.92,351.65,158.82,6.97"  xml:id="b18">
+	<analytic>
+		<title level="a" type="main">Erasure code replication revisited</title>
+		<author>
+			<persName>
+				<forename type="first">W</forename>
+				<forename type="middle">K</forename>
+				<surname>Lin</surname>
+			</persName>
+		</author>
+		<author>
+			<persName>
+				<forename type="first">D</forename>
+				<forename type="middle">M</forename>
+				<surname>Chiu</surname>
+			</persName>
+		</author>
+		<author>
+			<persName>
+				<forename type="first">Y</forename>
+				<forename type="middle">B</forename>
+				<surname>Lee</surname>
+			</persName>
+		</author>
+	</analytic>
+	<monogr>
+		<title level="m">PTP04: 4th Int. Conf. on Peer-to-Peer Computing</title>
+		<imprint>
+			<date type="published" when="2004" />
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct coords="9,338.88,359.93,201.16,6.97;9,337.92,367.85,201.95,6.97;9,337.92,375.77,153.42,6.97"  xml:id="b19">
+	<analytic>
+		<title level="a" type="main">Lh*rs: a high-availability scalable distributed data structure using Reed Solomon codes</title>
+		<author>
+			<persName>
+				<forename type="first">W</forename>
+				<surname>Litwin</surname>
+			</persName>
+		</author>
+		<author>
+			<persName>
+				<forename type="first">T</forename>
+				<surname>Schwarz</surname>
+			</persName>
+		</author>
+	</analytic>
+	<monogr>
+		<title level="j">ACM SIGMOD Int. Conf. on Management of Data</title>
+		<imprint>
+			<biblScope unit="page" from="237" to="248" />
+			<date type="published" when="2000" />
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct coords="9,338.88,384.17,201.04,6.97;9,337.92,392.09,202.06,6.97;9,337.92,400.01,132.90,6.97"  xml:id="b20">
+	<analytic>
+		<title level="a" type="main">Practical loss-resilient codes</title>
+		<author>
+			<persName>
+				<forename type="first">M</forename>
+				<surname>Luby</surname>
+			</persName>
+		</author>
+		<author>
+			<persName>
+				<forename type="first">M</forename>
+				<surname>Mitzenmacher</surname>
+			</persName>
+		</author>
+		<author>
+			<persName>
+				<forename type="first">A</forename>
+				<surname>Shokrollahi</surname>
+			</persName>
+		</author>
+		<author>
+			<persName>
+				<forename type="first">D</forename>
+				<surname>Spielman</surname>
+			</persName>
+		</author>
+		<author>
+			<persName>
+				<forename type="first">V</forename>
+				<surname>Stemann</surname>
+			</persName>
+		</author>
+	</analytic>
+	<monogr>
+		<title level="m">29th Annual ACM Symp. on Theory of Computing</title>
+		<meeting><address><addrLine>El Paso, TX</addrLine></address></meeting>
+		<imprint>
+			<date type="published" when="1997" />
+			<biblScope unit="page" from="150" to="159" />
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct coords="9,338.88,408.41,201.37,6.97;9,337.92,416.33,202.20,6.97;9,337.92,424.25,56.34,6.97"  xml:id="b21">
+	<monogr>
+		<title level="m" type="main">The Theory of Error-Correcting Codes, Part I</title>
+		<author>
+			<persName>
+				<forename type="first">F</forename>
+				<forename type="middle">J</forename>
+				<surname>Macwilliams</surname>
+			</persName>
+		</author>
+		<author>
+			<persName>
+				<forename type="first">N</forename>
+				<forename type="middle">J A</forename>
+				<surname>Sloane</surname>
+			</persName>
+		</author>
+		<imprint>
+			<date type="published" when="1977" />
+			<publisher>North-Holland Publishing Company</publisher>
+			<pubPlace>Amsterdam, New York, Oxford</pubPlace>
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct coords="9,338.88,432.53,201.13,6.97;9,337.92,440.57,134.82,6.97"  xml:id="b22">
+	<analytic>
+		<title level="a" type="main">Digital fountains: A survey and look forward</title>
+		<author>
+			<persName>
+				<forename type="first">M</forename>
+				<surname>Mitzenmacher</surname>
+			</persName>
+		</author>
+	</analytic>
+	<monogr>
+		<title level="m">IEEE Inf. Theory Workshop</title>
+		<meeting><address><addrLine>San Antonio</addrLine></address></meeting>
+		<imprint>
+			<date type="published" when="2004" />
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct coords="9,338.88,448.85,201.13,6.97;9,337.92,456.77,201.90,6.97;9,337.92,464.81,15.66,6.97"  xml:id="b23">
+	<analytic>
+		<title level="a" type="main">A tutorial on Reed-Solomon coding for fault-tolerance in RAID-like systems</title>
+		<author>
+			<persName>
+				<forename type="first">J</forename>
+				<forename type="middle">S</forename>
+				<surname>Plank</surname>
+			</persName>
+		</author>
+	</analytic>
+	<monogr>
+		<title level="j">Software – Practice &amp; Experience</title>
+		<imprint>
+			<biblScope unit="volume">27</biblScope>
+			<biblScope unit="issue">9</biblScope>
+			<biblScope unit="page" from="995" to="1012" />
+			<date type="published" when="1997" />
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct coords="9,338.88,473.09,200.90,6.97;9,337.92,481.01,202.12,6.97;9,337.92,489.05,37.86,6.97"  xml:id="b24">
+	<monogr>
+		<title level="m" type="main">Optimizing Cauchy Reed-Solomon codes for fault-tolerant storage applications</title>
+		<author>
+			<persName>
+				<forename type="first">J</forename>
+				<forename type="middle">S</forename>
+				<surname>Plank</surname>
+			</persName>
+		</author>
+		<imprint>
+			<date type="published" when="2005-12" />
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct coords="9,338.88,497.33,201.16,6.97;9,337.92,505.25,201.90,6.97;9,337.92,513.29,15.66,6.97"  xml:id="b25">
+	<analytic>
+		<title level="a" type="main">Note: Correction to the 1997 tutorial on Reed- Solomon coding</title>
+		<author>
+			<persName>
+				<forename type="first">J</forename>
+				<forename type="middle">S</forename>
+				<surname>Plank</surname>
+			</persName>
+		</author>
+		<author>
+			<persName>
+				<forename type="first">Y</forename>
+				<surname>Ding</surname>
+			</persName>
+		</author>
+	</analytic>
+	<monogr>
+		<title level="j">Software – Practice &amp; Experience</title>
+		<imprint>
+			<biblScope unit="volume">35</biblScope>
+			<biblScope unit="issue">2</biblScope>
+			<biblScope unit="page" from="189" to="194" />
+			<date type="published" when="2005" />
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct coords="9,338.88,521.57,201.13,6.97;9,337.92,529.49,202.00,6.97;9,337.92,537.53,202.00,6.97;9,337.92,545.45,12.18,6.97"  xml:id="b26">
+	<analytic>
+		<title level="a" type="main">A practical analysis of low-density parity-check erasure codes for wide-area storage applications</title>
+		<author>
+			<persName>
+				<forename type="first">J</forename>
+				<forename type="middle">S</forename>
+				<surname>Plank</surname>
+			</persName>
+		</author>
+		<author>
+			<persName>
+				<forename type="first">M</forename>
+				<forename type="middle">G</forename>
+				<surname>Thomason</surname>
+			</persName>
+		</author>
+	</analytic>
+	<monogr>
+		<title level="m">DSN-04: Int. Conf. on Dependable Sys. and Networks</title>
+		<meeting><address><addrLine>Florence</addrLine></address></meeting>
+		<imprint>
+			<date type="published" when="2004" />
+			<biblScope unit="page" from="115" to="124" />
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct coords="9,338.88,553.73,201.13,6.97;9,337.92,561.77,202.10,6.97;9,337.92,569.69,84.54,6.97"  xml:id="b27">
+	<analytic>
+		<title level="a" type="main">Maintenance-free global data storage</title>
+		<author>
+			<persName>
+				<forename type="first">S</forename>
+				<surname>Rhea</surname>
+			</persName>
+		</author>
+		<author>
+			<persName>
+				<forename type="first">C</forename>
+				<surname>Wells</surname>
+			</persName>
+		</author>
+		<author>
+			<persName>
+				<forename type="first">P</forename>
+				<surname>Eaton</surname>
+			</persName>
+		</author>
+		<author>
+			<persName>
+				<forename type="first">D</forename>
+				<surname>Geels</surname>
+			</persName>
+		</author>
+		<author>
+			<persName>
+				<forename type="first">B</forename>
+				<surname>Zhao</surname>
+			</persName>
+		</author>
+		<author>
+			<persName>
+				<forename type="first">H</forename>
+				<surname>Weatherspoon</surname>
+			</persName>
+		</author>
+		<author>
+			<persName>
+				<forename type="first">J</forename>
+				<surname>Kubiatowicz</surname>
+			</persName>
+		</author>
+	</analytic>
+	<monogr>
+		<title level="j">IEEE Internet Computing</title>
+		<imprint>
+			<biblScope unit="volume">5</biblScope>
+			<biblScope unit="issue">5</biblScope>
+			<biblScope unit="page" from="40" to="49" />
+			<date type="published" when="2001" />
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct coords="9,338.88,577.97,201.04,6.97;9,337.92,586.01,202.14,6.97;9,337.92,593.93,53.58,6.97"  xml:id="b28">
+	<analytic>
+		<title level="a" type="main">Effective erasure codes for reliable computer communication protocols</title>
+		<author>
+			<persName>
+				<forename type="first">L</forename>
+				<surname>Rizzo</surname>
+			</persName>
+		</author>
+	</analytic>
+	<monogr>
+		<title level="j">ACM SIGCOMM Computer Communication Review</title>
+		<imprint>
+			<biblScope unit="volume">27</biblScope>
+			<biblScope unit="issue">2</biblScope>
+			<biblScope unit="page" from="24" to="36" />
+			<date type="published" when="1997" />
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct coords="9,338.88,602.21,201.10,6.97;9,337.92,610.25,172.98,6.97"  xml:id="b29">
+	<monogr>
+		<title level="m" type="main">Fundamentals of Codes, Graphs, and Iterative Decoding</title>
+		<author>
+			<persName>
+				<forename type="first">S</forename>
+				<forename type="middle">B</forename>
+				<surname>Wicker</surname>
+			</persName>
+		</author>
+		<author>
+			<persName>
+				<forename type="first">S</forename>
+				<surname>Kim</surname>
+			</persName>
+		</author>
+		<imprint>
+			<date type="published" when="2003" />
+			<publisher>Kluwer Academic Publishers</publisher>
+			<pubPlace>Norwell, MA</pubPlace>
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct coords="9,338.88,618.53,201.06,6.97;9,337.92,626.45,168.90,6.97"  xml:id="b30">
+	<analytic>
+		<title level="a" type="main">IBM intelligent brick project – petabytes and beyond</title>
+		<author>
+			<persName>
+				<forename type="first">W</forename>
+				<surname>Wilcke</surname>
+			</persName>
+		</author>
+	</analytic>
+	<monogr>
+		<title level="j">IBM Journal of Research and Development</title>
+		<imprint>
+			<date type="published" when="2006" />
+		</imprint>
+	</monogr>
+	<note>to. appear</note>
+</biblStruct>
+
+<biblStruct coords="9,338.88,634.73,201.13,6.97;9,337.92,642.77,202.02,6.97;9,337.92,650.69,39.78,6.97"  xml:id="b31">
+	<monogr>
+		<title level="m" type="main">RobuSTore: Robust performance for distributed storage systems</title>
+		<author>
+			<persName>
+				<forename type="first">H</forename>
+				<surname>Xia</surname>
+			</persName>
+		</author>
+		<author>
+			<persName>
+				<forename type="first">A</forename>
+				<forename type="middle">A</forename>
+				<surname>Chien</surname>
+			</persName>
+		</author>
+		<imprint>
+			<date type="published" when="2005-10" />
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct coords="9,338.88,658.97,201.19,6.97;9,337.92,667.01,201.90,6.97;9,337.92,674.93,15.66,6.97"  xml:id="b32">
+	<analytic>
+		<title level="a" type="main">Low density MDS codes and factors of complete graphs</title>
+		<author>
+			<persName>
+				<forename type="first">L</forename>
+				<surname>Xu</surname>
+			</persName>
+		</author>
+		<author>
+			<persName>
+				<forename type="first">V</forename>
+				<surname>Bohossian</surname>
+			</persName>
+		</author>
+		<author>
+			<persName>
+				<forename type="first">J</forename>
+				<surname>Bruck</surname>
+			</persName>
+		</author>
+		<author>
+			<persName>
+				<forename type="first">D</forename>
+				<surname>Wagner</surname>
+			</persName>
+		</author>
+	</analytic>
+	<monogr>
+		<title level="j">IEEE Trans. Inf. Thy</title>
+		<imprint>
+			<biblScope unit="issue">6</biblScope>
+			<biblScope unit="page" from="451817" to="1826" />
+			<date type="published" when="1999" />
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct coords="9,338.88,683.21,201.06,6.97;9,337.92,691.13,121.74,6.97"  xml:id="b33">
+	<analytic>
+		<title level="a" type="main">X-Code: MDS array codes with optimal encoding</title>
+		<author>
+			<persName>
+				<forename type="first">L</forename>
+				<surname>Xu</surname>
+			</persName>
+		</author>
+		<author>
+			<persName>
+				<forename type="first">J</forename>
+				<surname>Bruck</surname>
+			</persName>
+		</author>
+	</analytic>
+	<monogr>
+		<title level="j">IEEE Trans. Inf. Thy</title>
+		<imprint>
+			<biblScope unit="volume">45</biblScope>
+			<biblScope unit="issue">1</biblScope>
+			<biblScope unit="page" from="272" to="276" />
+			<date type="published" when="1999" />
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct coords="9,338.88,699.53,201.16,6.97;9,337.92,707.45,202.12,6.97;9,337.92,715.37,103.26,6.97"  xml:id="b34">
+	<analytic>
+		<title level="a" type="main">Reperasure: Replication protocol using erasurecode in peer-to-peer storage network</title>
+		<author>
+			<persName>
+				<forename type="first">Z</forename>
+				<surname>Zhang</surname>
+			</persName>
+		</author>
+		<author>
+			<persName>
+				<forename type="first">Q</forename>
+				<surname>Lian</surname>
+			</persName>
+		</author>
+	</analytic>
+	<monogr>
+		<title level="m">21st IEEE Symp. Reliable Distributed Systems</title>
+		<imprint>
+			<date type="published" when="2002" />
+			<biblScope unit="page" from="330" to="339" />
+		</imprint>
+	</monogr>
+</biblStruct>
+
+				</listBibl>
+			</div>
+		</back>
+	</text>
+</TEI>

@@ -1,0 +1,1416 @@
+{
+  "predictions": [
+    {
+      "document": {
+        "abstract": "In recent years, deep artificial neural networks (including recurrent ones) have won numerous contests in pattern recognition and machine learning. This historical survey compactly summarizes relevant work, much of it from the previous millennium. Shallow and Deep Learners are distinguished by the depth of their credit assignment paths, which are chains of possibly learnable, causal links between actions and effects. I review deep supervised learning (also recapitulating the history of backpropagation), unsupervised learning, reinforcement learning & evolutionary computation, and indirect search for short programs encoding deep and large networks.", 
+        "authors": [
+          "J\u00fcrgen Schmidhuber"
+        ], 
+        "citations": [], 
+        "id": "1d385cfe161d8c2f7fcc15c5a37871bce0261a9e", 
+        "title": "Deep Learning in Neural Networks: An Overview", 
+        "venue": "Neural Networks", 
+        "year": 2015
+      }, 
+      "explanation": {
+        "abstract": {}, 
+        "title": {
+          "deep": 0.08874175697565079, 
+          "deep learning": 0.2294566035270691, 
+          "learning": 0.026376601308584213, 
+          "networks": 0.007726480718702078, 
+          "neural": 0.11289099603891373, 
+          "overview": 0.016256051138043404
+        }
+      }, 
+      "score": 0.007836912758648396
+    }, 
+    {
+      "document": {
+        "abstract": "This report will show the history of deep learning evolves. It will trace back as far as the initial belief of connectionism modelling of brain, and come back to look at its early stage realization: neural networks. With the background of neural network, we will gradually introduce how convolutional neural networks, as a representative of deep discriminative models, is developed from neural networks , together with many practical techniques that can help in optimization of neural networks. On the other hand, we will also trace back to see the evolution history of deep generative models, to see how researchers balance the representation power and computation complexity to reach Restricted Boltzmann Machine and eventually reach Deep Belief Nets. Further, we will also look into the development history of modelling time series data with neural networks. We start with Time Delay Neural Networks and move further to currently famous model named Recurrent Neural Network and its extension Lone Time Short Memory. We will also briefly look into how to construct deep recurrent neural networks. Finally, we will conclude this report with some interesting open-ended questions of deep neural networks.", 
+        "authors": [
+          "Haohan Wang", 
+          "Bhiksha Raj"
+        ], 
+        "citations": [], 
+        "id": "77e90bee8509ad995ea0129f2070f6017f000e01", 
+        "title": "A Survey: Time Travel in Deep Learning Space: An Introduction to Deep Learning Models and How Deep Learning Models Evolved from the Initial Ideas", 
+        "venue": "ArXiv", 
+        "year": 2015
+      }, 
+      "explanation": {
+        "abstract": {}, 
+        "title": {
+          "deep": 0.08874175697565079, 
+          "deep learning": 0.2294566035270691, 
+          "evolved": 0.04061821475625038, 
+          "ideas": 0.0011422141687944531, 
+          "initial": 0.001021264004521072, 
+          "learning": 0.026376601308584213, 
+          "models": 0.005238830577582121, 
+          "survey": 0.0041770548559725285
+        }
+      }, 
+      "score": 0.0126561988145113
+    }, 
+    {
+      "document": {
+        "abstract": "Deep learning gains lots of attentions in recent years and is more and more important for mining values in big data. However, to make deep learning practical for a wide range of applications in Tencent Inc., three requirements must be considered: 1) Lots of computational power are required to train a practical model with tens of millions of parameters and billions of samples for products such as automatic speech recognition (ASR), and the number of parameters and training data is still growing. 2) The capability of training larger model is necessary for better model quality. 3) Easy to use frameworks are valuable to do many experiments to perform model selection, such as finding an appropriate optimization algorithm and tuning optimal hyper-parameters. To accelerate training, support large models, and make experiments easier, we built Mariana, the Tencent deep learning platform, which utilizes GPU and CPU cluster to train models parallelly with three frameworks: 1) a multi-GPU data parallelism framework for deep neural networks (DNNs). 2) a multi-GPU model parallelism and data parallelism framework for deep convolutional neural networks (CNNs). 3) a CPU cluster framework for large scale DNNs. Mariana also provides built-in algorithms and features to facilitate experiments. Mariana is in production usage for more than one year, achieves state-of-the-art acceleration performance, and plays a key role in training models and improving quality for automatic speech recognition and image recognition in Tencent WeChat, a mobile social platform, and for Ad click-through rate prediction (pCTR) in Tencent QQ, an instant messaging platform, and Tencent Qzone, a social networking service.", 
+        "authors": [
+          "Yongqiang Zou", 
+          "Xing Jin", 
+          "Yi Li", 
+          "Zhimao Guo", 
+          "Eryu Wang", 
+          "Bin Xiao"
+        ], 
+        "citations": [], 
+        "id": "5f6904f96c018a10434a7ecd45777aa2eae9a868", 
+        "title": "Mariana: Tencent Deep Learning Platform and its Applications", 
+        "venue": "PVLDB", 
+        "year": 2014
+      }, 
+      "explanation": {
+        "abstract": {}, 
+        "title": {
+          "deep": 0.08874175697565079, 
+          "deep learning": 0.2294566035270691, 
+          "its": 0.0019271511118859053, 
+          "learning": 0.026376601308584213
+        }
+      }, 
+      "score": 0.007748978212475777
+    }, 
+    {
+      "document": {
+        "abstract": "The predominant methodology in training deep learning advocates the use of stochastic gradient descent methods (SGDs). Despite its ease of implementation, SGDs are difficult to tune and parallelize. These problems make it challenging to develop, debug and scale up deep learning algorithms with SGDs. In this paper, we show that more sophisticated off-the-shelf optimization methods such as Limited memory BFGS (L-BFGS) and Conjugate gradient (CG) with line search can significantly simplify and speed up the process of pretraining deep algorithms. In our experiments, the difference between L-BFGS/CG and SGDs are more pronounced if we consider algorithmic extensions (e.g., sparsity regularization) and hardware extensions (e.g., GPUs or computer clusters). Our experiments with distributed optimization support the use of L-BFGS with locally connected networks and convolutional neural networks. Using L-BFGS, our convolutional network model achieves 0.69% on the standard MNIST dataset. This is a state-of-the-art result on MNIST among algorithms that do not use distortions or pretraining.", 
+        "authors": [
+          "Quoc V. Le", 
+          "Jiquan Ngiam", 
+          "Adam Coates", 
+          "Ahbik Lahiri", 
+          "Bobby Prochnow", 
+          "Andrew Y. Ng"
+        ], 
+        "citations": [], 
+        "id": "053912e76e50c9f923a1fc1c173f1365776060cc", 
+        "title": "On optimization methods for deep learning", 
+        "venue": "ICML", 
+        "year": 2011
+      }, 
+      "explanation": {
+        "abstract": {}, 
+        "title": {
+          "deep": 0.08874175697565079, 
+          "deep learning": 0.2294566035270691, 
+          "learning": 0.026376601308584213, 
+          "methods": 0.000823566282633692, 
+          "optimization": 0.012366673909127712
+        }
+      }, 
+      "score": 0.011293375864624977
+    }, 
+    {
+      "document": {
+        "abstract": "\u2014 Deep Neural Networks (DNNs) are analyzed via the theoretical framework of the information bottleneck (IB) principle. We first show that any DNN can be quantified by the mutual information between the layers and the input and output variables. Using this representation we can calculate the optimal information theoretic limits of the DNN and obtain finite sample generalization bounds. The advantage of getting closer to the theoretical limit is quantifiable both by the generalization bound and by the network's simplicity. We argue that both the optimal architecture, number of layers and features/connections at each layer, are related to the bifurcation points of the information bottleneck tradeoff, namely, relevant compression of the input layer with respect to the output layer. The hierarchical representations at the layered network naturally correspond to the structural phase transitions along the information curve. We believe that this new insight can lead to new optimality bounds and deep learning algorithms.", 
+        "authors": [
+          "Naftali Tishby", 
+          "Noga Zaslavsky"
+        ], 
+        "citations": [], 
+        "id": "24038c6cacb604aada9784aa1315228623ccf302", 
+        "title": "Deep Learning and the Information Bottleneck Principle", 
+        "venue": "ITW", 
+        "year": 2015
+      }, 
+      "explanation": {
+        "abstract": {}, 
+        "title": {
+          "bottleneck": 0.0020443452522158623, 
+          "deep": 0.08874175697565079, 
+          "deep learning": 0.2294566035270691, 
+          "learning": 0.026376601308584213, 
+          "principle": 0.005156093742698431
+        }
+      }, 
+      "score": 0.010446194559335709
+    }, 
+    {
+      "document": {
+        "abstract": "\u2014Deep learning has made significant breakthroughs in various fields of artificial intelligence. Advantages of deep learning include the ability to capture highly complicated features , weak involvement of human engineering, etc. However, it is still virtually impossible to use deep learning to analyze programs since deep architectures cannot be trained effectively with pure back propagation. In this pioneering paper, we propose the \" coding criterion \" to build program vector representations, which are the premise of deep learning for program analysis. Our representation learning approach directly makes deep learning a reality in this new field. We evaluate the learned vector representations both qualitatively and quantitatively. We conclude, based on the experiments, the coding criterion is successful in building program representations. To evaluate whether deep learning is beneficial for program analysis, we feed the representations to deep neural networks, and achieve higher accuracy in the program classification task than \" shallow \" methods, such as logistic regression and the support vector machine. This result confirms the feasibility of deep learning to analyze programs. It also gives primary evidence of its success in this new field. We believe deep learning will become an outstanding technique for program analysis in the near future.", 
+        "authors": [
+          "Hao Peng", 
+          "Lili Mou", 
+          "Ge Li", 
+          "Yuxuan Liu", 
+          "Lu Zhang", 
+          "Zhi Jin"
+        ], 
+        "citations": [], 
+        "id": "47225c992d7086cf5d113942212edb4a57401130", 
+        "title": "Building Program Vector Representations for Deep Learning", 
+        "venue": "KSEM", 
+        "year": 2015
+      }, 
+      "explanation": {
+        "abstract": {}, 
+        "title": {
+          "building": 0.005206335335969925, 
+          "deep": 0.08874175697565079, 
+          "deep learning": 0.2294566035270691, 
+          "learning": 0.026376601308584213, 
+          "representations": 0.03167164698243141, 
+          "vector": 0.01162522379308939
+        }
+      }, 
+      "score": 0.007545766420662403
+    }, 
+    {
+      "document": {
+        "abstract": "Deep networks have been successfully applied to unsupervised feature learning for single modalities (e.g., text, images or audio). In this work, we propose a novel application of deep networks to learn features over multiple modalities. We present a series of tasks for multimodal learning and show how to train deep networks that learn features to address these tasks. In particular, we demonstrate cross modality feature learning, where better features for one modality (e.g., video) can be learned if multiple modalities (e.g., audio and video) are present at feature learning time. Furthermore, we show how to learn a shared representation between modalities and evaluate it on a unique task, where the classifier is trained with audio-only data but tested with video-only data and vice-versa. Our models are validated on the CUAVE and AVLet-ters datasets on audiovisual speech classification , demonstrating best published visual speech classification on AVLetters and effective shared representation learning.", 
+        "authors": [
+          "Jiquan Ngiam", 
+          "Aditya Khosla", 
+          "Mingyu Kim", 
+          "Juhan Nam", 
+          "Honglak Lee", 
+          "Andrew Y. Ng"
+        ], 
+        "citations": [], 
+        "id": "27208c88f07a1ffe97760c12be08fad3ab68fee2", 
+        "title": "Multimodal Deep Learning", 
+        "venue": "ICML", 
+        "year": 2011
+      }, 
+      "explanation": {
+        "abstract": {}, 
+        "title": {
+          "deep": 0.08874175697565079, 
+          "deep learning": 0.2294566035270691, 
+          "learning": 0.026376601308584213, 
+          "multimodal": 0.018187614157795906
+        }
+      }, 
+      "score": 0.014818479306995869
+    }, 
+    {
+      "document": {
+        "abstract": "Recently, fully-connected and convolutional neural networks have been trained to reach state-of-the-art performance on a wide variety of tasks such as speech recognition, image classification, natural language processing , and bioinformatics data. For classification tasks, much of these \" deep learning \" models employ the softmax activation functions to learn output labels in 1-of-K format. In this paper, we demonstrate a small but consistent advantage of replacing soft-max layer with a linear support vector machine. Learning minimizes a margin-based loss instead of the cross-entropy loss. In almost all of the previous works, hidden representation of deep networks are first learned using supervised or unsupervised techniques, and then are fed into SVMs as inputs. In contrast to those models, we are proposing to train all layers of the deep networks by backpropagating gradients through the top level SVM, learning features of all layers. Our experiments show that simply replacing softmax with linear SVMs gives significant gains on datasets MNIST, CIFAR-10, and the ICML 2013 Representation Learning Workshop's face expression recognition challenge .", 
+        "authors": [
+          "Yichuan Tang"
+        ], 
+        "citations": [], 
+        "id": "96c9f11fd9901f2edeaab8cf6bbff2590cea93c4", 
+        "title": "Deep Learning using Support Vector Machines", 
+        "venue": "ArXiv", 
+        "year": 2013
+      }, 
+      "explanation": {
+        "abstract": {}, 
+        "title": {
+          "deep": 0.08874175697565079, 
+          "deep learning": 0.2294566035270691, 
+          "learning": 0.026376601308584213, 
+          "machines": 0.005191377829760313, 
+          "support vector": 0.010501565411686897, 
+          "vector": 0.01162522379308939
+        }
+      }, 
+      "score": 0.00927708949893713
+    }, 
+    {
+      "document": {
+        "abstract": "Deep learning models, which learn high-level feature representations from raw data, have become popular for machine learning and artificial intelligence tasks that involve images, audio, and other forms of complex data. A number of software \" frameworks \" have been developed to expedite the process of designing and training deep neural networks, such as Caffe [11], Torch [4], and Theano [1]. Currently, these frameworks can harness multiple GPUs on the same machine, but are unable to use GPUs that are distributed across multiple machines; because even average-sized deep networks can take days to train on a single GPU when faced with 100s of GBs to TBs of data, distributed GPUs present a prime opportunity for scaling up deep learning. However, the limited inter-machine bandwidth available on commodity Eth-ernet networks presents a bottleneck to distributed GPU training, and prevents its trivial realization. To investigate how existing software frameworks can be adapted to efficiently support distributed GPUs, we propose Poseidon, a scalable system architecture for distributed inter-machine communication in existing deep learning frameworks. In order to assess Poseidon's effectiveness , we integrate Poseidon into the Caffe [11] framework and evaluate its performance at training con-volutional neural networks for object recognition in images. Poseidon features three key contributions that improve the training speed of deep neural networks on clusters: (i) a three-level hybrid architecture that allows Poseidon to support both CPU-only clusters as well as GPU-equipped clusters, (ii) a distributed wait-free back-propagation (DWBP) algorithm to improve GPU utilization and to balance communication, and (iii) a dedicated structure-aware communication protocol (SACP) to minimize communication overheads. We empirically show that Poseidon converges to the same objective value as a single machine, and achieves state-of-the-art training speedup across multiple models and well-established datasets, using a commodity GPU cluster of 8 nodes (e.g. 4.5\u00d7 speedup on AlexNet, 4\u00d7 on GoogLeNet, 4\u00d7 on CIFAR-10). On the much larger ImageNet 22K dataset, Poseidon with 8 nodes achieves better speedup and competitive accuracy to recent CPU-based distributed deep learning systems such as Adam [2] and Le et al. [16], which use 10s to 1000s of nodes.", 
+        "authors": [
+          "Hao Zhang", 
+          "Zhiting Hu", 
+          "Jinliang Wei", 
+          "Pengtao Xie", 
+          "Gunhee Kim", 
+          "Qirong Ho", 
+          "Eric P. Xing"
+        ], 
+        "citations": [], 
+        "id": "f6ec27f0ac6616e61434ba635e1a320e61b5f245", 
+        "title": "Poseidon: A System Architecture for Efficient GPU-based Deep Learning on Multiple Machines", 
+        "venue": "ArXiv", 
+        "year": 2015
+      }, 
+      "explanation": {
+        "abstract": {}, 
+        "title": {
+          "architecture": 0.017441125586628914, 
+          "based": 0.001731741358526051, 
+          "deep": 0.08874175697565079, 
+          "deep learning": 0.2294566035270691, 
+          "gpu": 0.041872333735227585, 
+          "learning": 0.026376601308584213, 
+          "machines": 0.005191377829760313, 
+          "system": 0.0015978923765942454, 
+          "system architecture": 0.003240777412429452
+        }
+      }, 
+      "score": 0.008000288158655167
+    }, 
+    {
+      "document": {
+        "abstract": "Deep learning systems have dramatically improved the accuracy of speech recognition, and various deep architectures and learning methods have been developed with distinct strengths and weaknesses in recent years. How can ensemble learning be applied to these varying deep learning systems to achieve greater recognition accuracy is the focus of this paper. We develop and report linear and log-linear stacking methods for ensemble learning with applications specifically to speech-class posterior probabilities as computed by the convolutional, recurrent, and fully-connected deep neural networks. Convex optimization problems are formulated and solved, with analytical formulas derived for training the ensemble-learning parameters. Experimental results demonstrate a significant increase in phone recognition accuracy after stacking the deep learning subsystems that use different mechanisms for computing high-level, hierarchical features from the raw acoustic signals in speech.", 
+        "authors": [
+          "Li Deng", 
+          "John C. Platt"
+        ], 
+        "citations": [], 
+        "id": "820155ecb57325503183253b8796de5f4535eb16", 
+        "title": "Ensemble deep learning for speech recognition", 
+        "venue": "INTERSPEECH", 
+        "year": 2014
+      }, 
+      "explanation": {
+        "abstract": {}, 
+        "title": {
+          "deep": 0.08874175697565079, 
+          "deep learning": 0.2294566035270691, 
+          "ensemble": 0.029102062806487083, 
+          "learning": 0.026376601308584213, 
+          "recognition": 0.01626916602253914, 
+          "speech": 0.011562716215848923
+        }
+      }, 
+      "score": 0.009121610783040524
+    }, 
+    {
+      "document": {
+        "abstract": "We investigate a simple yet effective method to introduce inhibitory and excitatory interactions between units in the layers of a deep neural network classifier. The method is based on the greedy layer-wise procedure of deep learning algorithms and extends the denoising autoencoder (Vincent et al., 2008) by adding asymmetric lateral connections between its hidden coding units, in a manner that is much simpler and computationally more efficient than previously proposed approaches. We present experiments on two character recognition problems which show for the first time that lateral connections can significantly improve the classification performance of deep networks.", 
+        "authors": [
+          "Hugo Larochelle", 
+          "Dumitru Erhan", 
+          "Pascal Vincent"
+        ], 
+        "citations": [], 
+        "id": "4700e447d1a0cddda978cd87177301790bb58efd", 
+        "title": "Deep Learning using Robust Interdependent Codes", 
+        "venue": "AISTATS", 
+        "year": 2009
+      }, 
+      "explanation": {
+        "abstract": {}, 
+        "title": {
+          "codes": 0.005671499762684107, 
+          "deep": 0.08874175697565079, 
+          "deep learning": 0.2294566035270691, 
+          "learning": 0.026376601308584213, 
+          "robust": 0.010236073285341263
+        }
+      }, 
+      "score": 0.010425306856632233
+    }, 
+    {
+      "document": {
+        "abstract": "Deep learning has shown outstanding performance in various machine learning tasks. However, the deep complex model structure and massive training data make it expensive to train. In this paper, we present a distributed deep learning system, called SINGA, for training big models over large datasets. An intuitive programming model based on the layer abstraction is provided, which supports a variety of popular deep learning models. SINGA architecture supports both synchronous and asynchronous training frameworks. Hybrid training frameworks can also be customized to achieve good scalability. SINGA provides different neural net partitioning schemes for training large models. SINGA is an Apache Incubator project released under Apache License 2.", 
+        "authors": [
+          "Beng Chin Ooi", 
+          "Kian-Lee Tan", 
+          "Sheng Wang", 
+          "Wei Wang", 
+          "Qingchao Cai", 
+          "Gang Chen", 
+          "Jinyang Gao", 
+          "Zhaojing Luo", 
+          "Anthony K. H. Tung", 
+          "Yuan Wang", 
+          "Zhongle Xie", 
+          "Meihui Zhang", 
+          "Kaiping Zheng"
+        ], 
+        "citations": [], 
+        "id": "51463d7d66e2c703561225efc9ae2b9abd768db6", 
+        "title": "SINGA: A Distributed Deep Learning Platform", 
+        "venue": "ACM Multimedia", 
+        "year": 2015
+      }, 
+      "explanation": {
+        "abstract": {}, 
+        "title": {
+          "deep": 0.08874175697565079, 
+          "deep learning": 0.2294566035270691, 
+          "learning": 0.026376601308584213
+        }
+      }, 
+      "score": 0.0077142477966845036
+    }, 
+    {
+      "document": {
+        "abstract": "Recently, fully-connected and convolutional neural networks have been trained to achieve state-of-the-art performance on a wide variety of tasks such as speech recognition, image classification, natural language processing , and bioinformatics. For classification tasks, most of these \" deep learning \" models employ the softmax activation function for prediction and minimize cross-entropy loss. In this paper, we demonstrate a small but consistent advantage of replacing the soft-max layer with a linear support vector machine. Learning minimizes a margin-based loss instead of the cross-entropy loss. While there have been various combinations of neu-ral nets and SVMs in prior art, our results using L2-SVMs show that by simply replacing softmax with linear SVMs gives significant gains on popular deep learning datasets MNIST, CIFAR-10, and the ICML 2013 Representation Learning Workshop's face expression recognition challenge.", 
+        "authors": [
+          "Yichuan Tang"
+        ], 
+        "citations": [], 
+        "id": "33c68d6bc73e74ea042dc5b9fe966625565c475e", 
+        "title": "Deep Learning using Linear Support Vector Machines", 
+        "venue": "", 
+        "year": 2013
+      }, 
+      "explanation": {
+        "abstract": {}, 
+        "title": {
+          "deep": 0.08874175697565079, 
+          "deep learning": 0.2294566035270691, 
+          "learning": 0.026376601308584213, 
+          "linear": 0.010339810512959957, 
+          "machines": 0.005191377829760313, 
+          "support vector": 0.010501565411686897, 
+          "vector": 0.01162522379308939
+        }
+      }, 
+      "score": 0.017917780205607414
+    }, 
+    {
+      "document": {
+        "abstract": "A grand challenge in machine learning is the development of computational algorithms that match or outperform humans in perceptual inference tasks such as visual object and speech recognition. The key factor complicating such tasks is the presence of numerous nuisance variables, for instance, the unknown object position, orientation, and scale in object recognition or the unknown voice pronunciation, pitch, and speed in speech recognition. Recently, a new breed of deep learning algorithms have emerged for high-nuisance inference tasks; they are constructed from many layers of alternating linear and nonlin-ear processing units and are trained using large-scale algorithms and massive amounts of training data. The recent success of deep learning systems is impressive \u2014 they now routinely yield pattern recognition systems with near-or superhuman capabilities \u2014 but a fundamental question remains: Why do they work? Intuitions abound, but a coherent framework for understanding, analyzing, and synthesizing deep learning architectures has remained elusive. We answer this question by developing a new probabilistic framework for deep learning based on a Bayesian generative probabilistic model that explicitly captures variation due to nuisance variables. The graphical structure of the model enables it to be learned from data using classical expectation-maximization techniques. Furthermore, by relaxing the generative model to a discriminative one, we can recover two of the current leading deep learning systems, deep convolutional neural networks (DCNs) and random decision forests (RDFs), providing insights into their successes and shortcomings as well as a princi-pled route to their improvement.", 
+        "authors": [
+          "Ankit B. Patel", 
+          "Tan Nguyen", 
+          "Richard G. Baraniuk"
+        ], 
+        "citations": [], 
+        "id": "4e20663168dd3e21b9c24d7fd8c0a0d5dff83db7", 
+        "title": "A Probabilistic Theory of Deep Learning", 
+        "venue": "ArXiv", 
+        "year": 2015
+      }, 
+      "explanation": {
+        "abstract": {}, 
+        "title": {
+          "deep": 0.08874175697565079, 
+          "deep learning": 0.2294566035270691, 
+          "learning": 0.026376601308584213, 
+          "probabilistic": 0.001467186608351767, 
+          "theory": 0.014102502726018429
+        }
+      }, 
+      "score": 0.008118124678730965
+    }, 
+    {
+      "document": {
+        "abstract": "\u2014 In this invited paper, my overview material on the same topic as presented in the plenary overview session of APSIPA-2011 and the tutorial material presented in the same conference (Deng, 2011) are expanded and updated to include more recent developments in deep learning. The previous and the updated materials cover both theory and applications, and analyze its future directions. The goal of this tutorial survey is to introduce the emerging area of deep learning or hierarchical learning to the APSIPA community. Deep learning refers to a class of machine learning techniques, developed largely since 2006, where many stages of nonlinear information processing in hierarchical architectures are exploited for pattern classification and for feature learning. In the more recent literature, it is also connected to representation learning, which involves a hierarchy of features or concepts where higher-level concepts are defined from lower-level ones and where the same lower-level concepts help to define higher-level ones. In this tutorial survey, a brief history of deep learning research is discussed first. Then, a classificatory scheme is developed to analyze and summarize major work reported in the recent deep learning literature. Using this scheme, I provide a taxonomy-oriented survey on the existing deep architectures and algorithms in the literature, and categorize them into three classes: generative, discriminative, and hybrid. Three representative deep architectures-deep auto-encoders, deep stacking networks with their generalization to the temporal domain (recurrent networks), and deep neural networks (pre-trained with deep belief networks)-one in each of the three classes, are presented in more detail. Next, selected applications of deep learning are reviewed in broad areas of signal and information processing including audio/speech, image/vision, multimodality, language modeling, natural language processing, and information retrieval. Finally, future directions of deep learning are discussed and analyzed.", 
+        "authors": [
+          "Li Deng"
+        ], 
+        "citations": [], 
+        "id": "5744bc176b4c59cc9fe1131196c57f3ab6d4f25e", 
+        "title": "A Tutorial Survey of Architectures, Algorithms, and Applications for Deep Learning a Tutorial Survey of Architectures, Algorithms, and Applications for Deep Learning", 
+        "venue": "", 
+        "year": 2013
+      }, 
+      "explanation": {
+        "abstract": {}, 
+        "title": {
+          "architectures": 0.01714370772242546, 
+          "deep": 0.08874175697565079, 
+          "deep learning": 0.2294566035270691, 
+          "learning": 0.026376601308584213, 
+          "survey": 0.0041770548559725285, 
+          "tutorial": 0.023016171529889107
+        }
+      }, 
+      "score": 0.007232120260596275
+    }, 
+    {
+      "document": {
+        "abstract": "In this paper, we prove a conjecture published in 1989 and also partially address an open problem announced at the Conference on Learning Theory (COLT) 2015. For an expected loss function of a deep nonlinear neural network, we prove the following statements under the independence assumption adopted from recent work: 1) the function is non-convex and non-concave, 2) every local minimum is a global minimum, 3) every critical point that is not a global minimum is a saddle point, and 4) the property of saddle points differs for shallow networks (with three layers) and deeper networks (with more than three layers). Moreover, we prove that the same four statements hold for deep linear neural networks with any depth, any widths and no unrealistic assumptions. As a result, we present an instance, for which we can answer to the following question: how difficult to directly train a deep model in theory? It is more difficult than the classical machine learning models (because of the non-convexity), but not too difficult (because of the nonexistence of poor local minima and the property of the saddle points). We note that even though we have advanced the theoretical foundations of deep learning, there is still a gap between theory and practice.", 
+        "authors": [
+          "Kenji Kawaguchi"
+        ], 
+        "citations": [], 
+        "id": "345177544d667e98a93da62c491e0abb344f0214", 
+        "title": "Deep Learning without Poor Local Minima", 
+        "venue": "ArXiv", 
+        "year": 2016
+      }, 
+      "explanation": {
+        "abstract": {}, 
+        "title": {
+          "deep": 0.08874175697565079, 
+          "deep learning": 0.2294566035270691, 
+          "learning": 0.026376601308584213, 
+          "local": 0.01702614314854145
+        }
+      }, 
+      "score": 0.007213537115603685
+    }, 
+    {
+      "document": {
+        "abstract": "\u2014 In this invited paper, my overview material on the same topic as presented in the plenary overview session of APSIPA-2011 and the tutorial material presented in the same conference (Deng, 2011) are expanded and updated to include more recent developments in deep learning. The previous and the updated materials cover both theory and applications, and analyze its future directions. The goal of this tutorial survey is to introduce the emerging area of deep learning or hierarchical learning to the APSIPA community. Deep learning refers to a class of machine learning techniques, developed largely since 2006, where many stages of nonlinear information processing in hierarchical architectures are exploited for pattern classification and for feature learning. In the more recent literature, it is also connected to representation learning, which involves a hierarchy of features or concepts where higher-level concepts are defined from lower-level ones and where the same lower-level concepts help to define higher-level ones. In this tutorial, a brief history of deep learning research is discussed first. Then, a classificatory scheme is developed to analyze and summarize major work reported in the deep learning literature. Using this scheme, I provide a taxonomy-oriented survey on the existing deep architectures and algorithms in the literature, and categorize them into three classes: generative, discriminative, and hybrid. Three representative deep architectures-deep auto-encoder, deep stacking network, and deep neural network (pre-trained with deep belief network)-one in each of the three classes, are presented in more detail. Next, selected applications of deep learning are reviewed in broad areas of signal and information processing including audio/speech, image/vision, multimodality, language modeling, natural language processing, and information retrieval. Finally, future directions of deep learning are discussed and analyzed.", 
+        "authors": [
+          "Li Deng"
+        ], 
+        "citations": [], 
+        "id": "5bd4177440c17dad736f1e0d2227694d612f5a59", 
+        "title": "Three Classes of Deep Learning Architectures and Their Applications: a Tutorial Survey", 
+        "venue": "", 
+        "year": 2013
+      }, 
+      "explanation": {
+        "abstract": {}, 
+        "title": {
+          "architectures": 0.01714370772242546, 
+          "classes": 0.005517004989087582, 
+          "deep": 0.08874175697565079, 
+          "deep learning": 0.2294566035270691, 
+          "learning": 0.026376601308584213, 
+          "survey": 0.0041770548559725285, 
+          "their": 0.0013803227338939905, 
+          "tutorial": 0.023016171529889107
+        }
+      }, 
+      "score": 0.014716751873493195
+    }, 
+    {
+      "document": {
+        "abstract": "Machine learning techniques based on neural networks are achieving remarkable results in a wide variety of domains. Often, the training of models requires large, representative datasets, which may be crowdsourced and contain sensitive information. The models should not expose private information in these datasets. Addressing this goal, we develop new algorithmic techniques for learning and a refined analysis of privacy costs within the framework of differential privacy. Our implementation and experiments demonstrate that we can train deep neural networks with non-convex objectives, under a modest privacy budget, and at a manageable cost in software complexity, training efficiency, and model quality.", 
+        "authors": [
+          "Mart\u00edn Abadi", 
+          "Andy Chu", 
+          "Ian J. Goodfellow", 
+          "H. Brendan McMahan", 
+          "Ilya Mironov", 
+          "Kunal Talwar", 
+          "Li Zhang"
+        ], 
+        "citations": [], 
+        "id": "14fed18d838bf6b89d98837837ff314e61ab7c60", 
+        "title": "Deep Learning with Differential Privacy", 
+        "venue": "ACM Conference on Computer and Communications Security", 
+        "year": 2016
+      }, 
+      "explanation": {
+        "abstract": {}, 
+        "title": {
+          "deep": 0.08874175697565079, 
+          "deep learning": 0.2294566035270691, 
+          "differential": 0.040019579231739044, 
+          "learning": 0.026376601308584213, 
+          "privacy": 0.0013377794530242682
+        }
+      }, 
+      "score": 0.010433156043291092
+    }, 
+    {
+      "document": {
+        "abstract": "In industrial process control, some product qualities and key variables are always difficult to measure online due to technical or economic limitations. As an effective solution, data-driven soft sensors provide stable and reliable online estimation of these variables based on historical measurements of easy-to-measure process variables. Deep learning, as a novel training strategy for deep neural networks, has recently become a popular data-driven approach in the area of machine learning. In the present study, the deep learning technique is employed to build soft sensors and applied to an industrial case to estimate the heavy diesel 95% cut point of a crude distillation unit (CDU). The comparison of modeling results demonstrates that the deep learning technique is especially suitable for soft sensor modeling because of the following advantages over traditional methods. First, with a complex multi-layer structure, the deep neural network is able to contain richer information and yield improved representation ability compared with traditional data-driven models. Second, deep neural networks are established as latent variable models that help to describe highly correlated process variables. Third, the deep learning is semi-supervised so that all available process data can be utilized. Fourth, the deep learning technique is particularly efficient dealing with massive data in practice. Soft sensors have been extensively studied and implemented in the process industries over the past two decades. Typically, they are predictive models based on massive amounts of data available in the industrial processes, and are mainly responsible for online predictions of some variables that play an indispensable role in quality control as well as production safety, for the reason that hardware measuring instruments are unavailable or costly [1]. In general, one can broadly classify soft sensors into two types, namely, the first-principle models (white-box models) and data-driven models (black-box models). First-principle models are dependent on a prior mechanical knowledge and thus often unavailable since industrial processes are commonly too complicated to analyze, making the mechanical knowledge rather hard-won. Their data-driven counterparts, alternatively, give empirical models based on the historical data collected in the industrial process. Owing to their practical utility and independence on a priori knowledge, data-driven soft sensors have increasingly established themselves as popular and effective approaches [2,3]. A wide variety of statistical inference techniques and machine learning techniques have been employed in data-driven soft sensors, among which representative examples are principal component regression (PCR) that incorporates principal component analysis (PCA) with a regression model, partial \u2026", 
+        "authors": [
+          "Chao Shang", 
+          "Fan Yang", 
+          "Dexian Huang", 
+          "Wenxiang Lyu"
+        ], 
+        "citations": [], 
+        "id": "71fa6ea9c3897e0b65028c8bffdb93e5535cc6c7", 
+        "title": "Data-driven soft sensor development based on deep learning technique", 
+        "venue": "", 
+        "year": 2014
+      }, 
+      "explanation": {
+        "abstract": {}, 
+        "title": {
+          "based": 0.001731741358526051, 
+          "data": 0.0012476665433496237, 
+          "data driven": 0.004075564444065094, 
+          "deep": 0.08874175697565079, 
+          "deep learning": 0.2294566035270691, 
+          "development": 0.005050627514719963, 
+          "learning": 0.026376601308584213, 
+          "sensor": 0.007038000505417585, 
+          "soft": 0.03139330446720123
+        }
+      }, 
+      "score": 0.006793074309825897
+    }, 
+    {
+      "document": {
+        "abstract": "Low-level saliency cues or priors do not produce good enough saliency detection results especially when the salient object presents in a low-contrast background with confusing visual appearance. This issue raises a serious problem for conventional approaches. In this paper, we tackle this problem by proposing a multi-context deep learning framework for salient object detection. We employ deep Convolutional Neural Networks to model saliency of objects in images. Global context and local context are both taken into account, and are jointly modeled in a unified multi-context deep learning framework. To provide a better initialization for training the deep neural networks, we investigate different pre-training strategies, and a task-specific pre-training scheme is designed to make the multi-context modeling suited for saliency detection. Furthermore, recently proposed contemporary deep models in the ImageNet Image Classification Challenge are tested, and their effectiveness in saliency detection are investigated. Our approach is extensively evaluated on five public datasets, and experimental results show significant and consistent improvements over the state-of-the-art methods.", 
+        "authors": [
+          "Rui Zhao", 
+          "Wanli Ouyang", 
+          "Hongsheng Li", 
+          "Xiaogang Wang"
+        ], 
+        "citations": [], 
+        "id": "97f8f968c69cb2b469d2f151e6957d6487cb6b30", 
+        "title": "Saliency detection by multi-context deep learning", 
+        "venue": "CVPR", 
+        "year": 2015
+      }, 
+      "explanation": {
+        "abstract": {}, 
+        "title": {
+          "context": 0.00017827868578024209, 
+          "deep": 0.08874175697565079, 
+          "deep learning": 0.2294566035270691, 
+          "detection": 0.014085681177675724, 
+          "learning": 0.026376601308584213, 
+          "saliency": 0.01781340502202511, 
+          "saliency detection": 0.018970994278788567
+        }
+      }, 
+      "score": 0.008001124486327171
+    }, 
+    {
+      "document": {
+        "abstract": "Energy disaggregation estimates appliance-by-appliance electricity consumption from a single meter that measures the whole home's electricity demand. Recently, deep neural networks have driven remarkable improvements in classification performance in neighbouring machine learning fields such as image classification and automatic speech recognition. In this paper, we adapt three deep neural network architectures to energy disaggregation: 1) a form of recurrent neural network called `long short-term memory' (LSTM); 2) denoising autoencoders; and 3) a network which regresses the start time, end time and average power demand of each appliance activation. We use seven metrics to test the performance of these algorithms on real aggregate power data from five appliances. Tests are performed against a house not seen during training and against houses seen during training. We find that all three neural nets achieve better F1 scores (averaged over all five appliances) than either combinatorial optimisation or factorial hidden Markov models and that our neural net algorithms generalise well to an unseen house.", 
+        "authors": [
+          "Jack Kelly", 
+          "William J. Knottenbelt"
+        ], 
+        "citations": [], 
+        "id": "1727c826ce2082002086e0de49a597b3f8f2e0fe", 
+        "title": "Neural NILM: Deep Neural Networks Applied to Energy Disaggregation", 
+        "venue": "BuildSys@SenSys", 
+        "year": 2015
+      }, 
+      "explanation": {
+        "abstract": {}, 
+        "title": {
+          "deep": 0.08874175697565079, 
+          "disaggregation": 0.026690982282161713, 
+          "energy": 0.02164478227496147, 
+          "networks": 0.007726480718702078, 
+          "neural": 0.11289099603891373
+        }
+      }, 
+      "score": 0.012575661763548851
+    }, 
+    {
+      "document": {
+        "abstract": "Deep multi-layer neural networks have many levels of non-linearities allowing them to compactly represent highly non-linear and highly-varying functions. However, until recently it was not clear how to train such deep networks, since gradient-based optimization starting from random initial-ization often appears to get stuck in poor solutions. Hinton et al. recently proposed a greedy layer-wise unsupervised learning procedure relying on the training algorithm of restricted Boltz-mann machines (RBM) to initialize the parameters of a deep belief network (DBN), a generative model with many layers of hidden causal variables. This was followed by the proposal of another greedy layer-wise procedure, relying on the usage of autoassociator networks. In the context of the above optimization problem, we study these algorithms empirically to better understand their success. Our experiments confirm the hypothesis that the greedy layer-wise unsupervised training strategy helps the optimization by initializing weights in a region near a good local minimum, but also implicitly acts as a sort of regularization that brings better generalization and encourages internal distributed representations that are high-level abstractions of the input. We also present a series of experiments aimed at evaluating the link between the performance of deep neural networks and practical aspects of their topology, for example, demonstrating cases where the addition of more depth helps. Finally, we empirically explore simple variants of these training algorithms, such as the use of different RBM input unit distributions, a simple way of combining gradient estimators to improve performance, as well as on-line versions of those algorithms.", 
+        "authors": [
+          "Hugo Larochelle", 
+          "Yoshua Bengio", 
+          "J\u00e9r\u00f4me Louradour", 
+          "Pascal Lamblin"
+        ], 
+        "citations": [], 
+        "id": "05fd1da7b2e34f86ec7f010bef068717ae964332", 
+        "title": "Exploring Strategies for Training Deep Neural Networks", 
+        "venue": "Journal of Machine Learning Research", 
+        "year": 2009
+      }, 
+      "explanation": {
+        "abstract": {}, 
+        "title": {
+          "deep": 0.08874175697565079, 
+          "exploring": 0.006440237630158663, 
+          "networks": 0.007726480718702078, 
+          "neural": 0.11289099603891373, 
+          "strategies": 0.0007170976605266333, 
+          "training": 0.012336679734289646
+        }
+      }, 
+      "score": 0.00984859187155962
+    }, 
+    {
+      "document": {
+        "abstract": "Learning effective feature representations and similarity measures are crucial to the retrieval performance of a content-based image retrieval (CBIR) system. Despite extensive research efforts for decades, it remains one of the most challenging open problems that considerably hinders the successes of real-world CBIR systems. The key challenge has been attributed to the well-known ``semantic gap'' issue that exists between low-level image pixels captured by machines and high-level semantic concepts perceived by human. Among various techniques, machine learning has been actively investigated as a possible direction to bridge the semantic gap in the long term. Inspired by recent successes of deep learning techniques for computer vision and other applications, in this paper, we attempt to address an open problem: if deep learning is a hope for bridging the semantic gap in CBIR and how much improvements in CBIR tasks can be achieved by exploring the state-of-the-art deep learning techniques for learning feature representations and similarity measures. Specifically, we investigate a framework of deep learning with application to CBIR tasks with an extensive set of empirical studies by examining a state-of-the-art deep learning method (Convolutional Neural Networks) for CBIR tasks under varied settings. From our empirical studies, we find some encouraging results and summarize some important insights for future research.", 
+        "authors": [
+          "Ji Wan", 
+          "Dayong Wang", 
+          "Steven C. H. Hoi", 
+          "Pengcheng Wu", 
+          "Jianke Zhu", 
+          "Yongdong Zhang", 
+          "Jintao Li"
+        ], 
+        "citations": [], 
+        "id": "391b86cf16c2702dcc4beee55a6dd6d3bd7cf27b", 
+        "title": "Deep Learning for Content-Based Image Retrieval: A Comprehensive Study", 
+        "venue": "ACM Multimedia", 
+        "year": 2014
+      }, 
+      "explanation": {
+        "abstract": {}, 
+        "title": {
+          "based": 0.001731741358526051, 
+          "content": 0.00572189362719655, 
+          "deep": 0.08874175697565079, 
+          "deep learning": 0.2294566035270691, 
+          "image": 0.017800673842430115, 
+          "learning": 0.026376601308584213, 
+          "study": 0.0016036871820688248
+        }
+      }, 
+      "score": 0.016191687434911728
+    }, 
+    {
+      "document": {
+        "abstract": "We study the problem of stochastic optimization for deep learning in the parallel computing environment under communication constraints. A new algorithm is proposed in this setting where the communication and coordination of work among concurrent processes (local workers), is based on an elastic force which links the parameter vectors they compute with a center variable stored by the parameter server (master). The algorithm enables the local workers to perform more exploration, i.e. the algorithm allows the local variables to fluctuate further from the center variable by reducing the amount of communication between local workers and the master. We empirically demonstrate that in the deep learning setting, due to the existence of many local optima, allowing more exploration can lead to the improved performance. We propose synchronous and asynchronous variants of the new algorithm. We provide the theoretical analysis of the synchronous variant in the quadratic case and prove it achieves the highest possible asymptotic rate of convergence for the center variable. We additionally propose the momentum-based version of the algorithm that can be applied in both synchronous and asynchronous settings. An asynchronous variant of the algorithm is applied to train convolutional neural networks for image classification on the CIFAR and ImageNet datasets. Experiments demonstrate that the new algorithm accelerates the training of deep architectures compared to DOWNPOUR and other common baseline approaches and furthermore is very communication efficient.", 
+        "authors": [
+          "Sixin Zhang", 
+          "Anna Choromanska", 
+          "Yann LeCun"
+        ], 
+        "citations": [], 
+        "id": "0760550d3830230a05191766c635cec80a676b7e", 
+        "title": "Deep learning with Elastic Averaging SGD", 
+        "venue": "NIPS", 
+        "year": 2015
+      }, 
+      "explanation": {
+        "abstract": {}, 
+        "title": {
+          "averaging": 0.025581659749150276, 
+          "deep": 0.08874175697565079, 
+          "deep learning": 0.2294566035270691, 
+          "learning": 0.026376601308584213, 
+          "sgd": 0.01186889223754406
+        }
+      }, 
+      "score": 0.006285901181399822
+    }, 
+    {
+      "document": {
+        "abstract": "\u2014Deep learning neural networks have emerged as one of the most powerful classification tools for vision related applications. However, the computational and energy requirements associated with such deep nets can be quite high, and hence their energy-efficient implementation is of great interest. Although traditionally the entire network is utilized for the recognition of all inputs, we observe that the classification difficulty varies widely across inputs in real-world datasets; only a small fraction of inputs require the full computational effort of a network, while a large majority can be classified correctly with very low effort. In this paper, we propose Conditional Deep Learning (CDL) where the convolutional layer features are used to identify the variability in the difficulty of input instances and conditionally activate the deeper layers of the network. We achieve this by cascading a linear network of output neurons for each convolutional layer and monitoring the output of the linear network to decide whether classification can be terminated at the current stage or not. The proposed methodology thus enables the network to dynamically adjust the computational effort depending upon the difficulty of the input data while maintaining competitive classification accuracy. We evaluate our approach on the MNIST dataset. Our experiments demonstrate that our proposed CDLN yields 1.91x reduction in average number of operations per input, which translates to 1.84x improvement in energy. In addition, our results show an improvement in classification accuracy from 92.65% to 93.82% as compared to the original network.", 
+        "authors": [
+          "Priyadarshini Panda", 
+          "Abhronil Sengupta", 
+          "Kaushik Roy"
+        ], 
+        "citations": [], 
+        "id": "3cd19f8590caf1e3e40f0f14c63e7a352091685d", 
+        "title": "Conditional Deep Learning for Energy-Efficient and Enhanced Pattern Recognition", 
+        "venue": "DATE", 
+        "year": 2016
+      }, 
+      "explanation": {
+        "abstract": {}, 
+        "title": {
+          "deep": 0.08874175697565079, 
+          "deep learning": 0.2294566035270691, 
+          "energy": 0.02164478227496147, 
+          "enhanced": 0.005721625406295061, 
+          "learning": 0.026376601308584213, 
+          "pattern": 0.0020480516832321882, 
+          "pattern recognition": 0.012917287647724152, 
+          "recognition": 0.01626916602253914
+        }
+      }, 
+      "score": 0.009281798265874386
+    }, 
+    {
+      "document": {
+        "abstract": "We present an analysis of different techniques for selecting the connection between layers of deep neural networks. Traditional deep neural networks use random connection tables between layers to keep the number of connections small and tune to different image features. This kind of connection performs adequately in supervised deep networks because their values are refined during the training. On the other hand, in unsupervised learning, one cannot rely on back-propagation techniques to learn the connections between layers. In this work, we tested four different techniques for connecting the first layer of the network to the second layer on the CIFAR and SVHN datasets and showed that the accuracy can be improved up to 3% depending on the technique used. We also showed that learning the connections based on the co-occurrences of the features does not confer an advantage over a random connection table in small networks. This work is helpful to improve the efficiency of connections between the layers of unsupervised deep neural networks.", 
+        "authors": [
+          "Eugenio Culurciello", 
+          "Jonghoon Jin", 
+          "Aysegul Dundar", 
+          "Jordan Bates"
+        ], 
+        "citations": [], 
+        "id": "ab4473d27eb9066853953497fc7bcbebea890930", 
+        "title": "An Analysis of the Connections Between Layers of Deep Neural Networks", 
+        "venue": "ArXiv", 
+        "year": 2013
+      }, 
+      "explanation": {
+        "abstract": {}, 
+        "title": {
+          "between": 0.009572750888764858, 
+          "connections": 0.02230031229555607, 
+          "deep": 0.08874175697565079, 
+          "layers": 0.02457030676305294, 
+          "networks": 0.007726480718702078, 
+          "neural": 0.11289099603891373
+        }
+      }, 
+      "score": 0.014149905182421207
+    }, 
+    {
+      "document": {
+        "abstract": "The state-of-the-art of face recognition has been significantly advanced by the emergence of deep learning. Very deep neural networks recently achieved great success on general object recognition because of their superb learning capacity. This motivates us to investigate their effectiveness on face recognition. This paper proposes two very deep neural network architectures, referred to as DeepID3, for face recognition. These two architectures are rebuilt from stacked convolution and inception layers proposed in VGG net [10] and GoogLeNet [16] to make them suitable to face recognition. Joint face identification-verification supervisory signals are added to both intermediate and final feature extraction layers during training. An ensemble of the proposed two architectures achieves 99.53% LFW face verification accuracy and 96.0% LFW rank-1 face identification accuracy, respectively. A further discussion of LFW face verification result is given in the end.", 
+        "authors": [
+          "Yi Sun", 
+          "Ding Liang", 
+          "Xiaogang Wang", 
+          "Xiaoou Tang"
+        ], 
+        "citations": [], 
+        "id": "b8084d5e193633462e56f897f3d81b2832b72dff", 
+        "title": "DeepID3: Face Recognition with Very Deep Neural Networks", 
+        "venue": "ArXiv", 
+        "year": 2015
+      }, 
+      "explanation": {
+        "abstract": {}, 
+        "title": {
+          "deep": 0.08874175697565079, 
+          "face": 0.014813639223575592, 
+          "face recognition": 0.01591072790324688, 
+          "networks": 0.007726480718702078, 
+          "neural": 0.11289099603891373, 
+          "recognition": 0.01626916602253914, 
+          "very": 0.0046979812905192375
+        }
+      }, 
+      "score": 0.007557845674455166
+    }, 
+    {
+      "document": {
+        "abstract": "Deep convolutional neural networks have led to breakthrough results in numerous practical machine learning tasks such as classification of images in the ImageNet data set, control-policy-learning to play Atari games or the board game Go, and image captioning. Many of these applications first perform feature extraction and then feed the results thereof into a trainable classifier. The mathematical analysis of deep convolutional neural networks for feature extraction was initiated by Mallat, 2012. Specifically, Mallat considered so-called scattering networks based on a wavelet transform followed by the modulus non-linearity in each network layer, and proved translation invariance (asymptotically in the wavelet scale parameter) and deformation stability of the corresponding feature extractor. This paper complements Mallat's results by developing a theory of deep convolutional neural networks for feature extraction encompassing general convolutional transforms, or in more technical parlance, general semi-discrete and modulus functions), and general Lipschitz-continuous pooling operators emulating sub-sampling and averaging. In addition, all of these elements can be different in different network layers. For the resulting feature extractor we prove a translation invariance result which is of vertical nature in the sense of the network depth determining the amount of invariance, and we establish deformation sensitivity bounds that apply to signal classes with inherent deformation insensitivity such as, e.g., band-limited functions.", 
+        "authors": [
+          "Thomas Wiatowski", 
+          "Helmut B\u00f6lcskei"
+        ], 
+        "citations": [], 
+        "id": "4043604116f90200c3b7cc7573a133349a24bb78", 
+        "title": "A Mathematical Theory of Deep Convolutional Neural Networks for Feature Extraction", 
+        "venue": "ArXiv", 
+        "year": 2015
+      }, 
+      "explanation": {
+        "abstract": {}, 
+        "title": {
+          "convolutional": 0.1012757420539856, 
+          "deep": 0.08874175697565079, 
+          "extraction": 0.014803865924477577, 
+          "feature": 0.004762830212712288, 
+          "mathematical": 0.023232322186231613, 
+          "networks": 0.007726480718702078, 
+          "neural": 0.11289099603891373, 
+          "theory": 0.014102502726018429
+        }
+      }, 
+      "score": 0.009381651878356934
+    }, 
+    {
+      "document": {
+        "abstract": "Speech signals convey various yet mixed information ranging from linguistic to speaker-specific information. However, most of acoustic representations characterize all different kinds of information as whole, which could hinder either a speech or a speaker recognition (SR) system from producing a better performance. In this paper, we propose a novel deep neural architecture (DNA) especially for learning speaker-specific characteristics from mel-frequency cepstral coefficients, an acoustic representation commonly used in both speech recognition and SR, which results in a speaker-specific overcomplete representation. In order to learn intrinsic speaker-specific characteristics, we come up with an objective function consisting of contrastive losses in terms of speaker similarity/dissimilarity and data reconstruction losses used as regularization to normalize the interference of non-speaker-related information. Moreover, we employ a hybrid learning strategy for learning parameters of the deep neural networks: i.e., local yet greedy layerwise unsupervised pretraining for initialization and global supervised learning for the ultimate discriminative goal. With four Linguistic Data Consortium (LDC) benchmarks and two non-English corpora, we demonstrate that our overcomplete representation is robust in characterizing various speakers, no matter whether their utterances have been used in training our DNA, and highly insensitive to text and languages spoken. Extensive comparative studies suggest that our approach yields favorite results in speaker verification and segmentation. Finally, we discuss several issues concerning our proposed approach.", 
+        "authors": [
+          "Ke Chen", 
+          "Ahmad Salman"
+        ], 
+        "citations": [], 
+        "id": "77a0a4a4af366a4d69382cddd5f378b29a20b0c5", 
+        "title": "Learning Speaker-Specific Characteristics With a Deep Neural Architecture", 
+        "venue": "IEEE Trans. Neural Networks", 
+        "year": 2011
+      }, 
+      "explanation": {
+        "abstract": {}, 
+        "title": {
+          "architecture": 0.017441125586628914, 
+          "characteristics": 0.012091409415006638, 
+          "deep": 0.08874175697565079, 
+          "learning": 0.026376601308584213, 
+          "neural": 0.11289099603891373, 
+          "neural architecture": 0.06353586912155151, 
+          "speaker": 0.021248599514365196, 
+          "specific": 0.00803147442638874
+        }
+      }, 
+      "score": 0.006899210624396801
+    }, 
+    {
+      "document": {
+        "abstract": "We propose the simple and efficient method of semi-supervised learning for deep neural networks. Basically, the proposed network is trained in a supervised fashion with labeled and unlabeled data simultaneously. For un-labeled data, Pseudo-Label s, just picking up the class which has the maximum predicted probability, are used as if they were true labels. This is in effect equivalent to Entropy Regularization. It favors a low-density separation between classes, a commonly assumed prior for semi-supervised learning. With De-noising Auto-Encoder and Dropout, this simple method outperforms conventional methods for semi-supervised learning with very small labeled data on the MNIST handwritten digit dataset.", 
+        "authors": [
+          "Dong-Hyun Lee"
+        ], 
+        "citations": [], 
+        "id": "798d9840d2439a0e5d47bcf5d164aa46d5e7dc26", 
+        "title": "Pseudo-Label : The Simple and Efficient Semi-Supervised Learning Method for Deep Neural Networks", 
+        "venue": "", 
+        "year": 2013
+      }, 
+      "explanation": {
+        "abstract": {}, 
+        "title": {
+          "deep": 0.08874175697565079, 
+          "label": 0.0029459393117576838, 
+          "learning": 0.026376601308584213, 
+          "method": 0.003127138130366802, 
+          "networks": 0.007726480718702078, 
+          "neural": 0.11289099603891373, 
+          "pseudo": 0.00030950724612921476, 
+          "semi supervised learning method": 0.007048847619444132, 
+          "simple": 0.012018095701932907
+        }
+      }, 
+      "score": 0.00944250077009201
+    }, 
+    {
+      "document": {
+        "abstract": "In this paper, we investigate how to scale up kernel methods to take on large-scale problems, on which deep neural networks have been prevailing. To this end, we leverage existing techniques and develop new ones. These techniques include approximating kernel functions with features derived from random projections, parallel training of kernel models with 100 million parameters or more, and new schemes for combining kernel functions as a way of learning representations. We demonstrate how to muster those ideas skillfully to implement large-scale kernel machines for challenging problems in automatic speech recognition. We valid our approaches with extensive empirical studies on real-world speech datasets on the tasks of acoustic modeling. We show that our kernel models are equally competitive as well-engineered deep neural networks (DNNs). In particular, kernel models either attain similar performance to, or surpass their DNNs counterparts. Our work thus avails more tools to machine learning researchers in addressing large-scale learning problems.", 
+        "authors": [
+          "Zhiyun Lu", 
+          "Avner May", 
+          "Kuan Liu", 
+          "Alireza Bagheri Garakani", 
+          "Dong Guo", 
+          "Aur\u00e9lien Bellet", 
+          "Linxi Fan", 
+          "Michael Collins", 
+          "Brian Kingsbury", 
+          "Michael Picheny", 
+          "Fei Sha"
+        ], 
+        "citations": [], 
+        "id": "ad8ad670e07c075bc3bc0197008b3fe62333c33c", 
+        "title": "How to Scale Up Kernel Methods to Be As Good As Deep Neural Nets", 
+        "venue": "ArXiv", 
+        "year": 2014
+      }, 
+      "explanation": {
+        "abstract": {}, 
+        "title": {
+          "deep": 0.08874175697565079, 
+          "good": 0.004343555308878422, 
+          "methods": 0.000823566282633692, 
+          "nets": 0.005272285547107458, 
+          "neural": 0.11289099603891373, 
+          "scale": 0.009196272119879723, 
+          "up": 0.003656210610643029
+        }
+      }, 
+      "score": 0.009685443714261055
+    }, 
+    {
+      "document": {
+        "abstract": "Understanding how congestion at one location can cause ripples throughout large-scale transportation network is vital for transportation researchers and practitioners to pinpoint traffic bottlenecks for congestion mitigation. Traditional studies rely on either mathematical equations or simulation techniques to model traffic congestion dynamics. However, most of the approaches have limitations, largely due to unrealistic assumptions and cumbersome parameter calibration process. With the development of Intelligent Transportation Systems (ITS) and Internet of Things (IoT), transportation data become more and more ubiquitous. This triggers a series of data-driven research to investigate transportation phenomena. Among them, deep learning theory is considered one of the most promising techniques to tackle tremendous high-dimensional data. This study attempts to extend deep learning theory into large-scale transportation network analysis. A deep Restricted Boltzmann Machine and Recurrent Neural Network architecture is utilized to model and predict traffic congestion evolution based on Global Positioning System (GPS) data from taxi. A numerical study in Ningbo, China is conducted to validate the effectiveness and efficiency of the proposed method. Results show that the prediction accuracy can achieve as high as 88% within less than 6 minutes when the model is implemented in a Graphic Processing Unit (GPU)-based parallel computing environment. The predicted congestion evolution patterns can be visualized temporally and spatially through a map-based platform to identify the vulnerable links for proactive congestion mitigation.", 
+        "authors": [
+          "Xiaolei Ma", 
+          "Haiyang Yu", 
+          "Yunpeng Wang", 
+          "Yinhai Wang"
+        ], 
+        "citations": [], 
+        "id": "c68750fb51415ac937bd06efefe18b46ebfb6f14", 
+        "title": "Large-Scale Transportation Network Congestion Evolution Prediction Using Deep Learning Theory", 
+        "venue": "PloS one", 
+        "year": 2015
+      }, 
+      "explanation": {
+        "abstract": {}, 
+        "title": {
+          "deep": 0.08874175697565079, 
+          "deep learning": 0.2294566035270691, 
+          "evolution": 0.028308071196079254, 
+          "large": 0.0004903341177850962, 
+          "learning": 0.026376601308584213, 
+          "network": 0.010749842040240765, 
+          "prediction": 0.007902734912931919, 
+          "scale": 0.009196272119879723, 
+          "theory": 0.014102502726018429
+        }
+      }, 
+      "score": 0.012178256176412106
+    }, 
+    {
+      "document": {
+        "abstract": "Whereas before 2006 it appears that deep multi-layer neural networks were not successfully trained, since then several algorithms have been shown to successfully train them, with experimental results showing the superiority of deeper vs less deep architectures. All these experimental results were obtained with new initialization or training mechanisms. Our objective here is to understand better why standard gradient descent from random initialization is doing so poorly with deep neural networks, to better understand these recent relative successes and help design better algorithms in the future. We first observe the influence of the non-linear activations functions. We find that the logistic sigmoid activation is unsuited for deep networks with random ini-tialization because of its mean value, which can drive especially the top hidden layer into saturation. Surprisingly, we find that saturated units can move out of saturation by themselves, albeit slowly, and explaining the plateaus sometimes seen when training neural networks. We find that a new non-linearity that saturates less can often be beneficial. Finally, we study how activations and gradients vary across layers and during training , with the idea that training may be more difficult when the singular values of the Jacobian associated with each layer are far from 1. Based on these considerations, we propose a new ini-tialization scheme that brings substantially faster convergence. Deep learning methods aim at learning feature hierarchies with features from higher levels of the hierarchy formed by the composition of lower level features. They include learning methods for a wide array of deep architectures, including neural networks with many hidden layers (Vin-cent et al., 2008) and graphical models with many levels of hidden variables (Hinton et al., 2006), among others (Zhu et al., 2009; Weston et al., 2008). Much attention has recently been devoted to them (see (Bengio, 2009) for a review), because of their theoretical appeal, inspiration from biology and human cognition, and because of empirical success in vision (Ranzato et al. Theoretical results reviewed and discussed by Ben-gio (2009), suggest that in order to learn the kind of complicated functions that can represent high-level abstractions (e.g. in vision, language, and other AI-level tasks), one may need deep architectures. Most of the recent experimental results with deep architecture are obtained with models that can be turned into deep supervised neural networks, but with initialization or training schemes different from the classical feedforward neural networks (Rumelhart et al., 1986). Why are these \u2026", 
+        "authors": [
+          "Xavier Glorot", 
+          "Yoshua Bengio"
+        ], 
+        "citations": [], 
+        "id": "ea9d2a2b4ce11aaf85136840c65f3bc9c03ab649", 
+        "title": "Understanding the difficulty of training deep feedforward neural networks", 
+        "venue": "AISTATS", 
+        "year": 2010
+      }, 
+      "explanation": {
+        "abstract": {}, 
+        "title": {
+          "deep": 0.08874175697565079, 
+          "difficulty": 0.00711893429979682, 
+          "feedforward": 0.03628535941243172, 
+          "networks": 0.007726480718702078, 
+          "neural": 0.11289099603891373, 
+          "training": 0.012336679734289646, 
+          "understanding": 0.014692421071231365
+        }
+      }, 
+      "score": 0.0060894908383488655
+    }, 
+    {
+      "document": {
+        "abstract": "Real time application of deep learning algorithms is often hindered by high computational complexity and frequent memory accesses. Network pruning is a promising technique to solve this problem. However, pruning usually results in irregular network connections that not only demand extra representation efforts but also do not fit well on parallel computation. We introduce structured sparsity at various scales for convolutional neural networks, which are channel wise, kernel wise and intra kernel strided sparsity. This structured sparsity is very advantageous for direct computational resource savings on embedded computers, parallel computing environments and hardware based systems. To decide the importance of network connections and paths, the proposed method uses a particle filtering approach. The importance weight of each particle is assigned by computing the misclassification rate with corresponding connectivity pattern. The pruned network is retrained to compensate for the losses due to pruning. While implementing convolutions as matrix products, we particularly show that intra kernel strided sparsity with a simple constraint can significantly reduce the size of kernel and feature map tensors. The pruned network is finally quantized with reduced word length precision. This results in significant reduction in the total storage size providing advantages for on-chip memory based implementations of deep neural networks. 1 Introduction Convolutional neural networks (CNN) have been successfully applied to several diverse classification problems including speech and image recognition [1][2][3]. In CNN design, we need to decide the optimum network architecture and parameters count for a specific task. Large networks have the capacity to learn more difficult functions at the cost of increased computational complexity. However if the current parameters count is greater than the unknown optimum number, overfitting may occur. On the other hand, too few parameters limit the network's learning capability. One efficient approach for training is to learn a task with a large sized network and prune it by removing redundant and duplicate connections. This results in comparable level of performance with fewer parameters and better generalization [4]. Another important problem is porting deep learning algorithms to resource limited portable devices. With the advances in deep learning, it can make the smartphones and other machines even smarter. For this purpose, researchers have proposed ideas for designing the best performing lightweight networks. Lightweight neural networks have improved generalization and the parameters can be saved in on chip memory. This results in energy", 
+        "authors": [
+          "Sajid Anwar", 
+          "Kyuyeon Hwang", 
+          "Wonyong Sung"
+        ], 
+        "citations": [], 
+        "id": "0163fdb902ea417c3e7eb4ff19fd2ed268911c32", 
+        "title": "Structured Pruning of Deep Convolutional Neural Networks", 
+        "venue": "ArXiv", 
+        "year": 2015
+      }, 
+      "explanation": {
+        "abstract": {}, 
+        "title": {
+          "convolutional": 0.1012757420539856, 
+          "deep": 0.08874175697565079, 
+          "networks": 0.007726480718702078, 
+          "neural": 0.11289099603891373, 
+          "pruning": 0.006257562432438135, 
+          "structured": 0.005706171505153179
+        }
+      }, 
+      "score": 0.006909329444169998
+    }, 
+    {
+      "document": {
+        "abstract": "The brain processes information through many layers of neurons. This deep architecture is representationally powerful 1,2,3,4 , but it complicates learning by making it hard to identify the responsible neurons when a mistake is made 1,5. In machine learning, the backpropagation algorithm 1 assigns blame to a neu-ron by computing exactly how it contributed to an error. To do this, it multiplies error signals by matrices consisting of all the synaptic weights on the neuron's axon and farther downstream. This operation requires a precisely choreographed transport of synaptic weight information, which is thought to be impossible in the Here we present a surprisingly simple algorithm for deep learning, which assigns blame by multiplying error signals by random synaptic weights. We show that a network can learn to extract useful information from signals sent through these random feedback connections. In essence, the network learns to learn. We demonstrate that this new mechanism performs as quickly and accurately as backpropagation on a variety of problems and describe the principles which underlie its function. Our demonstration provides a plausible basis for how a neuron can be adapted using error signals generated at distal locations in the brain, and thus dispels long-held assumptions about the algorithmic constraints on learning in neural circuits. Networks in the brain compute via many layers of interconnected neurons 15,16. To work properly neurons must adjust their synapses so that the network's outputs are appropriate for its tasks. A longstanding mystery is how upstream synapses (e.g. the synapse between \u03b1 and \u03b2 in Fig. 1a) are adjusted on the basis of downstream errors (e.g. e in Fig. 1a). In artificial intelligence this problem is solved by an algorithm called backpropagation of error 1. Backprop works well in real-world applications 17,18,19 , and networks trained with it can account for cell response properties in some areas of cortex 20,21. But it is biologically implausible because it requires that neurons send each other precise information about large numbers of synaptic weights \u2014 i.e. it needs e by the matrix W T , the transpose of the forward synaptic connections, W (Fig. 1b). This implies that feedback is computed using knowledge of all the synaptic weights W in the forward path. For this reason, current theories of biological learning have turned to simpler schemes such as reinforcement learning 23 , and \" shallow \" mechanisms which use errors to adjust only the final \u2026", 
+        "authors": [
+          "Timothy P. Lillicrap", 
+          "Daniel Cownden", 
+          "Douglas B. Tweed", 
+          "Colin J. Akerman"
+        ], 
+        "citations": [], 
+        "id": "9a99c2453c4239662d093eb0715c846aef4cb84a", 
+        "title": "Random feedback weights support learning in deep neural networks", 
+        "venue": "ArXiv", 
+        "year": 2014
+      }, 
+      "explanation": {
+        "abstract": {}, 
+        "title": {
+          "deep": 0.08874175697565079, 
+          "learning": 0.026376601308584213, 
+          "networks": 0.007726480718702078, 
+          "neural": 0.11289099603891373, 
+          "random": 0.015656687319278717, 
+          "weights": 0.04272923991084099
+        }
+      }, 
+      "score": 0.008287976495921612
+    }, 
+    {
+      "document": {
+        "abstract": "Contemporary deep neural networks exhibit impressive results on practical problems. These networks generalize well although their inherent capacity may extend significantly beyond the number of training examples. We analyze this behavior in the context of deep, infinite neural networks. We show that deep infinite layers are naturally aligned with Gaussian processes and kernel methods, and devise stochastic kernels that encode the information of these networks. We show that stability results apply despite the size, offering an explanation for their empirical success.", 
+        "authors": [
+          "Tamir Hazan", 
+          "Tommi S. Jaakkola"
+        ], 
+        "citations": [], 
+        "id": "a7abb1c0c16d6d41b14630c797a84379253c9aef", 
+        "title": "Steps Toward Deep Kernel Methods from Infinite Neural Networks", 
+        "venue": "ArXiv", 
+        "year": 2015
+      }, 
+      "explanation": {
+        "abstract": {}, 
+        "title": {
+          "deep": 0.08874175697565079, 
+          "infinite": 0.002838253043591976, 
+          "methods": 0.000823566282633692, 
+          "networks": 0.007726480718702078, 
+          "neural": 0.11289099603891373, 
+          "steps": 0.0009043347090482712, 
+          "toward": 0.009035678580403328
+        }
+      }, 
+      "score": 0.008617890067398548
+    }, 
+    {
+      "document": {
+        "abstract": "Deep learning is a broad set of techniques that uses multiple layers of representation to automatically learn relevant features directly from structured data. Recently, such techniques have yielded record-breaking results on a diverse set of difficult machine learning tasks in computer vision, speech recognition, and natural language processing. Despite the enormous success of deep learning, relatively little is understood theoretically about why these techniques are so successful at feature learning and compression. Here, we show that deep learning is intimately related to one of the most important and successful techniques in theoretical physics, the renormalization group (RG). RG is an iterative coarse-graining scheme that allows for the extraction of relevant features (i.e. operators) as a physical system is examined at different length scales. We construct an exact mapping from the variational renormalization group, first introduced by Kadanoff, and deep learning architectures based on Restricted Boltzmann Machines (RBMs). We illustrate these ideas using the nearest-neighbor Ising Model in one and two-dimensions. Our results suggests that deep learning algorithms may be employing a generalized RG-like scheme to learn relevant features from data. A central goal of modern machine learning research is to learn and extract important features directly from data. Among the most promising and successful techniques for accomplishing this goal are those associated with the emerging sub-discipline of deep learning. Deep learning uses multiple layers of representation to learn descriptive features directly from training data [1, 2] and has been successfully utilized, often achieving record breaking results, in difficult machine learning tasks including object labeling [3], speech recognition [4], and natural language processing [5]. In this work, we will focus on a set of deep learning algorithms known as deep neural networks (DNNs) [6]. DNNs are biologically-inspired graphical statistical models that consist of multiple layers of \" neurons \" , with units in one layer receiving inputs from units in the layer below them. Despite their enormous success, it is still unclear what advantages these deep, multi-layer architec-tures possess over shallower architectures with a similar number of parameters. In particular, it is still not well understood theoretically why DNNs are so successful at uncovering features in structured data. (But see [7\u20139].) One possible explanation for the success of DNN ar-chitectures is that they can be viewed as an iterative coarse-graining scheme, where each new high-level layer of the neural network learns increasingly abstract higher-level features from the data [1, 10]. The \u2026", 
+        "authors": [
+          "Pankaj Mehta", 
+          "David J. Schwab"
+        ], 
+        "citations": [], 
+        "id": "9c32e95faffabbf2db71e53ce367d78c16f0692f", 
+        "title": "An exact mapping between the Variational Renormalization Group and Deep Learning", 
+        "venue": "ArXiv", 
+        "year": 2014
+      }, 
+      "explanation": {
+        "abstract": {}, 
+        "title": {
+          "between": 0.009572750888764858, 
+          "deep": 0.08874175697565079, 
+          "deep learning": 0.2294566035270691, 
+          "exact": 0.007207836955785751, 
+          "learning": 0.026376601308584213, 
+          "mapping": 0.01304646022617817, 
+          "variational": 0.008477399125695229
+        }
+      }, 
+      "score": 0.0075929127633571625
+    }, 
+    {
+      "document": {
+        "abstract": "Rectifying neurons are more biologically plausible than logistic sigmoid neurons, which are themselves more biologically plausible than hyperbolic tangent neu-rons. However, the latter work better for training multi-layer neural networks than logistic sigmoid neurons. This paper shows that networks of rectifying neu-rons yield equal or better performance than hyperbolic tangent networks in spite of the hard non-linearity and non-differentiability at zero and create sparse representations with true zeros which are remarkably suitable for naturally sparse data. Even though they can take advantage of semi-supervised setups with extra-unlabeled data, deep rectifier networks can reach their best performance without requiring any unsupervised pre-training on purely supervised tasks with large labeled datasets. Hence, these results can be seen as a new milestone in the attempts at understanding the difficulty in training deep but purely supervised neural networks , and closing the performance gap between neural networks learnt with and without unsupervised pre-training.", 
+        "authors": [
+          "Xavier Glorot", 
+          "Antoine Bordes", 
+          "Yoshua Bengio"
+        ], 
+        "citations": [], 
+        "id": "83174a52f38c80427e237446ccda79e2a9170742", 
+        "title": "Deep Sparse Rectifier Neural Networks", 
+        "venue": "AISTATS", 
+        "year": 2011
+      }, 
+      "explanation": {
+        "abstract": {}, 
+        "title": {
+          "deep": 0.08874175697565079, 
+          "networks": 0.007726480718702078, 
+          "neural": 0.11289099603891373, 
+          "sparse": 0.012045936658978462
+        }
+      }, 
+      "score": 0.013972558081150055
+    }, 
+    {
+      "document": {
+        "abstract": "In this paper, we propose deformable deep convolutional neural networks for generic object detection. This new deep learning object detection diagram has innovations in multiple aspects. In the proposed new deep architecture, a new deformation constrained pooling (def-pooling) layer models the deformation of object parts with geometric constraint and penalty. A new pre-training strategy is proposed to learn feature representations more suitable for the object detection task and with good generalization capability. By changing the net structures, training strategies, adding and removing some key components in the detection pipeline, a set of models with large diversity are obtained, which significantly improves the effectiveness of model averaging. The proposed approach improves the mean averaged precision obtained by RCNN [13], which is the state-of-the-art, from 31% to 44.4% on the ILSVRC2014 detection dataset. Detailed component-wise analysis is also provided through extensive experimental evaluation, which provide a global view for people to understand the deep learning object detection pipeline.", 
+        "authors": [
+          "Wanli Ouyang", 
+          "Xiaogang Wang", 
+          "Xingyu Zeng", 
+          "Shi Qiu", 
+          "Ping Luo", 
+          "Yonglong Tian", 
+          "Hongsheng Li", 
+          "Shuo Yang", 
+          "Zhe Wang", 
+          "Chen Change Loy", 
+          "Xiaoou Tang"
+        ], 
+        "citations": [], 
+        "id": "5b4ea55ff202d32ad3a4c9bf8edd5212e6793890", 
+        "title": "DeepID-Net: Deformable deep convolutional neural networks for object detection", 
+        "venue": "CVPR", 
+        "year": 2015
+      }, 
+      "explanation": {
+        "abstract": {}, 
+        "title": {
+          "convolutional": 0.1012757420539856, 
+          "deep": 0.08874175697565079, 
+          "deformable": 0.009190456941723824, 
+          "detection": 0.014085681177675724, 
+          "networks": 0.007726480718702078, 
+          "neural": 0.11289099603891373, 
+          "object detection": 0.014105530455708504
+        }
+      }, 
+      "score": 0.006697563454508781
+    }, 
+    {
+      "document": {
+        "abstract": "In spite of the advances in recognition technology, handwritten Hangul recognition (HHR) remains largely unsolved due to the presence of many confusing characters and excessive cursiveness in Hangul handwritings. Even the best existing recognizers do not lead to satisfactory performance for practical applications and have much lower performance than those developed for Chinese or alphanumeric characters. To improve the performance of HHR, here we developed a new type of recognizers based on deep neural networks (DNNs). DNN has recently shown excellent performance in many pattern recognition and machine learning problems, but have not been attempted for HHR. We built our Hangul recognizers based on deep convolutional neural networks and proposed several novel techniques to improve the performance and training speed of the networks. We systematically evaluated the performance of our recognizers on two public Hangul image databases, SERI95a and PE92. Using our framework, we achieved a recognition rate of 95.96\u00a0% on SERI95a and 92.92\u00a0% on PE92. Compared with the previous best records of 93.71\u00a0% on SERI95a and 87.70\u00a0% on PE92, our results yielded improvements of 2.25 and 5.22\u00a0%, respectively. These improvements lead to error reduction rates of 35.71\u00a0% on SERI95a and 42.44\u00a0% on PE92, relative to the previous lowest error rates. Such improvement fills a significant portion of the large gap between practical requirement and the actual performance of Hangul recognizers.", 
+        "authors": [
+          "In-Jung Kim", 
+          "Xiaohui Xie"
+        ], 
+        "citations": [], 
+        "id": "7d941dbab0bb645af81781bd3867ebde11c3641d", 
+        "title": "Handwritten Hangul recognition using deep convolutional neural networks", 
+        "venue": "International Journal on Document Analysis and Recognition (IJDAR)", 
+        "year": 2014
+      }, 
+      "explanation": {
+        "abstract": {}, 
+        "title": {
+          "convolutional": 0.1012757420539856, 
+          "deep": 0.08874175697565079, 
+          "handwritten": 0.06432623416185379, 
+          "networks": 0.007726480718702078, 
+          "neural": 0.11289099603891373, 
+          "recognition": 0.01626916602253914
+        }
+      }, 
+      "score": 0.010986756533384323
+    }, 
+    {
+      "document": {
+        "abstract": "In this work, we examine the strength of deep learning approaches for pathology detection in chest radiographs. Convolutional neural networks (CNN) deep architecture classification approaches have gained popularity due to their ability to learn mid and high level image representations. We explore the ability of CNN learned from a non-medical dataset to identify different types of pathologies in chest x-rays. We tested our algorithm on a 433 image dataset. The best performance was achieved using CNN and GIST features. We obtained an area under curve (AUC) of 0.87-0.94 for the different pathologies. The results demonstrate the feasibility of detecting pathology in chest x-rays using deep learning approaches based on non-medical learning. This is a first-of-its-kind experiment that shows that Deep learning with ImageNet, a large scale non-medical image database may be a good substitute to domain specific representations, which are yet to be available, for general medical image recognition tasks.", 
+        "authors": [
+          "Yaniv Bar", 
+          "Idit Diamant", 
+          "Lior Wolf", 
+          "Sivan Lieberman", 
+          "Eli Konen", 
+          "Hayit Greenspan"
+        ], 
+        "citations": [], 
+        "id": "5cc51fb6ecadc853cb4017a43fb644ad1b852bc1", 
+        "title": "Chest pathology detection using deep learning with non-medical training", 
+        "venue": "ISBI", 
+        "year": 2015
+      }, 
+      "explanation": {
+        "abstract": {}, 
+        "title": {
+          "chest": 0.04663357511162758, 
+          "deep": 0.08874175697565079, 
+          "deep learning": 0.2294566035270691, 
+          "detection": 0.014085681177675724, 
+          "learning": 0.026376601308584213, 
+          "non": 0.005257536191493273, 
+          "training": 0.012336679734289646
+        }
+      }, 
+      "score": 0.011548859067261219
+    }, 
+    {
+      "document": {
+        "abstract": "In this paper we introduce a deep neural network architecture to perform information extraction on character-based sequences, e.g. named-entity recognition on Chinese text or secondary-structure detection on protein sequences. With a task-independent architecture, the deep network relies only on simple character-based features, which obviates the need for task-specific feature engineering. The proposed dis-criminative framework includes three important strategies, (1) a deep learning module mapping characters to vector representations is included to capture the semantic relationship between characters; (2) abundant online sequences (unlabeled) are utilized to improve the vector representation through semi-supervised learning; and (3) the constraints of spatial dependency among output labels are modeled explicitly in the deep architecture. The experiments on four benchmark datasets have demonstrated that, the proposed architecture consistently leads to the state-of-the-art performance.", 
+        "authors": [
+          "Yanjun Qi", 
+          "Sujatha G. Das", 
+          "Ronan Collobert", 
+          "Jason Weston"
+        ], 
+        "citations": [], 
+        "id": "3a12b0c8b3c5981ba21fb09259a441827853ec3a", 
+        "title": "Deep Learning for Character-Based Information Extraction", 
+        "venue": "ECIR", 
+        "year": 2014
+      }, 
+      "explanation": {
+        "abstract": {}, 
+        "title": {
+          "based": 0.001731741358526051, 
+          "character": 0.021056227385997772, 
+          "deep": 0.08874175697565079, 
+          "deep learning": 0.2294566035270691, 
+          "extraction": 0.014803865924477577, 
+          "learning": 0.026376601308584213
+        }
+      }, 
+      "score": 0.009094025939702988
+    }, 
+    {
+      "document": {
+        "abstract": "Despite the widespread practical success of deep learning methods, our theoretical understanding of the dynamics of learning in deep neural networks remains quite sparse. We attempt to bridge the gap between the theory and practice of deep learning by systematically analyzing learning dynamics for the restricted case of deep linear neural networks. Despite the linearity of their input-output map, such networks have nonlinear gradient descent dynamics on weights that change with the addition of each new hidden layer. We show that deep linear networks exhibit nonlinear learning phenomena similar to those seen in simulations of nonlinear networks, including long plateaus followed by rapid transitions to lower error solutions, and faster convergence from greedy unsupervised pretraining initial conditions than from random initial conditions. We provide an analytical description of these phenomena by finding new exact solutions to the nonlinear dynamics of deep learning. Our theoretical analysis also reveals the surprising finding that as the depth of a network approaches infinity, learning speed can nevertheless remain finite: for a special class of initial conditions on the weights, very deep networks incur only a finite, depth independent, delay in learning speed relative to shallow networks. We show that, under certain conditions on the training data, unsupervised pretraining can find this special class of initial conditions, while scaled random Gaussian initializations cannot. We further exhibit a new class of random orthogonal initial conditions on weights that, like unsupervised pre-training, enjoys depth independent learning times. We further show that these initial conditions also lead to faithful propagation of gradients even in deep nonlinear networks, as long as they operate in a special regime known as the edge of chaos. Deep learning methods have realized impressive performance in a range of applications, from visual object classification [1, 2, 3] to speech recognition [4] and natural language processing [5, 6]. These successes have been achieved despite the noted difficulty of training such deep architectures [7, 8, 9, 10, 11]. Indeed, many explanations for the difficulty of deep learning have been advanced in the literature, including the presence of many local minima, low curvature regions due to saturating nonlinearities, and exponential growth or decay of back-propagated gradients [12, 13, 14, 15]. Furthermore, many neural network simulations have observed", 
+        "authors": [
+          "Andrew M. Saxe", 
+          "James L. McClelland", 
+          "Surya Ganguli"
+        ], 
+        "citations": [], 
+        "id": "5ca4abab527f6b0270e50548f0dea30638c9b86e", 
+        "title": "Exact solutions to the nonlinear dynamics of learning in deep linear neural networks", 
+        "venue": "ArXiv", 
+        "year": 2013
+      }, 
+      "explanation": {
+        "abstract": {}, 
+        "title": {
+          "deep": 0.08874175697565079, 
+          "dynamics": 0.022763047367334366, 
+          "exact": 0.007207836955785751, 
+          "learning": 0.026376601308584213, 
+          "linear": 0.010339810512959957, 
+          "networks": 0.007726480718702078, 
+          "neural": 0.11289099603891373, 
+          "nonlinear": 0.04228464141488075
+        }
+      }, 
+      "score": 0.00780129199847579
+    }, 
+    {
+      "document": {
+        "abstract": "\u2014Three important properties of a classification machinery are: (i) the system preserves the important information of the input data; (ii) the training examples convey information for unseen data; and (iii) the system is able to treat differently points from different classes. In this work we show that these fundamental properties are inherited by the architecture of deep neural networks. We formally prove that these networks with random Gaussian weights perform a distance-preserving embedding of the data, with a special treatment for in-class and out-of-class data. Similar points at the input of the network are likely to have the same The theoretical analysis of deep networks here presented exploits tools used in the compressed sensing and dictionary learning literature, thereby making a formal connection between these important topics. The derived results allow drawing conclusions on the metric learning properties of the network and their relation to its structure; and provide bounds on the required size of the training set such that the training examples would represent faithfully the unseen data. The results are validated with state-of-the-art trained networks.", 
+        "authors": [
+          "Raja Giryes", 
+          "Guillermo Sapiro", 
+          "Alexander M. Bronstein"
+        ], 
+        "citations": [], 
+        "id": "12d4bfd7b56f47048811595c0e0672446a65ade9", 
+        "title": "Deep Neural Networks with Random Gaussian Weights: A Universal Classification Strategy?", 
+        "venue": "IEEE Trans. Signal Processing", 
+        "year": 2016
+      }, 
+      "explanation": {
+        "abstract": {}, 
+        "title": {
+          "classification": 0.012319961562752724, 
+          "deep": 0.08874175697565079, 
+          "gaussian": 0.023841513320803642, 
+          "networks": 0.007726480718702078, 
+          "neural": 0.11289099603891373, 
+          "random": 0.015656687319278717, 
+          "universal": 0.016216373071074486, 
+          "weights": 0.04272923991084099
+        }
+      }, 
+      "score": 0.016888733953237534
+    }, 
+    {
+      "document": {
+        "abstract": "Ab initio protein secondary structure (SS) predictions are utilized to generate tertiary structure predictions, which are increasingly demanded due to the rapid discovery of proteins. Although recent developments have slightly exceeded previous methods of SS prediction, accuracy has stagnated around 80 percent and many wonder if prediction cannot be advanced beyond this ceiling. Disciplines that have traditionally employed neural networks are experimenting with novel deep learning techniques in attempts to stimulate progress. Since neural networks have historically played an important role in SS prediction, we wanted to determine whether deep learning could contribute to the advancement of this field as well. We developed an SS predictor that makes use of the position-specific scoring matrix generated by PSI-BLAST and deep learning network architectures, which we call DNSS. Graphical processing units and CUDA software optimize the deep network architecture and efficiently train the deep networks. Optimal parameters for the training process were determined, and a workflow comprising three separately trained deep networks was constructed in order to make refined predictions. This deep learning network approach was used to predict SS for a fully independent test dataset of 198 proteins, achieving a Q3 accuracy of 80.7 percent and a Sov accuracy of 74.2 percent.", 
+        "authors": [
+          "Matt Spencer", 
+          "Jesse Eickholt", 
+          "Jianlin Cheng"
+        ], 
+        "citations": [], 
+        "id": "16d2b677d7bf1d4e5ecfb97dcbbfc3f894f37464", 
+        "title": "A Deep Learning Network Approach to ab initio Protein Secondary Structure Prediction", 
+        "venue": "IEEE/ACM Trans. Comput. Biology Bioinform.", 
+        "year": 2015
+      }, 
+      "explanation": {
+        "abstract": {}, 
+        "title": {
+          "ab": 0.002700714161619544, 
+          "ab initio": 0.001972232246771455, 
+          "deep": 0.08874175697565079, 
+          "deep learning": 0.2294566035270691, 
+          "initio": 0.00506655452772975, 
+          "learning": 0.026376601308584213, 
+          "network": 0.010749842040240765, 
+          "prediction": 0.007902734912931919, 
+          "secondary": 0.02759486809372902, 
+          "secondary structure prediction": 0.02010934241116047, 
+          "structure": 0.00047890644054859877
+        }
+      }, 
+      "score": 0.011813576333224773
+    }, 
+    {
+      "document": {
+        "abstract": "Deep neural networks are highly expressive models that have recently achieved state of the art performance on speech and visual recognition tasks. While their expressiveness is the reason they succeed, it also causes them to learn uninter-pretable solutions that could have counter-intuitive properties. In this paper we report two such properties. First, we find that there is no distinction between individual high level units and random linear combinations of high level units, according to various methods of unit analysis. It suggests that it is the space, rather than the individual units, that contains of the semantic information in the high layers of neural networks. Second, we find that deep neural networks learn input-output mappings that are fairly discontinuous to a significant extend. Specifically, we find that we can cause the network to misclassify an image by applying a certain imperceptible perturbation , which is found by maximizing the network's prediction error. In addition, the specific nature of these perturbations is not a random artifact of learning: the same perturbation can cause a different network, that was trained on a different subset of the dataset, to misclassify the same input.", 
+        "authors": [
+          "Christian Szegedy", 
+          "Wojciech Zaremba", 
+          "Ilya Sutskever", 
+          "Joan Bruna", 
+          "Dumitru Erhan", 
+          "Ian J. Goodfellow", 
+          "Rob Fergus"
+        ], 
+        "citations": [], 
+        "id": "a2caf5eb5fd2c29b688d5b8b9e600627e04f4090", 
+        "title": "Intriguing properties of neural networks", 
+        "venue": "ArXiv", 
+        "year": 2013
+      }, 
+      "explanation": {
+        "abstract": {}, 
+        "title": {
+          "intriguing": 0.0009996825829148293, 
+          "networks": 0.007726480718702078, 
+          "neural": 0.11289099603891373, 
+          "properties": 0.001102726673707366
+        }
+      }, 
+      "score": 0.015567278489470482
+    }, 
+    {
+      "document": {
+        "abstract": "Thanks to their state-of-the-art performance, deep neural networks are increasingly used for object recognition. To achieve the best results, they use millions of parameters to be trained. However, when targetting embedded applications the size of these models becomes problematic. As a consequence, their usage on smartphones or other resource limited devices is prohibited. In this paper we introduce a novel compression method for deep neural networks that is performed during the learning phase. It consists in adding an extra regularization term to the cost function of fully-connected layers. We combine this method with Product Quantization (PQ) of the trained weights for higher savings in storage consumption. We evaluate our method on two data sets (MNIST and CIFAR10), on which we achieve significantly larger compression rates than state-of-the-art methods.", 
+        "authors": [
+          "Guillaume Souli\u00e9", 
+          "Vincent Gripon", 
+          "Ma\u00eblys Robert"
+        ], 
+        "citations": [], 
+        "id": "332fae4adc26a10f2401bef9e2987ad2a08c1da3", 
+        "title": "Compression of Deep Neural Networks on the Fly", 
+        "venue": "ICANN", 
+        "year": 2016
+      }, 
+      "explanation": {
+        "abstract": {}, 
+        "title": {
+          "deep": 0.08874175697565079, 
+          "networks": 0.007726480718702078, 
+          "neural": 0.11289099603891373
+        }
+      }, 
+      "score": 0.008119135163724422
+    }, 
+    {
+      "document": {
+        "abstract": "Monaural source separation is useful for many real-world applications though it is a challenging problem. In this paper, we study deep learning for monaural speech separation. We propose the joint optimization of the deep learning models (deep neural networks and recurrent neural networks) with an extra masking layer, which enforces a reconstruction constraint. Moreover, we explore a discriminative training criterion for the neural networks to further enhance the separation performance. We evaluate our approaches using the TIMIT speech corpus for a monaural speech separation task. Our proposed models achieve about 3.8\u21e04.9 dB SIR gain compared to NMF models, while maintaining better SDRs and SARs.", 
+        "authors": [
+          "Po-Sen Huang", 
+          "Minje Kim", 
+          "Mark Hasegawa-Johnson", 
+          "Paris Smaragdis"
+        ], 
+        "citations": [], 
+        "id": "1ffb43a8d68dfe732e7c7bb99bf91808ec73f113", 
+        "title": "Deep learning for monaural speech separation", 
+        "venue": "ICASSP", 
+        "year": 2014
+      }, 
+      "explanation": {
+        "abstract": {}, 
+        "title": {
+          "deep": 0.08874175697565079, 
+          "deep learning": 0.2294566035270691, 
+          "learning": 0.026376601308584213, 
+          "monaural": 0.037811167538166046, 
+          "separation": 0.01761297695338726, 
+          "speech": 0.011562716215848923, 
+          "speech separation": 0.1002211645245552
+        }
+      }, 
+      "score": 0.007329586427658796
+    }, 
+    {
+      "document": {
+        "abstract": "\u2014Inspired by the brain, deep neural networks (DNN) are thought to learn abstract representations through their hierarchical architecture. However, at present, how this happens is not well understood. Here, we demonstrate that DNN learn abstract representations by a process of demodulation. We introduce a biased sigmoid activation function and use it to show that DNN learn and perform better when optimized for demodulation. Our findings constitute the first unambiguous evidence that DNN perform abstract learning in practical use. Our findings may also explain abstract learning in the human brain.", 
+        "authors": [
+          "Andrew J. R. Simpson"
+        ], 
+        "citations": [], 
+        "id": "6ad92e5ffd023f9466e67c29e57e0733492f56cd", 
+        "title": "Abstract Learning via Demodulation in a Deep Neural Network", 
+        "venue": "ArXiv", 
+        "year": 2015
+      }, 
+      "explanation": {
+        "abstract": {}, 
+        "title": {
+          "deep": 0.08874175697565079, 
+          "deep neural network": 0.0523252934217453, 
+          "demodulation": 0.027466190978884697, 
+          "learning": 0.026376601308584213, 
+          "network": 0.010749842040240765, 
+          "neural": 0.11289099603891373, 
+          "via": 0.0036147998180240393
+        }
+      }, 
+      "score": 0.01704036444425583
+    }, 
+    {
+      "document": {
+        "abstract": "The key challenge of face recognition is to develop effective feature representations for reducing intra-personal variations while enlarging inter-personal differences. In this paper, we show that it can be well solved with deep learning and using both face identification and verification signals as supervision. The Deep IDentification-verification features (DeepID2) are learned with carefully designed deep convolutional networks. The face identification task increases the inter-personal variations by drawing DeepID2 extracted from different identities apart, while the face verification task reduces the intra-personal variations by pulling DeepID2 extracted from the same identity together, both of which are essential to face recognition. The learned DeepID2 features can be well generalized to new identities unseen in the training data. On the challenging LFW dataset [11], 99.15% face verification accuracy is achieved. Compared with the best deep learning result [21] on LFW, the error rate has been significantly reduced by 67%.", 
+        "authors": [
+          "Yi Sun", 
+          "Xiaogang Wang", 
+          "Xiaoou Tang"
+        ], 
+        "citations": [], 
+        "id": "41951953579a0e3620f0235e5fcb80b930e6eee3", 
+        "title": "Deep Learning Face Representation by Joint Identification-Verification", 
+        "venue": "NIPS", 
+        "year": 2014
+      }, 
+      "explanation": {
+        "abstract": {}, 
+        "title": {
+          "deep": 0.08874175697565079, 
+          "deep learning": 0.2294566035270691, 
+          "face": 0.014813639223575592, 
+          "identification": 0.004461169242858887, 
+          "identification verification": 0.01925303414463997, 
+          "learning": 0.026376601308584213, 
+          "representation": 0.01885172910988331, 
+          "verification": 0.001676879241131246
+        }
+      }, 
+      "score": 0.019298436120152473
+    }
+  ]
+}

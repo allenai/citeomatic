@@ -1,0 +1,30 @@
+#!/usr/bin/python
+import setuptools
+
+setuptools.setup(
+    name='citeomatic',
+    version='0.01',
+    url='http://github.com/allenai/s2-research',
+    packages=setuptools.find_packages(),
+    install_requires=[
+        'Flask',
+        'Keras==1.2.2',
+        'annoy',
+        'elasticsearch',
+        'luigi',
+        'pandas',
+        'requests',
+        'scikit-learn',
+        'tensorflow',
+        'tqdm',
+        'untangle',
+    ],
+    tests_require=[
+        'pytest',
+        'yapf',
+    ],
+    zip_safe=False,
+    test_suite='py.test',
+    entry_points='',
+    pyrobuf_modules=['citeomatic.proto'],
+)

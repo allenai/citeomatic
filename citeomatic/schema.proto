@@ -1,0 +1,20 @@
+syntax = "proto3";
+message Document {
+  string title = 1;
+  string abstract = 2;
+  repeated string authors = 3;
+  int32 year = 5;
+  string id = 6;
+  string venue = 7;
+  repeated string citations = 4;
+}
+
+message Hit {
+  string docid = 1;
+  int32 tf = 2;
+}
+
+message PostingList {
+  repeated Hit hits = 1;
+}
+ 

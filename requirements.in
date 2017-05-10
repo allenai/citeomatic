@@ -1,0 +1,17 @@
+Flask
+Keras==1.2.2
+annoy
+blosc
+boto3
+elasticsearch
+gunicorn
+h5py
+honcho
+mmh3
+pandas==0.19.2
+pytest
+requests
+scikit-learn
+tensorflow
+tqdm
+untangle

@@ -1,0 +1,203 @@
+<html>
+<head>
+    <title>CiteoMatic</title>
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css"
+          rel="stylesheet"
+          integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7"
+          crossorigin="anonymous">
+    <script type="text/javascript"
+            src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.1.0/jquery.min.js"></script>
+    <script type="text/javascript"
+            src="https://twitter.github.io/typeahead.js/releases/latest/typeahead.bundle.js"></script>
+    <style>
+        .typeahead, .tt-query, .tt-hint {
+          width: 400px;
+          outline: none;
+        }
+
+        .tt-query {
+        }
+
+        .tt-hint {
+          color: #999
+        }
+
+        .tt-menu {
+          width: 400px;
+          background-color: #fff;
+          border: 1px solid #ccc;
+          border: 1px solid rgba(0, 0, 0, 0.2);
+        }
+
+        .tt-suggestion {
+          padding: 3px 20px;
+          line-height: 24px;
+        }
+
+        .tt-suggestion:hover {
+          cursor: pointer;
+          color: #fff;
+          background-color: #0097cf;
+        }
+
+        .tt-suggestion.tt-cursor {
+          color: #fff;
+          background-color: #0097cf;
+
+        }
+
+        .tt-suggestion p {
+          margin: 0;
+        }
+
+    </style>
+    <script language="javascript">
+        function submit_form() {
+          $("form#options").submit()
+        }
+
+        function bibtex() {
+          var data = $("form#options").serialize();
+          window.location.href = "/api/predictions/bibtex?" + data;
+        }
+
+    </script>
+</head>
+<body>
+<div class="container">
+    <div class="header">
+        <h1>Citeomatic</h1>
+        <p>
+            Not sure what papers you should be citing? Afraid of missing out on an obscure reference
+            and having your
+            paper relegated to the halls of shame? Citeomatic identifies missing citations for you!
+        </p>
+    </div>
+    <form id="options" class="form-horizontal" method="GET" action="/predictions">
+        Enter a query here to see the most popular facets that result from
+        the top 500 documents.
+        <p>
+        <div class="col-md-8">
+            <div class="form-group" id="title-lookup">
+                <label class="col-sm-2">Title</label>
+                <input class="col-sm-8 typeahead" type="text" name="title" value="{{form.title}}">
+            </div>
+            <div class="form-group">
+                <label class="col-sm-2">Abstract</label>
+                <textarea class="col-sm-8" rows=5 cols=80 name="abstract">{{form.abstract}}</textarea>
+            </div>
+            <div class="form-group">
+                <label class="col-sm-2">Authors</label>
+                <input class="col-sm-8" type="text" name="authors" value="{{form.authors|join(',')}}">
+            </div>
+            <div class="form-group">
+                <label class="col-sm-2">Scoring Function</label>
+                <input class="col-sm-8" type="text" name="combine_equation" cols="80"
+                       rows="1" value="{{form.combine_equation}}"></input>
+            </div>
+        </div>
+        <div class="form-group" class="col-md-4">
+            <label>
+                <input type="checkbox"
+                       name="show_coauthors"
+                       value="1"
+                       onchange="javascript:submit_form()"
+                       {% if form.show_coauthors %}checked{% endif %}>Show co-authored papers
+            </label>
+            <br/>
+            <label>
+                <input type="checkbox"
+                       name="show_abstracts"
+                       value="1"
+                       onchange="javascript:submit_form()"
+                       {% if form.show_abstracts %}checked{% endif %}>Show abstracts
+            </label>
+        </div>
+
+        <input class="btn btn-primary" type="submit">
+        {% if predictions %}
+        <input type="hidden" name="format" value="bibtex"/>
+        <h3>Predicted citations
+            <small><a href="javascript:bibtex()">Download as BibTeX</a></small>
+        </h3>
+        {% if stats %}
+        Evaluating against an existing paper.
+        <i>{{stats.citations}} total citations, {{stats.correct}} citations predicted correctly</i>.
+        </ul>
+        {% endif %}
+    </form>
+    <table class="table table-striped">
+        <thead>
+        <tr>
+            <th>Title</th>
+            <th>Authors</th>
+            <th>Year</th>
+            <th>Text Score</th>
+            <th>Citation Score</th>
+            <th>Total</th>
+        </tr>
+        </thead>
+        {% for res in predictions %}
+        <tr>
+            <td>{{ res.document.title }}</td>
+            <td>{{ ','.join(res.document.authors) }}</td>
+            <td>{{ res.document.year }}</td>
+            <td>{{ res.text_score }}</td>
+            <td>{{ res.citation_score }}</td>
+            <td>{{ res.score }}</td>
+            {% if doc.citations %}
+            <td>
+                {% if res.document.id in doc.citations %}
+                <span class="glyphicon glyphicon-ok" aria-hidden="true"></span>
+                {% else %}
+                <span class="glyphicon glyphicon-remove" aria-hidden="true"></span>
+                {% endif %}
+            </td>
+            {% endif %}
+        </tr>
+        {% if form.show_abstracts %}
+        <tr>
+            <td colspan="6">
+                <!--{{ res.highlights.words }}-->
+                {{ res.document.abstract }}
+                {% if 0 %}  <!--{{ highlight(res.document.abstract, res.highlights.words)|join(" ")|safe }}--> {% endif
+                %}
+            </td>
+        </tr>
+        {% endif %}
+        {% endfor %}
+    </table>
+    {% endif %}
+</div>
+</body>
+<!--
+DEBUG:
+{% if doc %}
+{{ json.dumps(doc, indent=2)|safe }}
+{% endif %}
+{% if results %}
+{% for r in results %}
+{{ r|safe}}
+{% endfor %}
+{% endif %}
+-->
+<script>
+        var titleLookup = new Bloodhound({
+          datumTokenizer: Bloodhound.tokenizers.obj.whitespace('value'),
+          queryTokenizer: Bloodhound.tokenizers.whitespace,
+          remote: {
+            url: '/api/title?q=%QUERY',
+            wildcard: '%QUERY'
+          }
+        });
+
+        $('#title-lookup .typeahead').typeahead(null, {
+          name: 'title-lookup',
+          display: 'title',
+          source: titleLookup
+        });
+
+
+
+</script>
+</html>
