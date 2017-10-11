@@ -126,8 +126,6 @@ class CreateFeaturizer(SharedParameters):
 class TrainModel(SharedParameters):
     model_config = luigi.Parameter()
     experiment_name = luigi.Parameter(default='v0')
-    batch_size = luigi.IntParameter(default=1024)
-    use_nn_negatives = luigi.BoolParameter(default=False)
 
     def requires(self):
         return {'featurizer': CreateFeaturizer(), 'corpus': BuildCorpus()}
@@ -139,67 +137,19 @@ class TrainModel(SharedParameters):
 
     def run(self):
         featurizer = file_util.read_pickle(self.input()['featurizer'].path)
-        c = corpus.Corpus.load(self.input()['corpus'].path)
+        corpus = corpus.Corpus.load(self.input()['corpus'].path)
 
         model_options = ModelOptions.load(self.model_config)
         model_options.n_authors = featurizer.n_authors
         model_options.n_features = featurizer.n_features
 
-        create_model = import_from(
-            'citeomatic.models.%s' % model_options.model_name, 'create_model'
-        )
-        models = create_model(model_options)
-
-        citeomatic_model, embedding_model = (
-            models['citeomatic'], models['embedding']
-        )
-
-        logging.info(citeomatic_model.summary())
-
-        training_dg = features.DataGenerator(
-            c,
+        citeomatic_model, embedding_model = train_text_model(
+            corpus,
             featurizer,
-        )
-        validation_dg = features.DataGenerator(
-            c,
-            featurizer,
-        )
-
-        metrics = []
-
-        training_generator = training_dg.triplet_generator(
-            id_pool=c.train_ids,
-            id_filter=c.train_ids,
-            batch_size=self.batch_size,
-            neg_to_pos_ratio=5
-        )
-        validation_generator = validation_dg.triplet_generator(
-            id_pool=c.valid_ids,
-            id_filter=c.train_ids,
-            batch_size=1024
-        )
-
-        optimizer = TFOptimizer(
-            tf.contrib.opt.LazyAdamOptimizer(learning_rate=model_options.lr)
-        )
-
-        compilation_options = {
-            'optimizer': optimizer,
-            'loss': layers.triplet_loss,
-            'metrics': metrics
-        }
-        citeomatic_model.compile(**compilation_options)
-
-        training.train_text_model(
-            corpus=c,
-            model=citeomatic_model,
-            embedding_model=embedding_model,
-            featurizer=featurizer,
-            training_generator=training_generator,
-            validation_generator=validation_generator,
-            data_generator=training_dg,
-            use_nn_negatives=self.use_nn_negatives,
-            debug=False
+            model_options,
+            embedding_model_for_ann=None,
+            debug=False,
+            tensorboard_dir=None
         )
 
         self.output().makedirs()
