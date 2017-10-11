@@ -2,13 +2,6 @@ import tensorflow as tf
 from keras import backend as K
 from keras.engine.topology import Layer
 from keras.layers import Lambda
-from keras.optimizers import TFOptimizer
-
-REG_LAMBDA = 1e-5 # todo: move to options
-LEARNING_RATE = 1e-4 # todo: move to options
-OPTIMIZER = TFOptimizer(
-                tf.contrib.opt.LazyAdamOptimizer(learning_rate=LEARNING_RATE)
-            )
 
 class ZeroMaskedEntries(Layer):
     """

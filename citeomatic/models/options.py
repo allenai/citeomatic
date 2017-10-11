@@ -6,18 +6,21 @@ class ModelOptions(HasTraits):
     model_name = Unicode()
     n_features = Int()
     n_authors = Int()
-    n_documents = Int()
+
     dense_dim = Int(default_value=75)
-    author_dim = Int()
-    embedding_type = Enum(values=['basic', 'holo'], default_value='basic')
+    embedding_type = Enum(values=['basic', 'cnn', 'lstm'], default_value='basic')
+
     use_dense = Bool(default_value=True)
     use_citations = Bool(default_value=True)
     use_authors = Bool(default_value=True)
+    author_dim = Int(default_value=10)
     use_sparse = Bool(default_value=True)
     use_holographic = Bool(default_value=False)
-    use_paper_id = Bool(default_value=False)
     use_attention = Bool(default_value=False)
     use_src_tgt_embeddings = Bool(default_value=False)
+
+    lr = Float(default_value=0.0001)
+    l2_lambda = Float(default_value=0.00001)
     l1_lambda = Float(default_value=0.0000001)
 
     # convolutions

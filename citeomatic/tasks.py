@@ -10,6 +10,9 @@ import os
 import zipfile
 from os import path
 
+import tensorflow as tf
+from keras.optimizers import TFOptimizer
+
 import luigi
 from citeomatic import file_util, features, training, corpus
 from citeomatic.features import Featurizer
@@ -88,7 +91,7 @@ class BuildCorpus(SharedParameters):
 
 
 class CreateFeaturizer(SharedParameters):
-    training_fraction = luigi.FloatParameter(default=0.9)
+    training_fraction = luigi.FloatParameter(default=0.8)
     use_bigrams = luigi.BoolParameter(default=False)
     use_unigrams = luigi.BoolParameter(default=True)
     max_features = luigi.IntParameter(default=100000000)
@@ -141,7 +144,6 @@ class TrainModel(SharedParameters):
         model_options = ModelOptions.load(self.model_config)
         model_options.n_authors = featurizer.n_authors
         model_options.n_features = featurizer.n_features
-        model_options.n_documents = len(c)
 
         create_model = import_from(
             'citeomatic.models.%s' % model_options.model_name, 'create_model'
@@ -176,11 +178,14 @@ class TrainModel(SharedParameters):
             id_filter=c.train_ids,
             batch_size=1024
         )
-        loss = layers.triplet_loss
+
+        optimizer = TFOptimizer(
+            tf.contrib.opt.LazyAdamOptimizer(learning_rate=model_options.lr)
+        )
 
         compilation_options = {
-            'optimizer': layers.OPTIMIZER,
-            'loss': loss,
+            'optimizer': optimizer,
+            'loss': layers.triplet_loss,
             'metrics': metrics
         }
         citeomatic_model.compile(**compilation_options)

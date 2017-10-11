@@ -7,7 +7,6 @@
   "use_authors": false,
   "use_sparse": false,
   "use_holographic": false,
-  "use_paper_id": false,
   "use_attention": false,
   "use_src_tgt_embeddings": false,
   "dense_type": "dense",
