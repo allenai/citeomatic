@@ -142,7 +142,6 @@ class TrainModel(SharedParameters):
         model_options.n_authors = featurizer.n_authors
         model_options.n_features = featurizer.n_features
         model_options.n_documents = len(c)
-        model_name = model_options.model_name
 
         create_model = import_from(
             'citeomatic.models.%s' % model_options.model_name, 'create_model'
@@ -173,7 +172,9 @@ class TrainModel(SharedParameters):
             neg_to_pos_ratio=5
         )
         validation_generator = validation_dg.triplet_generator(
-            id_pool=c.test_ids, id_filter=c.train_ids, batch_size=1024
+            id_pool=c.valid_ids,
+            id_filter=c.train_ids,
+            batch_size=1024
         )
         loss = layers.triplet_loss
 
