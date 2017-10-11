@@ -4,9 +4,8 @@ import tempfile
 import time
 import os
 import random
-from base import file_util
 
-from citeomatic import features
+from citeomatic import features, file_util
 from citeomatic.corpus import Corpus
 from citeomatic.schema_pb2 import Document
 from google.protobuf.json_format import MessageToDict
@@ -122,7 +121,7 @@ wintertime
 zaniest
 '''.split('\n')
 
-WORDS = WORDS * 1000
+WORDS = WORDS * 100
 print(len(WORDS))
 
 
@@ -133,7 +132,7 @@ def build_test_corpus(source_file, target_file):
         pass
 
     with open(source_file, 'w') as tf:
-        for i in range(1000):
+        for i in range(100):
             json.dump(
                 dict(
                     title=' '.join(random.sample(WORDS, 10)),
@@ -157,17 +156,16 @@ def test_corpus_conversion():
 
 
 def test_data_gen():
-    #build_test_corpus('/tmp/foo.json', '/tmp/foo.sqlite')
-    corpus = Corpus.load('/home/power/citeomatic-data/data/papers-2017-02-21-sample.sqlite')
-    featurizer = file_util.read_pickle('/home/power/citeomatic-data/model/featurizer-default.pickle')
-#    featurizer = features.Featurizer(
-#        use_unigrams_from_corpus=True,
-#        use_bigrams_from_corpus=True,
-#        allow_duplicates=False,
-#        training_fraction=0.9
-#    )
-#    featurizer.fit(corpus, max_features=10000, max_df_frac=1.0)
-    dg = features.DataGenerator(corpus, featurizer, es_negatives=None)
+    build_test_corpus('/tmp/foo.json', '/tmp/foo.sqlite')
+    corpus = Corpus.load('/tmp/foo.sqlite')
+    featurizer = features.Featurizer(
+        use_unigrams_from_corpus=True,
+        use_bigrams_from_corpus=True,
+        allow_duplicates=False,
+        training_fraction=0.9
+    )
+    featurizer.fit(corpus, max_features=10000, max_df_frac=1.0)
+    dg = features.DataGenerator(corpus, featurizer)
     gen = dg.triplet_generator(
         id_pool=corpus.train_ids,
         id_filter=corpus.train_ids,

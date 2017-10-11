@@ -1,7 +1,7 @@
 import glob
 
 from citeomatic.grobid_parser import GrobidParser, parse_full_text
-from base import file_util
+from citeomatic import file_util
 
 
 def test_grobid_reed():
