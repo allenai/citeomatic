@@ -3,7 +3,8 @@ import sqlite3
 
 import tqdm
 
-from base import file_util, batchify
+from citeomatic import file_util
+from citeomatic.utils import batchify
 from citeomatic.schema_pb2 import Document
 
 

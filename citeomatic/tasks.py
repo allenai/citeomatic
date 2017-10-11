@@ -11,8 +11,7 @@ import zipfile
 from os import path
 
 import luigi
-from base import file_util
-from citeomatic import features, training, corpus
+from citeomatic import file_util, features, training, corpus
 from citeomatic.features import Featurizer
 from citeomatic.models import layers
 from citeomatic.models.options import ModelOptions

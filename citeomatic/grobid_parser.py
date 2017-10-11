@@ -5,7 +5,7 @@ import re
 import arrow
 import requests
 import untangle
-from base import flatten
+from citeomatic.utils import flatten
 
 date_parser = re.compile(r'[^\d](?:19|20)\d\d[^\d]')
 CURRENT_YEAR = arrow.now().year

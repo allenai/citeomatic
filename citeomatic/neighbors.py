@@ -5,7 +5,8 @@ import numpy as np
 import tqdm
 
 from annoy import AnnoyIndex
-from base import batch_apply, file_util, flatten
+from citeomatic import file_util
+from citeomatic.utils import batch_apply, flatten
 from citeomatic.schema_pb2 import Document
 from citeomatic.serialization import load_pickle
 

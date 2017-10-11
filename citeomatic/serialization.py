@@ -4,11 +4,11 @@ Helpers for pickle compatibility across module renames.
 """
 from typing import Tuple, Any
 
-from base import file_util
 import os
 import importlib
 import pickle
 
+from citeomatic import file_util
 from citeomatic.features import Featurizer
 
 

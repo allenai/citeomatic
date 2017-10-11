@@ -1,4 +1,4 @@
-from base import file_util
+from citeomatic import file_util
 from traitlets import Bool, HasTraits, Int, Unicode, Enum, Float
 
 

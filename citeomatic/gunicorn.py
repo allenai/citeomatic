@@ -7,7 +7,7 @@ from citeomatic import model_from_directory, service
 from citeomatic.features import Corpus
 from citeomatic.grobid_parser import GrobidParser
 from citeomatic.neighbors import ANN, EmbeddingModel
-from base import setup_default_logging
+from citeomatic.config import setup_default_logging
 
 
 def get_session():

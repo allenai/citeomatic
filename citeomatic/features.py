@@ -11,7 +11,7 @@ import tqdm
 from keras.preprocessing.sequence import pad_sequences
 from sklearn.feature_extraction.text import CountVectorizer
 
-from base import flatten
+from citeomatic.utils import flatten
 
 MAX_AUTHORS_PER_DOCUMENT = 8
 CLEAN_TEXT_RE = re.compile('[^ a-z]')
