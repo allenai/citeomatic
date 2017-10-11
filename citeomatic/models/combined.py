@@ -154,7 +154,8 @@ def create_model(options: ModelOptions):
             name='authors',
             input=author_input,
             n_features=options.n_authors,
-            dense_dim=options.author_dim
+            dense_dim=options.author_dim,
+            l2_lambda=options.l2_lambda
         )
 
         if options.author_dim != options.dense_dim:

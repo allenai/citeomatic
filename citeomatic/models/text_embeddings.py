@@ -1,5 +1,4 @@
-from citeomatic.models.layers import L2Normalize, REG_LAMBDA, ScalarMul, Sum, \
-    ZeroMaskedEntries
+from citeomatic.models.layers import L2Normalize, ScalarMul, Sum, ZeroMaskedEntries
 from keras.layers import Bidirectional, Embedding, Input, LSTM, merge
 from keras.layers.convolutional import Convolution1D
 from keras.layers.pooling import GlobalAveragePooling1D
@@ -11,11 +10,11 @@ def _prefix(tuple):
     return '-'.join(tuple)
 
 
-def summed_embedding(name, input, n_features, dense_dim):
+def summed_embedding(name, input, n_features, dense_dim, l2_lambda):
     embed = Embedding(
         output_dim=dense_dim,
         input_dim=n_features,
-        W_regularizer=l2(REG_LAMBDA),
+        W_regularizer=l2(l2_lambda),
         mask_zero=True
     )
     embedded_input = ZeroMaskedEntries()(embed(input))
@@ -28,16 +27,17 @@ class TextEmbedding(object):
     Text embedding models class.
     """
 
-    def __init__(self, n_features, dense_dim, l1_lambda=0):
+    def __init__(self, n_features, dense_dim, l1_lambda=0, l2_lambda=0):
         self.n_features = n_features
         self.dense_dim = dense_dim
         self.l1_lambda = l1_lambda
+        self.l2_lambda = l2_lambda
 
         # shared layers
         self.embed_direction = Embedding(
             output_dim=self.dense_dim,
             input_dim=self.n_features,
-            W_regularizer=l2(REG_LAMBDA),
+            W_regularizer=l2(self.l2_lambda),
             mask_zero=True,
             dropout=0
         )
@@ -86,19 +86,20 @@ class TextEmbeddingConv(object):
     """
 
     def __init__(
-        self, n_features, dense_dim, n_filter, max_filter_length, l1_lambda=0
+        self, n_features, dense_dim, n_filter, max_filter_length, l1_lambda=0, l2_lambda=0
     ):
         self.n_features = n_features
         self.dense_dim = dense_dim
         self.nb_filter = n_filter
         self.max_filter_length = max_filter_length
         self.l1_lambda = l1_lambda
+        self.l2_lambda = l2_lambda
 
         # shared embedding layers
         self.embed_direction = Embedding(
             output_dim=self.dense_dim,
             input_dim=self.n_features,
-            W_regularizer=l2(REG_LAMBDA),
+            W_regularizer=l2(self.l2_lambda),
             mask_zero=True
         )
         self.mask_direction = ZeroMaskedEntries()
@@ -183,16 +184,17 @@ class TextEmbeddingLSTM(object):
     Text embedding models class.
     """
 
-    def __init__(self, n_features, dense_dim, lstm_dim, **kw):
+    def __init__(self, n_features, dense_dim, lstm_dim, l2_lambda=0, **kw):
         self.n_features = n_features
         self.dense_dim = dense_dim
         self.lstm_dim = lstm_dim
+        self.l2_lambda = l2_lambda
 
         # shared embedding layers
         self.embedding = Embedding(
             output_dim=self.dense_dim,
             input_dim=self.n_features,
-            W_regularizer=l2(REG_LAMBDA),
+            W_regularizer=l2(self.l2_lambda),
             mask_zero=True
         )
         self.bilstm = Bidirectional(LSTM(lstm_dim))

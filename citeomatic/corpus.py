@@ -60,7 +60,7 @@ def build_corpus(db_filename, corpus_json):
         conn.commit()
 
 
-def load(data_path, train_frac=0.95):
+def load(data_path, train_frac=0.80):
     return Corpus(data_path, train_frac)
 
 
@@ -80,14 +80,19 @@ class Corpus(object):
 
         self.all_ids = [str(r[0]) for r in id_rows]
         self._id_set = set(self.all_ids)
-        n_train = int(self.train_frac * len(self.all_ids))
+        n = len(self.all_ids)
+        n_train = int(self.train_frac * n)
+        n_valid = (n - n_train) // 2
+        n_test = n - n_train - n_valid
         self.train_ids = self.all_ids[0:n_train]
-        self.test_ids = self.all_ids[n_train:]
-        logging.info('%d training docs' % len(self.train_ids))
-        logging.info('%d testing docs' % len(self.test_ids))
+        self.valid_ids = self.all_ids[n_train:n_train + n_valid]
+        self.test_ids = self.all_ids[n_train + n_valid:]
+        logging.info('%d training docs' % n_train)
+        logging.info('%d validation docs' % n_valid)
+        logging.info('%d testing docs' % n_test)
 
     @staticmethod
-    def load(data_path, train_frac=0.95):
+    def load(data_path, train_frac=0.80):
         return load(data_path, train_frac)
 
     @staticmethod
