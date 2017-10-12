@@ -178,7 +178,6 @@ def train_text_model(
     ))
 
     callbacks_list = []
-
     if debug:
         callbacks_list.append(MemoryUsageCallback())
     if tensorboard_dir is not None:
@@ -201,7 +200,7 @@ def train_text_model(
 
     model.fit_generator(
         training_generator,
-        samples_per_epoch= model_options.samples_per_epoch,
+        samples_per_epoch=model_options.samples_per_epoch,
         callbacks=callbacks_list,
         nb_epoch=epochs,
         max_q_size=2,
