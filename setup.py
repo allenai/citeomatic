@@ -18,6 +18,8 @@ setuptools.setup(
         'tensorflow',
         'tqdm',
         'untangle',
+        'arrow',
+        'boto3'
     ],
     tests_require=[
         'pytest',

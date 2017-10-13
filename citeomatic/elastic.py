@@ -2,7 +2,7 @@ import logging
 
 import elasticsearch
 import six
-from citeomatic.features import Document
+from citeomatic.common import Document
 
 ES_ADDRESS = "es.production.s2.prod.ai2:9200"
 ES = elasticsearch.Elasticsearch(ES_ADDRESS)

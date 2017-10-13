@@ -14,10 +14,17 @@ import numpy as np
 import requests
 from citeomatic import display, elastic
 from citeomatic.cache import LocalCache, S3Cache
+from citeomatic.common import Document, FieldNames
 from citeomatic.elastic import fetch_citations
-from citeomatic.features import Corpus, Document, Featurizer
+from citeomatic.corpus import Corpus
+from citeomatic.features import Featurizer
 from citeomatic.neighbors import ANN, EmbeddingModel
 from flask import Flask, Response, request, Blueprint
+
+
+NUM_ES_PAPERS = 1000
+DEFAULT_NUM_CITATIONS = 50
+TOTAL_CANDIDATES = 1000
 
 app = Flask(__name__, template_folder='.', static_folder='client/build/')
 
@@ -51,6 +58,10 @@ class APIModel(object):
     def get_ann_similar_documents(self, doc, top_n=NUM_ES_PAPERS):
         doc_embedded = self.embedding_model.embed(doc)
         return self._ann.get_nns_by_vector(doc_embedded, top_n)
+
+    @staticmethod
+    def _sha_to_url(sha):
+        return "https://pdfs.semanticscholar.org/" + sha[0:4] + "/" + sha[4:] + ".pdf"
 
     def predict(self, doc, top_n=DEFAULT_NUM_CITATIONS) -> List[Prediction]:
         bulk_ids = self.get_ann_similar_documents(doc, top_n=self.max_neighbors)
@@ -96,7 +107,7 @@ class APIModel(object):
                 Prediction(
                     score=float(scores[match_idx]),
                     document=candidates[match_idx],
-                    pdf=sha_to_url(str(candidates[match_idx].id)),
+                    pdf=APIModel._sha_to_url(str(candidates[match_idx].id)),
                     position=i,
                     explanation={},
                     cited=candidates[match_idx].title.lower() in doc.citations
@@ -108,16 +119,16 @@ class APIModel(object):
 
 def document_from_dict(doc):
     defaults = {
-        'title': '',
-        'abstract': '',
-        'authors': [],
-        'citations': [],
-        'year': 2016,
-        'id': 0,
-        'venue': '',
-        'in_citation_count': 0,
-        'out_citation_count': 0,
-        'key_phrases': []
+        FieldNames.TITLE: '',
+        FieldNames.ABSTRACT: '',
+        FieldNames.AUTHORS: [],
+        FieldNames.OUT_CITATIONS: [],
+        FieldNames.YEAR: 2016,
+        FieldNames.PAPER_ID: 0,
+        FieldNames.VENUE: '',
+        FieldNames.IN_CITATIONS_COUNT: 0,
+        FieldNames.OUT_CITATIONS_COUNT: 0,
+        FieldNames.KEY_PHRASES: []
     }
     defaults.update(doc)
 

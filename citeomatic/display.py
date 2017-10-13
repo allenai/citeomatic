@@ -1,4 +1,4 @@
-from citeomatic.features import Document
+from citeomatic.common import Document
 
 
 def document_to_bibtex(doc: Document):
