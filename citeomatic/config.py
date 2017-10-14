@@ -10,10 +10,9 @@ from ast import literal_eval
 import numpy
 import pandas
 import traitlets
-from base import file_util
-from base import traits
 from traitlets.config import Configurable
 
+from citeomatic import traits, file_util
 from .file_util import read_json, read_pickle, write_file, write_json, write_pickle
 
 # These properties will be ignored for argument parsing.
