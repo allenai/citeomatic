@@ -1,28 +1,21 @@
 #!/usr/bin/env python3
 
 import collections
-import hashlib
-import json
 import logging
-import os
-import re
 from typing import List
 
-import boto3
 import flask
 import numpy as np
-import requests
+from flask import Flask, request
+
 from citeomatic import display, elastic
-from citeomatic.cache import LocalCache, S3Cache
 from citeomatic.common import Document, FieldNames
-from citeomatic.elastic import fetch_citations
 from citeomatic.corpus import Corpus
+from citeomatic.elastic import fetch_citations
 from citeomatic.features import Featurizer
 from citeomatic.neighbors import ANN, EmbeddingModel
-from flask import Flask, Response, request, Blueprint
 
-
-NUM_ES_PAPERS = 1000
+NUM_ANN_CANDIDATES = 1000
 DEFAULT_NUM_CITATIONS = 50
 TOTAL_CANDIDATES = 1000
 
@@ -55,7 +48,7 @@ class APIModel(object):
         self.max_neighbors = max_neighbors
         self.candidate_min_in_citations = candidate_min_in_citations
 
-    def get_ann_similar_documents(self, doc, top_n=NUM_ES_PAPERS):
+    def get_ann_similar_documents(self, doc, top_n=NUM_ANN_CANDIDATES):
         doc_embedded = self.embedding_model.embed(doc)
         return self._ann.get_nns_by_vector(doc_embedded, top_n)
 
