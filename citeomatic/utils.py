@@ -1,9 +1,20 @@
 import functools
+import importlib
 from typing import TypeVar, Iterator, Callable, List
 
 T = TypeVar('T')
 U = TypeVar('U')
 
+def import_from(module, name):
+    '''
+    usage example:
+    grid = import_from('sklearn.model_selection', 'GridSearchCV')
+    is equivalent to:
+    from sklearn.model_selection import GridSearchV as grid
+    '''
+    module = importlib.import_module(module)
+    # module = reload(module) # maybe needed for py2?
+    return getattr(module, name)
 
 def flatten(lst):
     """Flatten `lst` (return the depth first traversal of `lst`)"""

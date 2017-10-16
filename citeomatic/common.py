@@ -39,6 +39,30 @@ class FilePaths(object):
     OC_CORPUS_JSON = os.path.join(BASE_DIR, 'open_corpus/corpus.json')
     OC_DB_FILE = os.path.join(BASE_DIR, 'db/oc.sqlite.db')
 
+    def get_json_path(self, corpus_name):
+        if corpus_name.lower() == 'dblp':
+            return self.DBLP_CORPUS_JSON
+        elif corpus_name.lower() == 'pubmed':
+            return self.PUBMED_CORPUS_JSON
+        elif (corpus_name.lower() == 'oc'
+              or corpus_name.lower() == 'open_corpus'
+              or corpus_name.lower() == 'opencorpus'):
+            return self.OC_CORPUS_JSON
+        else:
+            return None
+
+    def get_db_path(self, corpus_name):
+        if corpus_name.lower() == 'dblp':
+            return self.DBLP_DB_FILE
+        elif corpus_name.lower() == 'pubmed':
+            return self.PUBMED_DB_FILE
+        elif (corpus_name.lower() == 'oc'
+              or corpus_name.lower() == 'open_corpus'
+              or corpus_name.lower() == 'opencorpus'):
+            return self.OC_DB_FILE
+        else:
+            return None
+
 
 class Document(object):
     _fields = [

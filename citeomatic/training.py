@@ -2,10 +2,16 @@ import logging
 import resource
 from collections import defaultdict
 
+import tensorflow as tf
 import keras
 import numpy as np
 from citeomatic.neighbors import EmbeddingModel, make_ann
+from citeomatic.features import DataGenerator
+from citeomatic.utils import import_from
+from citeomatic.models import layers
 from keras.callbacks import ReduceLROnPlateau, TensorBoard
+from keras.optimizers import TFOptimizer
+
 
 
 def rank_metrics(y, preds, max_num_true_multiplier=9):
@@ -150,18 +156,18 @@ def train_text_model(
 
     logging.info(model.summary())
 
-    training_dg = features.DataGenerator(corpus, featurizer)
+    training_dg = DataGenerator(corpus, featurizer)
     training_generator = training_dg.triplet_generator(
-        id_pool=corpus.train_ids,
-        id_filter=corpus.train_ids,
+        paper_ids=corpus.train_ids,
+        candidate_ids=corpus.train_ids,
         batch_size=model_options.batch_size,
         neg_to_pos_ratio=5
     )
 
-    validation_dg = features.DataGenerator(corpus, featurizer)
+    validation_dg = DataGenerator(corpus, featurizer)
     validation_generator = validation_dg.triplet_generator(
-        id_pool=corpus.valid_ids,
-        id_filter=corpus.train_ids,
+        paper_ids=corpus.valid_ids,
+        candidate_ids=corpus.train_ids + corpus.valid_ids,
         batch_size=1024
     )
 
@@ -170,9 +176,9 @@ def train_text_model(
     )
     model.compile(optimizer=optimizer, loss=layers.triplet_loss)
 
-    model_options.samples_per_epoch = np.minimum(
+    model_options.samples_per_epoch = int(np.minimum(
         model_options.samples_per_epoch, model_options.total_samples
-    )
+    ))
     epochs = int(np.ceil(
         model_options.total_samples /  model_options.samples_per_epoch
     ))

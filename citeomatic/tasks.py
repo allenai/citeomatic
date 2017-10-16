@@ -10,13 +10,9 @@ import os
 import zipfile
 from os import path
 
-import tensorflow as tf
-from keras.optimizers import TFOptimizer
-
 import luigi
 from citeomatic import file_util, features, training, corpus
 from citeomatic.features import Featurizer
-from citeomatic.models import layers
 from citeomatic.models.options import ModelOptions
 from citeomatic.serialization import import_from
 from luigi.util import inherits
@@ -92,8 +88,6 @@ class BuildCorpus(SharedParameters):
 
 class CreateFeaturizer(SharedParameters):
     training_fraction = luigi.FloatParameter(default=0.8)
-    use_bigrams = luigi.BoolParameter(default=False)
-    use_unigrams = luigi.BoolParameter(default=True)
     max_features = luigi.IntParameter(default=100000000)
     name = luigi.Parameter('default')
 
@@ -112,13 +106,8 @@ class CreateFeaturizer(SharedParameters):
         c = corpus.Corpus.load(self.input()['corpus'].path, self.training_fraction)
 
         logger.info("Fitting featurizer and making cache...")
-        featurizer = Featurizer(
-            use_unigrams_from_corpus=self.use_unigrams,
-            use_bigrams_from_corpus=self.use_bigrams,
-            allow_duplicates=False,
-            training_fraction=self.training_fraction
-        )
-        featurizer.fit(c, max_features=self.max_features)
+        featurizer = Featurizer(max_features=self.max_features)
+        featurizer.fit(c)
         self.output().makedirs()
         file_util.write_pickle(self.output().path, featurizer)
 
