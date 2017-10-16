@@ -7,6 +7,7 @@ from hyperopt.pyll.base import scope
 from citeomatic import file_util
 from citeomatic.config import App
 from citeomatic.corpus import Corpus
+from citeomatic.common import FieldNames
 from citeomatic.training import train_text_model
 from citeomatic.models.options import ModelOptions
 from traitlets import Bool, Int, Unicode, Enum, Float
@@ -26,12 +27,13 @@ class EntityLinkerHyperopt(App):
     )
 
     # fixed model parameters
-    dataset_type = Enum(('dblp', 'pubmed'), default_value='dblp')
+    dataset_type = Enum(('dblp', 'pubmed', 'oc'), default_value='dblp')
     embedding_type = Enum(('rnn', 'cnn', 'basic'), default_value='basic')
     samples_per_epoch = Int(default_value=1000000)
     batch_size = Int(default_value=1024)
     use_nn_negatives = Bool(default_value=False)
     reduce_lr_flag = Bool(default_value=True)
+    max_features = Int(default_value=200000)
 
     # to be filled in later
     models_dir = None
@@ -132,14 +134,30 @@ class EntityLinkerHyperopt(App):
         if not os.path.exists(self.models_dir):
             os.makedirs(self.models_dir)
 
-        # step 2: get the right corpus
-        if self.dataset_type == 'pubmed':
-            corpus_fn = '/net/nfs.corp/s2-research/citeomatic/data/pubmed/corpus.json'
-        elif self.dataset_type == 'dblp':
-            corpus_fn = '/net/nfs.corp/s2-research/citeomatic/data/pubmed/corpus.json'
+        # step 2: load the corpus DB
+        print("Loading corpus db...")
+        fp = FilePaths()
+        db_file = fp.get_db_path(self.dataset_type)
+        json_file = fp.get_json_path(self.dataset_type)
+        if not os.path.isfile(db_file):
+            print("Have to build the database! This may take a while, but should only happen once.")
+            Corpus.build(db_file, json_file)
+        corpus = Corpus.load(db_file, self.train_frac)
+        #model_options = ModelOptions(**hyperopt.pyll.stochastic.sample(params))
 
-        corpus = Corpus.build('corpus.tmp', corpus_fn)
-        model_options = ModelOptions(**hyperopt.pyll.stochastic.sample(params))
+        # step 3: load/make the featurizer (once per hyperopt run)
+        featurizer_file = os.path.join(self.models_dir, 'featurizer.pickle')
+        if not os.path.isfile(featurizer_file):
+            featurizer = Featurizer(
+                max_features=self.max_features,
+                allow_duplicates=False
+            )
+            featurizer.fit(corpus)
+            file_util.write_pickle(featurizer_file, featurizer)
+        else:
+            featurizer = file_util.read_pickle(featurizer_file)
+
+        # step 4:
         train_cmd = self.construct_train_val_cmd(params)
         print('Running\n', train_cmd)
         os.system(train_cmd)

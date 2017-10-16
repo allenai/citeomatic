@@ -23,7 +23,9 @@ class ModelOptions(HasTraits):
 
     lr = Float(default_value=0.0001)
 
-    # training length params
+    # training and feature params
+    max_features = Int(default_value=200000)
+    neg_to_pos_ratio = Int(default_value=6) # ideally divisible by 2 and 3
     batch_size = Int(default_value=1024)
     samples_per_epoch = Int(default_value=1000000)
     total_samples = Int(default_value=5000000)

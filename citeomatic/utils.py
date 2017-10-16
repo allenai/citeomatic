@@ -1,6 +1,11 @@
 import functools
+import sys
 import importlib
 from typing import TypeVar, Iterator, Callable, List
+
+PY3 = sys.version_info[0] == 3
+if PY3:
+    reload = importlib.reload
 
 T = TypeVar('T')
 U = TypeVar('U')
@@ -13,7 +18,7 @@ def import_from(module, name):
     from sklearn.model_selection import GridSearchV as grid
     '''
     module = importlib.import_module(module)
-    # module = reload(module) # maybe needed for py2?
+    module = reload(module)
     return getattr(module, name)
 
 def flatten(lst):

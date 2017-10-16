@@ -1,6 +1,5 @@
 import os
 
-
 class FieldNames(object):
     PAPER_ID = "id"
     TITLE = "title"
