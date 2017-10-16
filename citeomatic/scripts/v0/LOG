@@ -1,0 +1,240 @@
+I2017-10-16 14:13:36,178 config.py:259 Initialized configuration (CiteomaticHyperopt)
+I2017-10-16 14:13:36,178 config.py:260 Writing to: ./v0
+I2017-10-16 14:13:36,178 config.py:380 Running: train_hyperopt.py
+I2017-10-16 14:13:36,194 tpe.py:814 tpe_transform took 0.004717 seconds
+I2017-10-16 14:13:36,194 tpe.py:844 TPE using 0 trials
+I2017-10-16 14:13:36,586 corpus.py:90 40181 training docs
+I2017-10-16 14:13:36,587 corpus.py:91 5023 validation docs
+I2017-10-16 14:13:36,587 corpus.py:92 5023 testing docs
+I2017-10-16 14:13:36,590 features.py:145 Usage at beginning of featurizer fit: 0.247672
+I2017-10-16 14:13:36,590 features.py:149 Fitting authors
+I2017-10-16 14:13:55,562 features.py:160 Cleaning text.
+I2017-10-16 14:14:15,034 features.py:167 Fitting vectorizer...
+I2017-10-16 14:14:20,330 features.py:185 Usage after word count: 0.400828
+I2017-10-16 14:14:20,330 features.py:187 Number of words = 54548
+I2017-10-16 14:14:20,346 features.py:198 Usage after word_indexer: 0.400828
+I2017-10-16 14:14:20,346 features.py:202 Usage at end of fit: 0.400828
+I2017-10-16 14:14:20,346 features.py:204 Total words 54548 
+I2017-10-16 14:14:20,635 combined.py:30 Building model: {
+  "author_dim": 10,
+  "batch_size": 1024,
+  "dense_config": "20,20",
+  "dense_dim": 200,
+  "dense_type": "dense",
+  "embedding_type": "basic",
+  "l1_lambda": 0.001,
+  "l2_lambda": 0.1,
+  "lr": 0.001,
+  "max_features": 200000,
+  "max_filter_len": 0,
+  "model_name": "combined",
+  "n_authors": 0,
+  "n_features": 0,
+  "n_filter": 0,
+  "neg_to_pos_ratio": 6,
+  "reduce_lr_flag": true,
+  "samples_per_epoch": 1000000,
+  "total_samples": 5000000,
+  "use_attention": true,
+  "use_authors": true,
+  "use_citations": true,
+  "use_dense": true,
+  "use_holographic": false,
+  "use_nn_negatives": false,
+  "use_sparse": false,
+  "use_src_tgt_embeddings": true
+}
+I2017-10-16 14:14:20,861 fmin.py:94 job exception: 
+I2017-10-16 14:19:48,940 config.py:259 Initialized configuration (CiteomaticHyperopt)
+I2017-10-16 14:19:48,940 config.py:260 Writing to: ./v0
+I2017-10-16 14:19:48,940 config.py:380 Running: train_hyperopt.py
+I2017-10-16 14:19:48,955 tpe.py:814 tpe_transform took 0.004663 seconds
+I2017-10-16 14:19:48,955 tpe.py:844 TPE using 0 trials
+I2017-10-16 14:19:49,307 corpus.py:90 40181 training docs
+I2017-10-16 14:19:49,307 corpus.py:91 5023 validation docs
+I2017-10-16 14:19:49,307 corpus.py:92 5023 testing docs
+I2017-10-16 14:19:49,386 combined.py:30 Building model: {
+  "author_dim": 10,
+  "batch_size": 1024,
+  "dense_config": "20,20",
+  "dense_dim": 50,
+  "dense_type": "dense",
+  "embedding_type": "basic",
+  "l1_lambda": 0.0,
+  "l2_lambda": 1.0,
+  "lr": 0.0001,
+  "max_features": 200000,
+  "max_filter_len": 0,
+  "model_name": "combined",
+  "n_authors": 5628,
+  "n_features": 54549,
+  "n_filter": 0,
+  "neg_to_pos_ratio": 6,
+  "reduce_lr_flag": true,
+  "samples_per_epoch": 1000000,
+  "total_samples": 5000000,
+  "use_attention": true,
+  "use_authors": true,
+  "use_citations": false,
+  "use_dense": true,
+  "use_holographic": false,
+  "use_nn_negatives": false,
+  "use_sparse": true,
+  "use_src_tgt_embeddings": true
+}
+I2017-10-16 14:19:49,551 fmin.py:94 job exception: Incompatible sparse options.
+I2017-10-16 14:23:26,166 config.py:259 Initialized configuration (CiteomaticHyperopt)
+I2017-10-16 14:23:26,167 config.py:260 Writing to: ./v0
+I2017-10-16 14:23:26,167 config.py:380 Running: train_hyperopt.py
+I2017-10-16 14:23:26,181 tpe.py:814 tpe_transform took 0.004346 seconds
+I2017-10-16 14:23:26,181 tpe.py:844 TPE using 0 trials
+I2017-10-16 14:23:26,417 corpus.py:90 40181 training docs
+I2017-10-16 14:23:26,417 corpus.py:91 5023 validation docs
+I2017-10-16 14:23:26,417 corpus.py:92 5023 testing docs
+I2017-10-16 14:23:26,486 combined.py:30 Building model: {
+  "author_dim": 10,
+  "batch_size": 1024,
+  "dense_config": "20,20",
+  "dense_dim": 275,
+  "dense_type": "dense",
+  "embedding_type": "basic",
+  "l1_lambda": 0.0,
+  "l2_lambda": 1e-07,
+  "lr": 0.001,
+  "max_features": 200000,
+  "max_filter_len": 0,
+  "model_name": "combined",
+  "n_authors": 5628,
+  "n_features": 54549,
+  "n_filter": 0,
+  "neg_to_pos_ratio": 6,
+  "reduce_lr_flag": true,
+  "samples_per_epoch": 1000000,
+  "sparse_option": "none",
+  "total_samples": 5000000,
+  "use_attention": false,
+  "use_authors": true,
+  "use_citations": true,
+  "use_dense": true,
+  "use_holographic": false,
+  "use_nn_negatives": false,
+  "use_src_tgt_embeddings": false
+}
+I2017-10-16 14:23:26,683 training.py:157 None
+I2017-10-16 14:23:27,453 fmin.py:94 job exception: output of generator should be a tuple `(x, y, sample_weight)` or `(x, y)`. Found: None
+I2017-10-16 14:24:33,729 config.py:259 Initialized configuration (CiteomaticHyperopt)
+I2017-10-16 14:24:33,729 config.py:260 Writing to: ./v0
+I2017-10-16 14:24:33,729 config.py:380 Running: train_hyperopt.py
+I2017-10-16 14:24:33,743 tpe.py:814 tpe_transform took 0.004306 seconds
+I2017-10-16 14:24:33,743 tpe.py:844 TPE using 0 trials
+I2017-10-16 14:24:34,050 corpus.py:90 40181 training docs
+I2017-10-16 14:24:34,050 corpus.py:91 5023 validation docs
+I2017-10-16 14:24:34,050 corpus.py:92 5023 testing docs
+I2017-10-16 14:24:34,125 combined.py:30 Building model: {
+  "author_dim": 10,
+  "batch_size": 1024,
+  "dense_config": "20,20",
+  "dense_dim": 275,
+  "dense_type": "dense",
+  "embedding_type": "basic",
+  "l1_lambda": 1e-06,
+  "l2_lambda": 0.01,
+  "lr": 0.001,
+  "max_features": 200000,
+  "max_filter_len": 0,
+  "model_name": "combined",
+  "n_authors": 5628,
+  "n_features": 54549,
+  "n_filter": 0,
+  "neg_to_pos_ratio": 6,
+  "reduce_lr_flag": true,
+  "samples_per_epoch": 1000000,
+  "sparse_option": "linear",
+  "total_samples": 5000000,
+  "use_attention": false,
+  "use_authors": false,
+  "use_citations": false,
+  "use_dense": true,
+  "use_holographic": true,
+  "use_nn_negatives": false,
+  "use_src_tgt_embeddings": false
+}
+I2017-10-16 14:24:34,378 training.py:157 None
+I2017-10-16 14:24:35,452 fmin.py:94 job exception: output of generator should be a tuple `(x, y, sample_weight)` or `(x, y)`. Found: None
+I2017-10-16 14:25:27,023 config.py:259 Initialized configuration (CiteomaticHyperopt)
+I2017-10-16 14:25:27,024 config.py:260 Writing to: ./v0
+I2017-10-16 14:25:27,024 config.py:380 Running: train_hyperopt.py
+I2017-10-16 14:25:27,038 tpe.py:814 tpe_transform took 0.004375 seconds
+I2017-10-16 14:25:27,038 tpe.py:844 TPE using 0 trials
+I2017-10-16 14:25:27,256 corpus.py:90 40181 training docs
+I2017-10-16 14:25:27,256 corpus.py:91 5023 validation docs
+I2017-10-16 14:25:27,256 corpus.py:92 5023 testing docs
+I2017-10-16 14:25:27,311 combined.py:30 Building model: {
+  "author_dim": 10,
+  "batch_size": 1024,
+  "dense_config": "20,20",
+  "dense_dim": 75,
+  "dense_type": "dense",
+  "embedding_type": "basic",
+  "l1_lambda": 0.1,
+  "l2_lambda": 1e-06,
+  "lr": 0.001,
+  "max_features": 200000,
+  "max_filter_len": 0,
+  "model_name": "combined",
+  "n_authors": 5628,
+  "n_features": 54549,
+  "n_filter": 0,
+  "neg_to_pos_ratio": 6,
+  "reduce_lr_flag": true,
+  "samples_per_epoch": 1000000,
+  "sparse_option": "linear",
+  "total_samples": 5000000,
+  "use_attention": false,
+  "use_authors": true,
+  "use_citations": true,
+  "use_dense": true,
+  "use_holographic": false,
+  "use_nn_negatives": false,
+  "use_src_tgt_embeddings": true
+}
+I2017-10-16 14:25:27,544 training.py:157 None
+I2017-10-16 14:32:24,098 config.py:259 Initialized configuration (CiteomaticHyperopt)
+I2017-10-16 14:32:24,099 config.py:260 Writing to: ./v0
+I2017-10-16 14:32:24,099 config.py:380 Running: train_hyperopt.py
+I2017-10-16 14:32:24,113 tpe.py:814 tpe_transform took 0.004296 seconds
+I2017-10-16 14:32:24,113 tpe.py:844 TPE using 0 trials
+I2017-10-16 14:32:24,428 corpus.py:90 40181 training docs
+I2017-10-16 14:32:24,429 corpus.py:91 5023 validation docs
+I2017-10-16 14:32:24,429 corpus.py:92 5023 testing docs
+I2017-10-16 14:32:24,534 combined.py:30 Building model: {
+  "author_dim": 10,
+  "batch_size": 1024,
+  "dense_config": "20,20",
+  "dense_dim": 50,
+  "dense_type": "dense",
+  "embedding_type": "basic",
+  "l1_lambda": 1e-06,
+  "l2_lambda": 0.001,
+  "lr": 0.0001,
+  "max_features": 200000,
+  "max_filter_len": 0,
+  "model_name": "combined",
+  "n_authors": 5628,
+  "n_features": 54549,
+  "n_filter": 0,
+  "neg_to_pos_ratio": 6,
+  "reduce_lr_flag": true,
+  "samples_per_epoch": 1000000,
+  "sparse_option": "none",
+  "total_samples": 5000000,
+  "use_attention": false,
+  "use_authors": true,
+  "use_citations": true,
+  "use_dense": true,
+  "use_holographic": true,
+  "use_nn_negatives": false,
+  "use_src_tgt_embeddings": true
+}
+I2017-10-16 14:32:24,766 combined.py:162 Holographic authors.
+I2017-10-16 14:32:24,844 training.py:157 None

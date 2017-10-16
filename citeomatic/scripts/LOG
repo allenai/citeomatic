@@ -1,0 +1,69 @@
+I2017-10-16 13:59:44,587 config.py:259 Initialized configuration (CiteomaticHyperopt)
+I2017-10-16 13:59:44,587 config.py:260 Writing to: .
+I2017-10-16 13:59:44,587 config.py:380 Running: train_hyperopt.py
+I2017-10-16 13:59:44,602 tpe.py:814 tpe_transform took 0.004672 seconds
+I2017-10-16 13:59:44,602 tpe.py:844 TPE using 0 trials
+I2017-10-16 13:59:44,607 fmin.py:94 job exception: name 'FilePaths' is not defined
+I2017-10-16 14:00:31,385 config.py:259 Initialized configuration (CiteomaticHyperopt)
+I2017-10-16 14:00:31,385 config.py:260 Writing to: .
+I2017-10-16 14:00:31,386 config.py:380 Running: train_hyperopt.py
+I2017-10-16 14:00:31,400 tpe.py:814 tpe_transform took 0.004540 seconds
+I2017-10-16 14:00:31,400 tpe.py:844 TPE using 0 trials
+I2017-10-16 14:00:32,500 corpus.py:90 40181 training docs
+I2017-10-16 14:00:32,500 corpus.py:91 5023 validation docs
+I2017-10-16 14:00:32,500 corpus.py:92 5023 testing docs
+I2017-10-16 14:00:32,504 fmin.py:94 job exception: name 'Featurizer' is not defined
+I2017-10-16 14:00:59,334 config.py:259 Initialized configuration (CiteomaticHyperopt)
+I2017-10-16 14:00:59,335 config.py:260 Writing to: .
+I2017-10-16 14:00:59,335 config.py:380 Running: train_hyperopt.py
+I2017-10-16 14:00:59,349 tpe.py:814 tpe_transform took 0.004545 seconds
+I2017-10-16 14:00:59,349 tpe.py:844 TPE using 0 trials
+I2017-10-16 14:00:59,621 corpus.py:90 40181 training docs
+I2017-10-16 14:00:59,622 corpus.py:91 5023 validation docs
+I2017-10-16 14:00:59,622 corpus.py:92 5023 testing docs
+I2017-10-16 14:00:59,624 features.py:145 Usage at beginning of featurizer fit: 0.247144
+I2017-10-16 14:00:59,625 features.py:149 Fitting authors
+I2017-10-16 14:01:18,447 features.py:160 Cleaning text.
+I2017-10-16 14:01:37,935 features.py:167 Fitting vectorizer...
+I2017-10-16 14:01:43,628 features.py:185 Usage after word count: 0.4
+I2017-10-16 14:01:43,628 features.py:187 Number of words = 54548
+I2017-10-16 14:01:43,644 features.py:198 Usage after word_indexer: 0.4
+I2017-10-16 14:01:43,644 features.py:202 Usage at end of fit: 0.4
+I2017-10-16 14:01:43,644 features.py:204 Total words 54548 
+I2017-10-16 14:01:43,833 fmin.py:94 job exception: name 'model_options' is not defined
+I2017-10-16 14:04:51,816 config.py:259 Initialized configuration (CiteomaticHyperopt)
+I2017-10-16 14:04:51,817 config.py:260 Writing to: .
+I2017-10-16 14:04:51,817 config.py:380 Running: train_hyperopt.py
+I2017-10-16 14:04:51,832 tpe.py:814 tpe_transform took 0.004866 seconds
+I2017-10-16 14:04:51,832 tpe.py:844 TPE using 0 trials
+I2017-10-16 14:04:52,085 corpus.py:90 40181 training docs
+I2017-10-16 14:04:52,085 corpus.py:91 5023 validation docs
+I2017-10-16 14:04:52,085 corpus.py:92 5023 testing docs
+I2017-10-16 14:04:52,088 features.py:145 Usage at beginning of featurizer fit: 0.247596
+I2017-10-16 14:04:52,089 features.py:149 Fitting authors
+I2017-10-16 14:05:11,194 features.py:160 Cleaning text.
+I2017-10-16 14:05:30,748 features.py:167 Fitting vectorizer...
+I2017-10-16 14:05:35,851 features.py:185 Usage after word count: 0.400756
+I2017-10-16 14:05:35,852 features.py:187 Number of words = 54548
+I2017-10-16 14:05:35,867 features.py:198 Usage after word_indexer: 0.400756
+I2017-10-16 14:05:35,867 features.py:202 Usage at end of fit: 0.400756
+I2017-10-16 14:05:35,867 features.py:204 Total words 54548 
+I2017-10-16 14:05:36,149 fmin.py:94 job exception: No module named 'citeomatic.models.'
+I2017-10-16 14:07:21,064 config.py:259 Initialized configuration (CiteomaticHyperopt)
+I2017-10-16 14:07:21,065 config.py:260 Writing to: .
+I2017-10-16 14:07:21,065 config.py:380 Running: train_hyperopt.py
+I2017-10-16 14:07:21,080 tpe.py:814 tpe_transform took 0.004961 seconds
+I2017-10-16 14:07:21,080 tpe.py:844 TPE using 0 trials
+I2017-10-16 14:07:21,377 corpus.py:90 40181 training docs
+I2017-10-16 14:07:21,378 corpus.py:91 5023 validation docs
+I2017-10-16 14:07:21,378 corpus.py:92 5023 testing docs
+I2017-10-16 14:07:21,381 features.py:145 Usage at beginning of featurizer fit: 0.247252
+I2017-10-16 14:07:21,381 features.py:149 Fitting authors
+I2017-10-16 14:07:40,546 features.py:160 Cleaning text.
+I2017-10-16 14:08:00,106 features.py:167 Fitting vectorizer...
+I2017-10-16 14:08:05,401 features.py:185 Usage after word count: 0.400824
+I2017-10-16 14:08:05,402 features.py:187 Number of words = 54548
+I2017-10-16 14:08:05,416 features.py:198 Usage after word_indexer: 0.400824
+I2017-10-16 14:08:05,416 features.py:202 Usage at end of fit: 0.400824
+I2017-10-16 14:08:05,416 features.py:204 Total words 54548 
+I2017-10-16 14:08:05,594 fmin.py:94 job exception: No module named 'citeomatic.models.'

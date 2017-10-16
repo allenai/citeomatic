@@ -20,7 +20,7 @@ CLEAN_TEXT_RE = re.compile('[^ a-z]')
 CITATION_SLOPE = 0.01
 MAX_CITATION_BOOST = 0.02
 
-MIN_TRUE_CITATIONS = 3
+MIN_TRUE_CITATIONS = 2
 MAX_TRUE_CITATIONS = 100
 
 # Parameters for soft-margin data generation.
@@ -455,17 +455,20 @@ class DataGenerator(object):
 
                 n_positive = len(true_citations)
                 n_per_type = {
-                    'hard_negatives': int(n_positive * neg_to_pos_ratio / 3.0),
-                    'easy': int(n_positive * neg_to_pos_ratio / 3.0),
-                    'nn': int(n_positive * neg_to_pos_ratio / 3.0)
+                    'hard_negatives':  np.ceil(n_positive * neg_to_pos_ratio / 3.0),
+                    'easy': np.ceil(n_positive * neg_to_pos_ratio / 3.0),
+                    'nn':  np.ceil(n_positive * neg_to_pos_ratio / 3.0)
                 }
 
-                pos_jaccard_sims = [
-                    jaccard(self.featurizer, query, self.corpus[i])
-                    for i in true_citations
-                ]
-                ann_jaccard_cutoff = np.percentile(pos_jaccard_sims, ANN_JACCARD_PERCENTILE)
-                
+                if self.ann is not None:
+                    pos_jaccard_sims = [
+                        jaccard(self.featurizer, query, self.corpus[i])
+                        for i in true_citations
+                    ]
+                    ann_jaccard_cutoff = np.percentile(pos_jaccard_sims, ANN_JACCARD_PERCENTILE)
+                else:
+                    ann_jaccard_cutoff = None
+
                 hard_negatives, nn_negatives, easy_negatives = self.get_negatives(
                     candidate_ids_set, candidate_ids_list, n_per_type, query, ann_jaccard_cutoff
                 )
@@ -493,15 +496,6 @@ class DataGenerator(object):
                 examples = [examples[i] for i in sorted_idx]
 
                 yield query, examples, labels
-
-    def listwise_generator(self, paper_ids, candidate_ids=None):
-        for query, examples, labels in self._listwise_examples(
-            paper_ids, candidate_ids
-        ):
-            yield (
-                self.featurizer.transform_query_and_results(query, examples),
-                labels,
-            )
 
     def triplet_generator(self, paper_ids, candidate_ids=None, batch_size=1024, neg_to_pos_ratio=6):
         queries = []
@@ -545,7 +539,7 @@ class DataGenerator(object):
             document_ids = document_ids.intersection(candidate_ids_set)
             if len(document_ids) > n:
                 document_ids = np.random.choice(
-                    list(document_ids), size=n, replace=False
+                    list(document_ids), size=int(n), replace=False
                 )
             return document_ids
 
@@ -558,8 +552,8 @@ class DataGenerator(object):
 
         # step 0: make sure we heed the limitations about NN negatives
         if self.ann is None:
-            n_per_type['easy'] += int(n_per_type['nn'] / 2.0)
-            n_per_type['hard_negatives'] += int(n_per_type['nn'] / 2.0)
+            n_per_type['easy'] += np.ceil(n_per_type['nn'] / 2.0)
+            n_per_type['hard_negatives'] += np.ceil(n_per_type['nn'] / 2.0)
             n_per_type['nn'] = 0
 
         # step 1: find hard citation negatives, and remove true positives from it
@@ -595,7 +589,7 @@ class DataGenerator(object):
         # step 3: get easy negatives
         if n_per_type['easy'] > 0:
             random_index = np.random.randint(len(candidate_ids_list))
-            random_index_range = np.arange(random_index, random_index + n_per_type['easy'])
+            random_index_range = np.arange(random_index, random_index + int(n_per_type['easy']))
             result_ids_dict['easy'] = set(np.take(candidate_ids_list, random_index_range, mode='wrap'))
             result_ids_dict['easy'].difference_update(doc_citations)
 

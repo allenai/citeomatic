@@ -7,13 +7,14 @@ from hyperopt.pyll.base import scope
 from citeomatic import file_util
 from citeomatic.config import App
 from citeomatic.corpus import Corpus
-from citeomatic.common import FieldNames
+from citeomatic.features import Featurizer
+from citeomatic.common import FilePaths
 from citeomatic.training import train_text_model
 from citeomatic.models.options import ModelOptions
 from traitlets import Bool, Int, Unicode, Enum, Float
 import datetime
 
-class EntityLinkerHyperopt(App):
+class CiteomaticHyperopt(App):
 
     # hyperopt parameters
     max_evals_initial = Int(default_value=75)
@@ -25,6 +26,7 @@ class EntityLinkerHyperopt(App):
         default_value=
         '/net/nfs.corp/s2-research/scigraph/data/craft/models/sf_test/'
     )
+    version = Unicode(default_value='v0')
 
     # fixed model parameters
     dataset_type = Enum(('dblp', 'pubmed', 'oc'), default_value='dblp')
@@ -45,7 +47,8 @@ class EntityLinkerHyperopt(App):
             [
                 'citeomatic_hyperopt',
                 self.dataset_type,
-                datetime.datetime.now().strftime("%Y-%m-%d_%H:%M")
+                datetime.datetime.now().strftime("%Y-%m-%d"),
+                self.version
             ]
         )
         self.models_dir = os.path.join(self.models_dir_base, run_identifier)
@@ -67,12 +70,10 @@ class EntityLinkerHyperopt(App):
                 hp.choice('use_authors', [True, False]),
             'author_dim':
                 10,
-            'use_sparse':
-                hp.choice('use_sparse', [True, False]),
+            'sparse_option':
+                hp.choice('sparse_option', ['none', 'linear', 'attention']),
             'use_holographic':
                 hp.choice('use_holographic', [True, False]),
-            'use_attention':
-                hp.choice('use_attention', [True, False]),
             'use_src_tgt_embeddings':
                 hp.choice('use_src_tgt_embeddings', [True, False]),
             'lr':
@@ -157,12 +158,22 @@ class EntityLinkerHyperopt(App):
         else:
             featurizer = file_util.read_pickle(featurizer_file)
 
-        # step 4:
-        train_cmd = self.construct_train_val_cmd(params)
-        print('Running\n', train_cmd)
-        os.system(train_cmd)
+        # step 4: train the model
+        model_options = ModelOptions(**params)
+        model_options.n_authors = featurizer.n_authors
+        model_options.n_features = featurizer.n_features
 
-        # step 3: import pickle with results
+        model, embedding_model = train_text_model(
+            corpus,
+            featurizer,
+            model_options,
+            embedding_model_for_ann=None,
+            debug=False,
+            tensorboard_dir=None
+        )
+
+        # step 5: evaluation
+        '''
         try:
             eval_file = os.path.join(
                 self.models_dir, 'evaluation_results.pickle'
@@ -187,6 +198,6 @@ class EntityLinkerHyperopt(App):
         }
 
         return out
+        '''
 
-
-EntityLinkerHyperopt.run(__name__)
+CiteomaticHyperopt.run(__name__)

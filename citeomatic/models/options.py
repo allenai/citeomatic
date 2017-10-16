@@ -3,7 +3,7 @@ from traitlets import Bool, HasTraits, Int, Unicode, Enum, Float
 
 
 class ModelOptions(HasTraits):
-    model_name = Unicode()
+    model_name = Unicode(default_value='combined')
     n_features = Int()
     n_authors = Int()
 
@@ -14,11 +14,11 @@ class ModelOptions(HasTraits):
     # todo: have a field here with the embedding_model directory?
     use_dense = Bool(default_value=True)
     use_citations = Bool(default_value=True)
-    use_authors = Bool(default_value=True)
+    use_authors = Bool(default_value=False)
     author_dim = Int(default_value=10)
-    use_sparse = Bool(default_value=True)
-    use_holographic = Bool(default_value=False)
+    sparse_option = Enum(values=['none', 'linear', 'attention'], default_value='linear')
     use_attention = Bool(default_value=False)
+    use_holographic = Bool(default_value=False)
     use_src_tgt_embeddings = Bool(default_value=False)
 
     lr = Float(default_value=0.0001)

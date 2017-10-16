@@ -168,7 +168,7 @@ def train_text_model(
     validation_generator = validation_dg.triplet_generator(
         paper_ids=corpus.valid_ids,
         candidate_ids=corpus.train_ids + corpus.valid_ids,
-        batch_size=1024
+        batch_size=10000
     )
 
     optimizer = TFOptimizer(
@@ -200,7 +200,7 @@ def train_text_model(
     if model_options.reduce_lr_flag:
         callbacks_list.append(
             ReduceLROnPlateau(
-                verbose=1, patience=1, epsilon=0.01, min_lr=1e-6, factor=0.5
+                verbose=1, patience=2, epsilon=0.01, min_lr=1e-6, factor=0.5
             )
         )
     if model_options.use_nn_negatives:
@@ -214,11 +214,11 @@ def train_text_model(
         training_generator,
         steps_per_epoch=steps_per_epoch,
         callbacks=callbacks_list,
-        nb_epoch=epochs,
+        epochs=epochs,
         max_q_size=2,
         pickle_safe=False,
         validation_data=validation_generator,
-        nb_val_samples=5000
+        validation_steps=1
     )
 
     return model, embedding_model

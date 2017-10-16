@@ -101,10 +101,7 @@ def create_model(options: ModelOptions):
             intermediate_outputs.append(flatten(_similarity(query, candidate)))
 
     # lookup weights for the intersection of individual terms (computed by the feature generator.)
-    assert not (
-        options.use_sparse and options.use_attention
-    ), 'Incompatible sparse options.'
-    if options.use_sparse:
+    if options.sparse_option == 'linear':
         for field in FIELDS:
             sparse_input = Input(
                 name='query-candidate-%s-intersection' % field, shape=(None,)
@@ -119,7 +116,7 @@ def create_model(options: ModelOptions):
             )(sparse_embedding(sparse_input))
             intermediate_outputs.append(_sum(elementwise_sparse))
             citeomatic_inputs.append(sparse_input)
-    elif options.use_attention:
+    elif options.sparse_option == 'attention':
         for field in FIELDS:
             sparse_input = Input(
                 name='query-candidate-%s-intersection' % field, shape=(None,)
@@ -159,8 +156,7 @@ def create_model(options: ModelOptions):
         )
 
         if options.author_dim != options.dense_dim:
-            author_embeddings = Dense(output_dim=options.dense_dim
-                                     )(author_embeddings)
+            author_embeddings = Dense(options.dense_dim)(author_embeddings)
 
         if options.use_holographic:
             logging.info('Holographic authors.')
@@ -209,10 +205,10 @@ def create_model(options: ModelOptions):
             )(last)
 
     text_output = Dense(
-        1, init='one', name='final-output', activation='sigmoid'
+        1, kernel_initializer='one', name='final-output', activation='sigmoid'
     )(last)
 
-    citeomatic_model = Model(input=citeomatic_inputs, output=text_output)
+    citeomatic_model = Model(inputs=citeomatic_inputs, outputs=text_output)
     embedding_model, _ = embedders['query'].create_text_embedding_model(
         prefix="doc"
     )
