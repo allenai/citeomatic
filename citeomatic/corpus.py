@@ -4,30 +4,23 @@ import sqlite3
 import tqdm
 
 from citeomatic import file_util
+from citeomatic.common import FieldNames
 from citeomatic.utils import batchify
 from citeomatic.schema_pb2 import Document
 
 
 def stream_papers(data_path):
     for line_json in tqdm.tqdm(file_util.read_json_lines(data_path)):
-        if 'outCitations' in line_json:
-            citation_key = 'outCitations'
-            abstract_key = 'paperAbstract'
-        else:
-            citation_key = 'citations'
-            abstract_key = 'abstract'
-
-        citations = set(line_json[citation_key])
-        citations.discard(line_json['id'])  # remove self-citations
+        citations = set(line_json[FieldNames.OUT_CITATIONS])
+        citations.discard(line_json[FieldNames.PAPER_ID])  # remove self-citations
         citations = list(citations)
-
         yield Document(
-            id=line_json['id'],
-            title=line_json['title'],
-            abstract=line_json[abstract_key],
-            authors=[a['name'] for a in line_json['authors']],
+            id=line_json[FieldNames.PAPER_ID],
+            title=line_json[FieldNames.TITLE],
+            abstract=line_json[FieldNames.ABSTRACT],
+            authors=line_json[FieldNames.AUTHORS],
             citations=citations,
-            year=line_json.get('year', 2017),
+            year=line_json.get(FieldNames.YEAR, 2017),
             venue=None,
         )
 
@@ -44,9 +37,9 @@ def build_corpus(db_filename, corpus_json):
             '''CREATE TABLE IF NOT EXISTS documents
                     (id STRING, year INT, payload BLOB)'''
         )
-        conn.execute('''CREATE INDEX year_idx on ids (year)''')
-        conn.execute('''CREATE INDEX id_idx on ids (id)''')
-        conn.execute('''CREATE INDEX id_doc_idx on documents (id)''')
+        conn.execute('''CREATE INDEX IF NOT EXISTS year_idx on ids (year)''')
+        conn.execute('''CREATE INDEX IF NOT EXISTS id_idx on ids (id)''')
+        conn.execute('''CREATE INDEX IF NOT EXISTS id_doc_idx on documents (id)''')
 
         for batch in batchify(stream_papers(corpus_json), 1024):
             conn.executemany(
