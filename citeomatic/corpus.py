@@ -10,14 +10,21 @@ from citeomatic.schema_pb2 import Document
 
 def stream_papers(data_path):
     for line_json in tqdm.tqdm(file_util.read_json_lines(data_path)):
-        citations = set(line_json['outCitations'])
+        if 'outCitations' in line_json:
+            citation_key = 'outCitations'
+            abstract_key = 'paperAbstract'
+        else:
+            citation_key = 'citations'
+            abstract_key = 'abstract'
+
+        citations = set(line_json[citation_key])
         citations.discard(line_json['id'])  # remove self-citations
         citations = list(citations)
 
         yield Document(
             id=line_json['id'],
             title=line_json['title'],
-            abstract=line_json['paperAbstract'],
+            abstract=line_json[abstract_key],
             authors=[a['name'] for a in line_json['authors']],
             citations=citations,
             year=line_json.get('year', 2017),
