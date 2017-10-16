@@ -425,7 +425,7 @@ class DataGenerator(object):
 
     def _listwise_examples(self, paper_ids, candidate_ids=None, neg_to_pos_ratio=6):
         # the id pool should only have IDs that are in the corpus
-        paper_ids = self.corpus.filter(paper_ids)
+        paper_ids_list = np.array(list(self.corpus.filter(paper_ids)))
 
         # candidate_ids is decides where candidates come from
         if candidate_ids is None:
@@ -439,7 +439,8 @@ class DataGenerator(object):
 
         while True:
             candidate_ids_list = np.random.permutation(candidate_ids_list)
-            for doc_id in np.random.permutation(paper_ids):
+            paper_ids_list = np.random.permutation(paper_ids_list)
+            for doc_id in paper_ids_list:
                 examples = []
                 labels = []
                 query = self.corpus[doc_id]

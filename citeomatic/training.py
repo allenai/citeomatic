@@ -161,7 +161,7 @@ def train_text_model(
         paper_ids=corpus.train_ids,
         candidate_ids=corpus.train_ids,
         batch_size=model_options.batch_size,
-        neg_to_pos_ratio=5
+        neg_to_pos_ratio=model_options.neg_to_pos_ratio
     )
 
     validation_dg = DataGenerator(corpus, featurizer)
@@ -176,13 +176,18 @@ def train_text_model(
     )
     model.compile(optimizer=optimizer, loss=layers.triplet_loss)
 
+    # training calculation
     model_options.samples_per_epoch = int(np.minimum(
         model_options.samples_per_epoch, model_options.total_samples
     ))
     epochs = int(np.ceil(
-        model_options.total_samples /  model_options.samples_per_epoch
+        model_options.total_samples / model_options.samples_per_epoch
     ))
+    steps_per_epoch = int(
+        model_options.samples_per_epoch / model_options.batch_size
+    )
 
+    # callbacks
     callbacks_list = []
     if debug:
         callbacks_list.append(MemoryUsageCallback())
@@ -204,9 +209,10 @@ def train_text_model(
             UpdateANN(corpus, featurizer, embedding_model_for_ann, data_generator)
         )
 
+    # logic
     model.fit_generator(
         training_generator,
-        samples_per_epoch=model_options.samples_per_epoch,
+        steps_per_epoch=steps_per_epoch,
         callbacks=callbacks_list,
         nb_epoch=epochs,
         max_q_size=2,
