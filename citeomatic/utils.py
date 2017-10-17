@@ -1,9 +1,26 @@
 import functools
+import sys
+import importlib
 from typing import TypeVar, Iterator, Callable, List
+
+PY3 = sys.version_info[0] == 3
+if PY3:
+    reload = importlib.reload
 
 T = TypeVar('T')
 U = TypeVar('U')
 
+def import_from(module, name, reload_flag=False):
+    '''
+    usage example:
+    grid = import_from('sklearn.model_selection', 'GridSearchCV')
+    is equivalent to:
+    from sklearn.model_selection import GridSearchV as grid
+    '''
+    module = importlib.import_module(module)
+    if reload_flag:
+        module = reload(module)
+    return getattr(module, name)
 
 def flatten(lst):
     """Flatten `lst` (return the depth first traversal of `lst`)"""

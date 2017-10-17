@@ -2,10 +2,16 @@ import logging
 import resource
 from collections import defaultdict
 
+import tensorflow as tf
 import keras
 import numpy as np
 from citeomatic.neighbors import EmbeddingModel, make_ann
+from citeomatic.features import DataGenerator
+from citeomatic.utils import import_from
+from citeomatic.models import layers
 from keras.callbacks import ReduceLROnPlateau, TensorBoard
+from keras.optimizers import TFOptimizer
+
 
 
 def rank_metrics(y, preds, max_num_true_multiplier=9):
@@ -132,15 +138,9 @@ class UpdateANN(keras.callbacks.Callback):
 
 def train_text_model(
     corpus,
-    model,
-    embedding_model,
     featurizer,
-    training_generator,
-    validation_generator=None,
-    data_generator=None,
-    use_nn_negatives=False,
-    samples_per_epoch=1000000,
-    total_samples=5000000,
+    model_options,
+    embedding_model_for_ann=None,
     debug=False,
     tensorboard_dir=None
 ):
@@ -148,11 +148,51 @@ def train_text_model(
     Utility function for training citeomatic models.
     """
 
-    samples_per_epoch = np.minimum(samples_per_epoch, total_samples)
-    epochs = int(np.ceil(total_samples / samples_per_epoch))
+    create_model = import_from(
+        'citeomatic.models.%s' % model_options.model_name,
+        'create_model'
+    )
+    models = create_model(model_options)
+    model, embedding_model = models['citeomatic'], models['embedding']
 
+    logging.info(model.summary())
+
+    training_dg = DataGenerator(corpus, featurizer)
+    training_generator = training_dg.triplet_generator(
+        paper_ids=corpus.train_ids,
+        candidate_ids=corpus.train_ids,
+        batch_size=model_options.batch_size,
+        neg_to_pos_ratio=model_options.neg_to_pos_ratio,
+        margin_multiplier=model_options.margin_multiplier
+    )
+
+    validation_dg = DataGenerator(corpus, featurizer)
+    validation_generator = validation_dg.triplet_generator(
+        paper_ids=corpus.valid_ids,
+        candidate_ids=corpus.train_ids + corpus.valid_ids,
+        batch_size=10000,
+        neg_to_pos_ratio=model_options.neg_to_pos_ratio,
+        margin_multiplier=model_options.margin_multiplier
+    )
+
+    optimizer = TFOptimizer(
+        tf.contrib.opt.LazyAdamOptimizer(learning_rate=model_options.lr)
+    )
+    model.compile(optimizer=optimizer, loss=layers.triplet_loss)
+
+    # training calculation
+    model_options.samples_per_epoch = int(np.minimum(
+        model_options.samples_per_epoch, model_options.total_samples
+    ))
+    epochs = int(np.ceil(
+        model_options.total_samples / model_options.samples_per_epoch
+    ))
+    steps_per_epoch = int(
+        model_options.samples_per_epoch / model_options.batch_size
+    )
+
+    # callbacks
     callbacks_list = []
-
     if debug:
         callbacks_list.append(MemoryUsageCallback())
     if tensorboard_dir is not None:
@@ -161,26 +201,28 @@ def train_text_model(
                 log_dir=tensorboard_dir, histogram_freq=1, write_graph=True
             )
         )
-
-    callbacks_list.append(
-        ReduceLROnPlateau(
-            verbose=1, patience=1, epsilon=0.01, min_lr=1e-4, factor=0.5
-        )
-    )
-    if use_nn_negatives:
+    if model_options.reduce_lr_flag:
         callbacks_list.append(
-            UpdateANN(corpus, featurizer, embedding_model, data_generator)
+            ReduceLROnPlateau(
+                verbose=1, patience=2, epsilon=0.01, min_lr=1e-6, factor=0.5
+            )
+        )
+    if model_options.use_nn_negatives:
+        assert embedding_model_for_ann is not None
+        callbacks_list.append(
+            UpdateANN(corpus, featurizer, embedding_model_for_ann, data_generator)
         )
 
+    # logic
     model.fit_generator(
         training_generator,
-        samples_per_epoch=samples_per_epoch,
+        steps_per_epoch=steps_per_epoch,
         callbacks=callbacks_list,
-        nb_epoch=epochs,
+        epochs=epochs,
         max_q_size=2,
         pickle_safe=False,
         validation_data=validation_generator,
-        nb_val_samples=5000
+        validation_steps=1
     )
 
-    return model
+    return model, embedding_model

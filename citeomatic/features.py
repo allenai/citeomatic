@@ -13,23 +13,29 @@ from sklearn.feature_extraction.text import CountVectorizer
 
 from citeomatic.utils import flatten
 
-MAX_AUTHORS_PER_DOCUMENT = 8
 CLEAN_TEXT_RE = re.compile('[^ a-z]')
+
+# filters for authors and docs
+MAX_AUTHORS_PER_DOCUMENT = 8
+MIN_TRUE_CITATIONS = 2
+MAX_TRUE_CITATIONS = 100
 
 # Adjustments to how we boost heavily cited documents.
 CITATION_SLOPE = 0.01
 MAX_CITATION_BOOST = 0.02
 
-MIN_TRUE_CITATIONS = 3
-MAX_TRUE_CITATIONS = 100
-
 # Parameters for soft-margin data generation.
 TRUE_CITATION_OFFSET = 0.3
-HARD_NEGATIVE_OFFSET = 0.25
-ES_NEGATIVE_OFFSET = 0.2
+HARD_NEGATIVE_OFFSET = 0.2
 NN_NEGATIVE_OFFSET = 0.1
 EASY_NEGATIVE_OFFSET = 0.0
 
+# ANN jaccard percentile cutoff
+ANN_JACCARD_PERCENTILE = 0.05
+
+def label_for_doc(d, offset):
+    sigmoid = 1 / (1 + np.exp(-d.in_citation_count * CITATION_SLOPE))
+    return offset + (sigmoid * MAX_CITATION_BOOST)
 
 def order_preserving_unique(seq):
     """
@@ -98,21 +104,8 @@ class Featurizer(object):
     ----------
     max_title_len : int, default=32
         Maximum number of tokens allowed in the paper title.
-
     max_abstract_len : int, default=256
         Maximum number of tokens allowed in the abstract title.
-
-    use_unigrams_from_corpus : bool, default=True
-        Whether to use the unigrams found in the corpus.
-    use_bigrams_from_corpus : bool, default=False
-        Whether to use bigrams found in the corpus.
-    keyphrases_path : string, default=None
-        Path of the keyphrase dictionary/set. If not None, will load the keyphrase dictionary and use the
-        sufficiently common keyphrases therein as tokens.
-    index_type : {'exact', 'hashed'}, default='exact'
-        Whether to use exact indexing or the hashing trick. If bigrams are turned on, 'hashed' is recommended.
-    training_fraction : float, default=0.95
-        What fraction of the corpus to use for training all of the word filtering and indexing.
     '''
     STOPWORDS = {
         'abstract', 'about', 'an', 'and', 'are', 'as', 'at', 'be', 'by', 'for',
@@ -121,25 +114,20 @@ class Featurizer(object):
         'the', 'we', 'our', 'which'
     }
 
-    N_KP_MAX_LENGTH = 4
-    N_KP_MIN_COUNT = 10
     MIN_AUTHOR_PAPERS = 5  # minimum number of papers for an author to get an embedding.
 
     def __init__(
         self,
+        max_features=200000,
         max_title_len=32,
         max_abstract_len=256,
-        use_unigrams_from_corpus=True,
-        use_bigrams_from_corpus=False,
-        allow_duplicates=True,
-        training_fraction=0.95
+        allow_duplicates=True
     ):
+        self.max_features = max_features
         self.max_title_len = max_title_len
         self.max_abstract_len = max_abstract_len
-        self.use_unigrams_from_corpus = use_unigrams_from_corpus
-        self.use_bigrams_from_corpus = use_bigrams_from_corpus
         self.allow_duplicates = allow_duplicates
-        self.training_fraction = training_fraction
+
         self.word_count = {}
         self.author_to_index = {}
         self.word_indexer = None
@@ -150,20 +138,19 @@ class Featurizer(object):
             self.author_to_index = {}
         return len(self.author_to_index) + 1
 
-    def fit(
-        self, corpus, max_df_frac=0.90, min_df_frac=0.000025, max_features=None
-    ):
+    def fit(self, corpus, max_df_frac=0.90, min_df_frac=0.000025):
 
         logging.info(
             'Usage at beginning of featurizer fit: %s',
             resource.getrusage(resource.RUSAGE_SELF).ru_maxrss / 1e6
         )
 
-        # Fitting authors:
+        # Fitting authors
         logging.info('Fitting authors')
         author_counts = collections.Counter()
         for doc in tqdm.tqdm(corpus):
-            author_counts.update(doc.authors)
+            if doc.id in corpus.train_ids:
+                author_counts.update(doc.authors)
 
         for author, count in author_counts.items():
             if count >= Featurizer.MIN_AUTHOR_PAPERS:
@@ -174,13 +161,14 @@ class Featurizer(object):
         all_docs_text = [
             ' '.join((_clean(doc.title), _clean(doc.abstract)))
             for doc in tqdm.tqdm(corpus)
+            if doc.id in corpus.train_ids
         ]
 
         logging.info('Fitting vectorizer...')
-        if max_features is not None:
+        if self.max_features is not None:
             count_vectorizer = CountVectorizer(
                 max_df=max_df_frac,
-                max_features=max_features,
+                max_features=self.max_features,
                 stop_words=self.STOPWORDS
             )
         else:
@@ -199,16 +187,10 @@ class Featurizer(object):
         logging.info('Number of words = %d' % len(self.word_count))
 
         # Step 4: Initialize mapper from word to index
-        self.n_features = (
-            1 + len(self.word_count) * self.use_unigrams_from_corpus
-        )
+        self.n_features = (1 + len(self.word_count))
 
-        if self.use_unigrams_from_corpus:
-            wc = self.word_count
-        else:
-            wc = {}
         self.word_indexer = FeatureIndexer(
-            word_count=wc, allow_duplicates=self.allow_duplicates
+            word_count=self.word_count, allow_duplicates=self.allow_duplicates
         )
 
         logging.info(
@@ -230,9 +212,7 @@ class Featurizer(object):
                 continue
 
     def _citation_features(self, documents):
-        return np.asarray(
-            [math.log(doc.in_citation_count + 1) for doc in documents]
-        )
+        return np.log([doc.in_citation_count + 1 for doc in documents])
 
     def _intersection_features(self, source_features, candidate_features):
         feats_intersection_lst = [
@@ -424,9 +404,6 @@ class FeatureIndexer(object):
         return indexed_X
 
 
-
-
-
 class DataGenerator(object):
     """
     Class to yield batches of data to train Keras models.
@@ -438,43 +415,42 @@ class DataGenerator(object):
 
     featurizer : Featurizer
         Featurizer to turn documents into indices.
-
-    es_negatives : dict
-        A dictionary of elasticsearch negative training examples for each training document in the Corpus.
     """
-    KEYS = ['hard_negatives', 'es', 'nn', 'easy']
+    KEYS = ['hard_negatives', 'nn', 'easy']
 
-    def __init__(
-        self,
-        corpus,
-        featurizer,
-        ann=None,
-    ):
-        self.ann = ann
+    def __init__(self, corpus, featurizer, ann=None):
         self.corpus = corpus
         self.featurizer = CachingFeaturizer(featurizer)
-        self.es_negatives = None
+        self.ann = ann
 
-    def _listwise_examples(self, id_pool, id_filter=None, neg_to_pos_ratio=5):
-        id_pool = self.corpus.filter(id_pool)
-        if id_filter is None:
-            id_filter = self.corpus.train_ids
+    def _listwise_examples(
+            self,
+            paper_ids,
+            candidate_ids=None,
+            neg_to_pos_ratio=6,
+            margin_multiplier=1
+    ):
+        # the id pool should only have IDs that are in the corpus
+        paper_ids_list = np.array(list(self.corpus.filter(paper_ids)))
+
+        # candidate_ids is decides where candidates come from
+        if candidate_ids is None:
+            candidate_ids = self.corpus.train_ids
         else:
-            id_filter = self.corpus.filter(id_filter)
+            candidate_ids = self.corpus.filter(candidate_ids)
 
-        id_filter = set(id_filter)
-        id_list = np.array(list(id_filter))
-
-        def _label_for_doc(d, offset):
-            sigmoid = 1 / (1 + np.exp(-d.in_citation_count * CITATION_SLOPE))
-            return offset + (sigmoid * MAX_CITATION_BOOST)
+        # these are reused
+        candidate_ids_set = set(candidate_ids)
+        candidate_ids_list = np.array(list(candidate_ids_set))
 
         while True:
-            for doc_id in np.random.permutation(id_list):
+            candidate_ids_list = np.random.permutation(candidate_ids_list)
+            paper_ids_list = np.random.permutation(paper_ids_list)
+            for doc_id in paper_ids_list:
                 examples = []
                 labels = []
                 query = self.corpus[doc_id]
-                true_citations = id_filter.intersection(query.citations)
+                true_citations = candidate_ids_set.intersection(query.citations)
                 if len(true_citations) < MIN_TRUE_CITATIONS:
                     continue
 
@@ -484,40 +460,40 @@ class DataGenerator(object):
                     )
 
                 n_positive = len(true_citations)
-                n_per_type = {}
-                n_per_type['hard_negatives'] = n_positive
-                n_per_type['es'] = n_positive
-                n_per_type['easy'] = int(n_positive * neg_to_pos_ratio / 2.0)
-                n_per_type['nn'] = int(n_positive * neg_to_pos_ratio / 2.0)
+                n_per_type = {
+                    'hard_negatives':  np.ceil(n_positive * neg_to_pos_ratio / 3.0),
+                    'easy': np.ceil(n_positive * neg_to_pos_ratio / 3.0),
+                    'nn':  np.ceil(n_positive * neg_to_pos_ratio / 3.0)
+                }
 
-                pos_jaccard_sims = [
-                    jaccard(self.featurizer, query, self.corpus[i])
-                    for i in true_citations
-                ]
-                ann_jaccard_cutoff = np.percentile(pos_jaccard_sims, 0.05)
-                hard_negatives, es_negatives, nn_negatives, easy_negatives = self.get_negatives(
-                    id_filter, id_list, n_per_type, query, ann_jaccard_cutoff
+                if self.ann is not None:
+                    pos_jaccard_sims = [
+                        jaccard(self.featurizer, query, self.corpus[i])
+                        for i in true_citations
+                    ]
+                    ann_jaccard_cutoff = np.percentile(pos_jaccard_sims, ANN_JACCARD_PERCENTILE)
+                else:
+                    ann_jaccard_cutoff = None
+
+                hard_negatives, nn_negatives, easy_negatives = self.get_negatives(
+                    candidate_ids_set, candidate_ids_list, n_per_type, query, ann_jaccard_cutoff
                 )
 
                 for c in true_citations:
                     doc = self.corpus[c]
-                    labels.append(_label_for_doc(doc, TRUE_CITATION_OFFSET))
-                    examples.append(doc)
-
-                for doc in es_negatives:
-                    labels.append(_label_for_doc(doc, ES_NEGATIVE_OFFSET))
+                    labels.append(label_for_doc(doc, TRUE_CITATION_OFFSET * margin_multiplier))
                     examples.append(doc)
 
                 for doc in hard_negatives:
-                    labels.append(_label_for_doc(doc, HARD_NEGATIVE_OFFSET))
-                    examples.append(doc)
-
-                for doc in easy_negatives:
-                    labels.append(_label_for_doc(doc, EASY_NEGATIVE_OFFSET))
+                    labels.append(label_for_doc(doc, HARD_NEGATIVE_OFFSET * margin_multiplier))
                     examples.append(doc)
 
                 for doc in nn_negatives:
-                    labels.append(_label_for_doc(doc, NN_NEGATIVE_OFFSET))
+                    labels.append(label_for_doc(doc, NN_NEGATIVE_OFFSET * margin_multiplier))
+                    examples.append(doc)
+
+                for doc in easy_negatives:
+                    labels.append(label_for_doc(doc, EASY_NEGATIVE_OFFSET * margin_multiplier))
                     examples.append(doc)
 
                 labels = np.asarray(labels)
@@ -527,17 +503,13 @@ class DataGenerator(object):
 
                 yield query, examples, labels
 
-    def listwise_generator(self, id_pool, id_filter=None):
-        for query, examples, labels in self._listwise_examples(
-            id_pool, id_filter
-        ):
-            yield (
-                self.featurizer.transform_query_and_results(query, examples),
-                labels,
-            )
-
     def triplet_generator(
-        self, id_pool, id_filter=None, batch_size=1024, neg_to_pos_ratio=5
+            self,
+            paper_ids,
+            candidate_ids=None,
+            batch_size=1024,
+            neg_to_pos_ratio=6,
+            margin_multiplier=1
     ):
         queries = []
         batch_ex = []
@@ -546,11 +518,7 @@ class DataGenerator(object):
         # Sample examples from our sorted list.  The margin between each example is the difference in their label:
         # easy negatives (e.g. very bad results) should be further away from a true positive than hard negatives
         # (less embarrassing).
-        for q, ex, labels in self._listwise_examples(
-            id_pool,
-            id_filter,
-            neg_to_pos_ratio=neg_to_pos_ratio,
-        ):
+        for q, ex, labels in self._listwise_examples(paper_ids, candidate_ids, neg_to_pos_ratio):
             num_true = len([l for l in labels if l >= TRUE_CITATION_OFFSET])
             # ignore cases where we didn't find enough negatives...
             if len(labels) < num_true * 2:
@@ -572,39 +540,36 @@ class DataGenerator(object):
                     del batch_labels[:]
 
     def get_negatives(
-        self, id_filter, id_list, n_per_type, document, ann_jaccard_cutoff=1
+        self, candidate_ids_set, candidate_ids_list, n_per_type, document, ann_jaccard_cutoff=1
     ):
         '''
-        :param n_per_type: dictionary with keys: 'easy', 'hard_negatives', 'es', 'nn'
+        :param n_per_type: dictionary with keys: 'easy', 'hard_negatives', 'nn'
         :param document: query document
         :return: documents
         '''
 
         def sample(document_ids, n):
-            document_ids = document_ids.intersection(id_filter)
+            document_ids = document_ids.intersection(candidate_ids_set)
             if len(document_ids) > n:
                 document_ids = np.random.choice(
-                    list(document_ids), size=n, replace=False
+                    list(document_ids), size=int(n), replace=False
                 )
             return document_ids
 
         # initialize some variables
-        all_docs = set(document.citations)
-        all_docs.add(document.id)
+        doc_citations = set(document.citations)
+        doc_citations.add(document.id)
         result_ids_dict = {}
         for key in self.KEYS:
             result_ids_dict[key] = set()
 
-        # step 0: make sure we heed the limitations about ES and NN negatives
-        if self.es_negatives is None:
-            n_per_type['hard_negatives'] += n_per_type['es']
-            n_per_type['es'] = 0
-
+        # step 0: make sure we heed the limitations about NN negatives
         if self.ann is None:
-            n_per_type['easy'] += n_per_type['nn']
+            n_per_type['easy'] += np.ceil(n_per_type['nn'] / 2.0)
+            n_per_type['hard_negatives'] += np.ceil(n_per_type['nn'] / 2.0)
             n_per_type['nn'] = 0
 
-        # step 1: find ALL hard citation negatives, and remove true positives from it
+        # step 1: find hard citation negatives, and remove true positives from it
         if n_per_type['hard_negatives'] > 0:
             result_ids_dict['hard_negatives'] = set(
                 flatten(
@@ -614,18 +579,13 @@ class DataGenerator(object):
                     ]
                 )
             )
-            result_ids_dict['hard_negatives'].difference_update(all_docs)
-            all_docs.update(result_ids_dict['hard_negatives'])
+            result_ids_dict['hard_negatives'].difference_update(doc_citations)
+            # adding hard_negatives to doc_citations so we can remove them later
+            doc_citations.update(result_ids_dict['hard_negatives'])
 
-        # step 2: get ALL es_negatives, and remove the true positives and hard citations from it
-        if n_per_type['es'] > 0:
-            if document.id in self.es_negatives:
-                result_ids_dict['es'] = set(self.es_negatives[document.id])
-                result_ids_dict['es'].difference_update(all_docs)
-                all_docs.update(result_ids_dict['es'])
-
-        # step 3: get nearest neighbors from embeddings, and remove the true positives, hard citations and es negatives
+        # step 2: get nearest neighbors from embeddings, and remove the true positives, hard citations and es negatives
         if n_per_type['nn'] > 0:
+            # getting more than we need because of the jaccard cutoff
             candidate_nn_ids = self.ann.get_nns_by_id(
                 document.id, 10 * n_per_type['nn']
             )
@@ -635,17 +595,18 @@ class DataGenerator(object):
                     if jaccard(self.featurizer, document, self.corpus[i]) < ann_jaccard_cutoff
                 ]
             result_ids_dict['nn'] = set(candidate_nn_ids)
-            result_ids_dict['nn'].difference_update(all_docs)
-            all_docs.update(result_ids_dict['nn'])
+            result_ids_dict['nn'].difference_update(doc_citations)
+            # adding ann_negatives to doc_citations so we can remove them later
+            doc_citations.update(result_ids_dict['nn'])
 
-        # step 4: get easy negatives
+        # step 3: get easy negatives
         if n_per_type['easy'] > 0:
-            result_ids_dict['easy'] = set(
-                np.random.choice(id_list, size=n_per_type['easy'], replace=False)
-            )
-            result_ids_dict['easy'].difference_update(all_docs)
+            random_index = np.random.randint(len(candidate_ids_list))
+            random_index_range = np.arange(random_index, random_index + int(n_per_type['easy']))
+            result_ids_dict['easy'] = set(np.take(candidate_ids_list, random_index_range, mode='wrap'))
+            result_ids_dict['easy'].difference_update(doc_citations)
 
-        # trim down the requested number of ids per type and get the actual documents
+        # step 4: trim down the requested number of ids per type and get the actual documents
         result_docs = []
         for key in self.KEYS:
             docs = [

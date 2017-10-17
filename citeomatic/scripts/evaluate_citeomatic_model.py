@@ -93,8 +93,6 @@ class TestCiteomatic(base.config.App):
     citation_source = Enum(values=['es', 'corpus'], default_value='es')
     candidate_min_in_citations = Int(default_value=4, allow_none=True)
     limit_candidate_to_train_ids = Bool(default_value=False)
-    use_es_neighbors = Bool(default_value=True)
-    use_es_docs = Bool(default_value=True)
     extend_candidate_citations = Bool(default_value=False)
 
     def _fetch_citations(self, paper_id, level):
@@ -124,7 +122,7 @@ class TestCiteomatic(base.config.App):
         return CITE_CACHE[key]
 
     def _predict(self, paper_id):
-        # Obtain out-citations of a paper from ES. We cannot use the ones
+        # Obtain out-citations of a paper. We cannot use the ones
         # in the `corpus` object because they were filtered down to contain
         # IDs that are in the corpus itself.
         gold_citations = set(self._fetch_citations(paper_id, 1))

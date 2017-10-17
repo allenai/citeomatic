@@ -14,7 +14,7 @@ def summed_embedding(name, input, n_features, dense_dim, l2_lambda):
     embed = Embedding(
         output_dim=dense_dim,
         input_dim=n_features,
-        W_regularizer=l2(l2_lambda),
+        embeddings_regularizer=l2(l2_lambda),
         mask_zero=True
     )
     embedded_input = ZeroMaskedEntries()(embed(input))
@@ -37,15 +37,14 @@ class TextEmbedding(object):
         self.embed_direction = Embedding(
             output_dim=self.dense_dim,
             input_dim=self.n_features,
-            W_regularizer=l2(self.l2_lambda),
-            mask_zero=True,
-            dropout=0
+            embeddings_regularizer=l2(self.l2_lambda),
+            mask_zero=True
         )
         self.mask_direction = ZeroMaskedEntries()
         self.embed_magnitude = Embedding(
             output_dim=1,
             input_dim=self.n_features,
-            W_regularizer=l1(self.l1_lambda),
+            embeddings_regularizer=l1(self.l1_lambda),
             # will induce sparsity if large enough
             mask_zero=True
         )
@@ -76,7 +75,7 @@ class TextEmbedding(object):
         else:
             outputs_list = [sum]
         return Model(
-            input=_input, output=outputs_list, name="%s-embedding-model"
+            inputs=_input, outputs=outputs_list, name="%s-embedding-model"
         ), outputs_list
 
 
@@ -99,14 +98,14 @@ class TextEmbeddingConv(object):
         self.embed_direction = Embedding(
             output_dim=self.dense_dim,
             input_dim=self.n_features,
-            W_regularizer=l2(self.l2_lambda),
+            embeddings_regularizer=l2(self.l2_lambda),
             mask_zero=True
         )
         self.mask_direction = ZeroMaskedEntries()
         self.embed_magnitude = Embedding(
             output_dim=1,
             input_dim=n_features,
-            W_regularizer=l1(self.l1_lambda),
+            embeddings_regularizer=l1(self.l1_lambda),
             mask_zero=True
         )
         self.mask_magnitude = ZeroMaskedEntries()
@@ -175,7 +174,7 @@ class TextEmbeddingConv(object):
             outputs_list = [pool]
 
         return Model(
-            input=_input, output=outputs_list, name='%s-embedding-model'
+            inputs=_input, outputs=outputs_list, name='%s-embedding-model'
         ), outputs_list
 
 
@@ -194,7 +193,7 @@ class TextEmbeddingLSTM(object):
         self.embedding = Embedding(
             output_dim=self.dense_dim,
             input_dim=self.n_features,
-            W_regularizer=l2(self.l2_lambda),
+            embeddings_regularizer=l2(self.l2_lambda),
             mask_zero=True
         )
         self.bilstm = Bidirectional(LSTM(lstm_dim))
@@ -216,5 +215,5 @@ class TextEmbeddingLSTM(object):
         else:
             outputs_list = [lstm_embedding]
         return Model(
-            input=_input, output=outputs_list, name="%s-embedding-model"
+            inputs=_input, outputs=outputs_list, name="%s-embedding-model"
         ), outputs_list
