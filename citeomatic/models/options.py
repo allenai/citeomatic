@@ -8,7 +8,7 @@ class ModelOptions(HasTraits):
     n_authors = Int()
 
     dense_dim = Int(default_value=75)
-    embedding_type = Enum(values=['sum', 'cnn', 'lstm'], default_value='basic')
+    embedding_type = Enum(values=['sum', 'cnn', 'lstm'], default_value='sum')
 
     use_nn_negatives = Bool(default_value=False)
     # todo: have a field here with the embedding_model directory?
