@@ -22,6 +22,7 @@ class ModelOptions(HasTraits):
     use_src_tgt_embeddings = Bool(default_value=False)
 
     lr = Float(default_value=0.0001)
+    margin_multiplier = Float(default_value=1)
 
     # training and feature params
     max_features = Int(default_value=200000)

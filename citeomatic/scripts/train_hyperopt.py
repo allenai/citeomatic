@@ -23,8 +23,7 @@ class CiteomaticHyperopt(App):
     total_samples_secondary = Int(default_value=20000000)
     train_frac = Float(default_value=0.80)
     models_dir_base = Unicode(
-        default_value=
-        '/net/nfs.corp/s2-research/scigraph/data/craft/models/sf_test/'
+        default_value='/net/nfs.corp/s2-research/citeomatic/'
     )
     version = Unicode(default_value='v0')
 
@@ -92,6 +91,8 @@ class CiteomaticHyperopt(App):
                 hp.choice('l2_lambda', np.append(np.logspace(-7, 0, 8), 0)),
             'l1_lambda':
                 hp.choice('l1_lambda', np.append(np.logspace(-7, 0, 8), 0)),
+            'margin_multiplier':
+                hp.choice('margin_multiplier', [0.5, 0.75, 1.0, 1.25, 1.5])
         }
 
         # stage 1: run hyperopt for max_evals_initial

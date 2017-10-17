@@ -10,7 +10,7 @@ if PY3:
 T = TypeVar('T')
 U = TypeVar('U')
 
-def import_from(module, name):
+def import_from(module, name, reload_flag=False):
     '''
     usage example:
     grid = import_from('sklearn.model_selection', 'GridSearchCV')
@@ -18,7 +18,8 @@ def import_from(module, name):
     from sklearn.model_selection import GridSearchV as grid
     '''
     module = importlib.import_module(module)
-    module = reload(module)
+    if reload_flag:
+        module = reload(module)
     return getattr(module, name)
 
 def flatten(lst):
