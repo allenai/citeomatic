@@ -39,7 +39,7 @@ def create_model(options: ModelOptions):
     embedders = {}
 
     def _make_embedder():
-        if options.embedding_type == 'basic':
+        if options.embedding_type == 'sum':
             return TextEmbedding(
                 n_features=options.n_features,
                 dense_dim=options.dense_dim,

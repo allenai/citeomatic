@@ -3,12 +3,12 @@ from traitlets import Bool, HasTraits, Int, Unicode, Enum, Float
 
 
 class ModelOptions(HasTraits):
-    model_name = Unicode(default_value='combined')
+    model_name = Enum(values=['model_ann', 'model_full'], default_value='model_full')
     n_features = Int()
     n_authors = Int()
 
     dense_dim = Int(default_value=75)
-    embedding_type = Enum(values=['basic', 'cnn', 'lstm'], default_value='basic')
+    embedding_type = Enum(values=['sum', 'cnn', 'lstm'], default_value='basic')
 
     use_nn_negatives = Bool(default_value=False)
     # todo: have a field here with the embedding_model directory?

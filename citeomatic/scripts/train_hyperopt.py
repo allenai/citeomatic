@@ -28,8 +28,9 @@ class CiteomaticHyperopt(App):
     version = Unicode(default_value='v0')
 
     # fixed model parameters
+    model_name = Enum(values=['model_ann', 'model_full'], default_value='model_full')
     dataset_type = Enum(('dblp', 'pubmed', 'oc'), default_value='dblp')
-    embedding_type = Enum(('rnn', 'cnn', 'basic'), default_value='basic')
+    embedding_type = Enum(('rnn', 'cnn', 'sum'), default_value='sum')
     samples_per_epoch = Int(default_value=1000000)
     batch_size = Int(default_value=1024)
     use_nn_negatives = Bool(default_value=False)
