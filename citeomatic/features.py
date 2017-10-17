@@ -13,24 +13,24 @@ from sklearn.feature_extraction.text import CountVectorizer
 
 from citeomatic.utils import flatten
 
-MAX_AUTHORS_PER_DOCUMENT = 8
 CLEAN_TEXT_RE = re.compile('[^ a-z]')
+
+# filters for authors and docs
+MAX_AUTHORS_PER_DOCUMENT = 8
+MIN_TRUE_CITATIONS = 2
+MAX_TRUE_CITATIONS = 100
 
 # Adjustments to how we boost heavily cited documents.
 CITATION_SLOPE = 0.01
 MAX_CITATION_BOOST = 0.02
 
-MIN_TRUE_CITATIONS = 2
-MAX_TRUE_CITATIONS = 100
-
 # Parameters for soft-margin data generation.
 TRUE_CITATION_OFFSET = 0.3
-HARD_NEGATIVE_OFFSET = 0.25
-ES_NEGATIVE_OFFSET = 0.2
+HARD_NEGATIVE_OFFSET = 0.2
 NN_NEGATIVE_OFFSET = 0.1
 EASY_NEGATIVE_OFFSET = 0.0
 
-# ANN jaccard cutoff
+# ANN jaccard percentile cutoff
 ANN_JACCARD_PERCENTILE = 0.05
 
 def label_for_doc(d, offset):
@@ -423,7 +423,13 @@ class DataGenerator(object):
         self.featurizer = CachingFeaturizer(featurizer)
         self.ann = ann
 
-    def _listwise_examples(self, paper_ids, candidate_ids=None, neg_to_pos_ratio=6):
+    def _listwise_examples(
+            self,
+            paper_ids,
+            candidate_ids=None,
+            neg_to_pos_ratio=6,
+            margin_multiplier=1
+    ):
         # the id pool should only have IDs that are in the corpus
         paper_ids_list = np.array(list(self.corpus.filter(paper_ids)))
 
@@ -475,19 +481,19 @@ class DataGenerator(object):
 
                 for c in true_citations:
                     doc = self.corpus[c]
-                    labels.append(label_for_doc(doc, TRUE_CITATION_OFFSET))
+                    labels.append(label_for_doc(doc, TRUE_CITATION_OFFSET * margin_multiplier))
                     examples.append(doc)
 
                 for doc in hard_negatives:
-                    labels.append(label_for_doc(doc, HARD_NEGATIVE_OFFSET))
-                    examples.append(doc)
-
-                for doc in easy_negatives:
-                    labels.append(label_for_doc(doc, EASY_NEGATIVE_OFFSET))
+                    labels.append(label_for_doc(doc, HARD_NEGATIVE_OFFSET * margin_multiplier))
                     examples.append(doc)
 
                 for doc in nn_negatives:
-                    labels.append(label_for_doc(doc, NN_NEGATIVE_OFFSET))
+                    labels.append(label_for_doc(doc, NN_NEGATIVE_OFFSET * margin_multiplier))
+                    examples.append(doc)
+
+                for doc in easy_negatives:
+                    labels.append(label_for_doc(doc, EASY_NEGATIVE_OFFSET * margin_multiplier))
                     examples.append(doc)
 
                 labels = np.asarray(labels)
@@ -497,7 +503,14 @@ class DataGenerator(object):
 
                 yield query, examples, labels
 
-    def triplet_generator(self, paper_ids, candidate_ids=None, batch_size=1024, neg_to_pos_ratio=6):
+    def triplet_generator(
+            self,
+            paper_ids,
+            candidate_ids=None,
+            batch_size=1024,
+            neg_to_pos_ratio=6,
+            margin_multiplier=1
+    ):
         queries = []
         batch_ex = []
         batch_labels = []
