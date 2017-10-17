@@ -149,7 +149,8 @@ def train_text_model(
     """
 
     create_model = import_from(
-        'citeomatic.models.%s' % model_options.model_name, 'create_model'
+        'citeomatic.models.%s' % model_options.model_name,
+        'create_model'
     )
     models = create_model(model_options)
     model, embedding_model = models['citeomatic'], models['embedding']
