@@ -2,7 +2,7 @@ import logging
 
 import tqdm
 
-from citeomatic.common import FilePaths, FieldNames
+from citeomatic.common import DatasetPaths, FieldNames
 from citeomatic.config import App
 from citeomatic.traits import Unicode
 import os
@@ -11,8 +11,8 @@ from citeomatic import file_util
 
 
 class ConvertOpenCorpusToCiteomatic(App):
-    input_path = Unicode(default_value=FilePaths.OC_FILE)
-    output_path = Unicode(default_value=FilePaths.OC_CORPUS_JSON)
+    input_path = Unicode(default_value=DatasetPaths.OC_FILE)
+    output_path = Unicode(default_value=DatasetPaths.OC_CORPUS_JSON)
 
     def main(self, args):
         logging.info("Reading Open Corpus file from: {}".format(self.input_path))

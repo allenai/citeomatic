@@ -2,7 +2,7 @@ import logging
 import os
 
 from citeomatic import file_util
-from citeomatic.common import FilePaths, FieldNames
+from citeomatic.common import DatasetPaths, FieldNames
 from citeomatic.config import App
 from citeomatic.service import document_from_dict, dict_from_document
 from citeomatic.traits import Enum
@@ -16,11 +16,11 @@ class ConvertKddToCiteomatic(App):
     def main(self, args):
 
         if self.dataset_name == 'dblp':
-            input_path = FilePaths.DBLP_GOLD_DIR
-            output_path = FilePaths.DBLP_CORPUS_JSON
+            input_path = DatasetPaths.DBLP_GOLD_DIR
+            output_path = DatasetPaths.DBLP_CORPUS_JSON
         elif self.dataset_name == 'pubmed':
-            input_path = FilePaths.PUBMED_GOLD_DIR
-            output_path = FilePaths.PUBMED_CORPUS_JSON
+            input_path = DatasetPaths.PUBMED_GOLD_DIR
+            output_path = DatasetPaths.PUBMED_CORPUS_JSON
         else:
             assert False
 

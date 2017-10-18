@@ -57,34 +57,21 @@ class APIModel(object):
         return "https://pdfs.semanticscholar.org/" + sha[0:4] + "/" + sha[4:] + ".pdf"
 
     def predict(self, doc, top_n=DEFAULT_NUM_CITATIONS) -> List[Prediction]:
-        bulk_ids = self.get_ann_similar_documents(doc, top_n=self.max_neighbors)
-        bulk_ids = [
-            bulk_id for bulk_id in bulk_ids
+        candidate_ids = self.get_ann_similar_documents(doc, top_n=self.max_neighbors)
+        candidate_ids = [
+            bulk_id for bulk_id in candidate_ids
             if self.corpus[bulk_id].in_citation_count >=
             self.candidate_min_in_citations
         ]
 
         # Extend the candidate set with their citations
         citations_of_candidates = []
-        for id in bulk_ids:
-            if self.citation_source == 'es':
-                citations_of_candidates.extend(fetch_citations(id))
-            else:
-                citations_of_candidates.extend(self.corpus[id].citations)
-        bulk_ids = list(set(citations_of_candidates + bulk_ids))
+        for id in candidate_ids:
+            citations_of_candidates.extend(self.corpus[id].citations)
+        candidate_ids = list(set(citations_of_candidates + candidate_ids))
 
-        logging.info('Fetching %d documents ' % len(bulk_ids))
-
-        if self.use_es_neighbors:
-            candidates = elastic.fetch_all(
-                bulk_ids[:TOTAL_CANDIDATES]
-            )  # Add method to make multiple requests if count exceed 1k
-        else:
-            if self.fetch_docs_from_es:
-                candidates = elastic.fetch_all(bulk_ids[:TOTAL_CANDIDATES])
-            else:
-                logging.info("Fetching documents from corpus")
-                candidates = [self.corpus[paper_id] for paper_id in bulk_ids]
+        logging.info('Fetching %d documents ' % len(candidate_ids))
+        candidates = [self.corpus[paper_id] for paper_id in candidate_ids]
 
         logging.info('Featurizing... %d documents ' % len(candidates))
         features = self.featurizer.transform_query_and_results(doc, candidates)

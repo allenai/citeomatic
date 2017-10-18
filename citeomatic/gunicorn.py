@@ -3,7 +3,8 @@ import os
 
 import keras.backend as K
 import tensorflow as tf
-from citeomatic import model_from_directory, service
+from citeomatic import service
+from citeomatic.serialization import model_from_directory
 from citeomatic.features import Corpus
 from citeomatic.grobid_parser import GrobidParser
 from citeomatic.neighbors import ANN, EmbeddingModel

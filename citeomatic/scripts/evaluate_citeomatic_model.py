@@ -28,7 +28,7 @@ DETAILED_PAPERS = [
     'End-To-End Memory Networks',
 ]
 
-EVAL_KEYS = [1, 5, 10, 20, 50, 100, 1000, 5000]
+EVAL_KEYS = [1, 5, 10, 20, 50, 100, 1000]
 
 CITE_CACHE = {}
 DONE_IDS = []
@@ -90,7 +90,6 @@ class TestCiteomatic(base.config.App):
     filter_method = Unicode(default_value='es')
     ann_path = Unicode(default_value=None, allow_none=True)
     ann_model_dir = Unicode(default_value=None, allow_none=True)
-    citation_source = Enum(values=['es', 'corpus'], default_value='es')
     candidate_min_in_citations = Int(default_value=4, allow_none=True)
     limit_candidate_to_train_ids = Bool(default_value=False)
     extend_candidate_citations = Bool(default_value=False)
@@ -99,11 +98,8 @@ class TestCiteomatic(base.config.App):
         key = '%s/%d' % (paper_id, level)
         if key not in CITE_CACHE:
             if level == 1:
-                if self.citation_source == 'es':
-                    citations = fetch_citations(paper_id)
-                else:
-                    citations = self.corpus[paper_id].citations
-                    citations = [c for c in citations if c in self.corpus.train_ids]
+                citations = self.corpus[paper_id].citations
+                citations = [c for c in citations if c in self.corpus.train_ids]
                 CITE_CACHE[key] = citations
             else:
                 if self.citation_source == 'es':

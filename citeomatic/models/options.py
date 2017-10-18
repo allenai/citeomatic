@@ -1,3 +1,4 @@
+import json
 from citeomatic import file_util
 from traitlets import Bool, HasTraits, Int, Unicode, Enum, Float
 
@@ -26,12 +27,13 @@ class ModelOptions(HasTraits):
     margin_multiplier = Float(default_value=1)
 
     # training and feature params
+    train_frac = Float(default_value=0.8) # the rest will be divided 50/50 val/test
     max_features = Int(default_value=200000)
     neg_to_pos_ratio = Int(default_value=6) # ideally divisible by 2 and 3
     batch_size = Int(default_value=1024)
     samples_per_epoch = Int(default_value=1000000)
     total_samples = Int(default_value=5000000)
-    reduce_lr_flag = Bool(default_value=True)
+    reduce_lr_flag = Bool(default_value=False)
 
     # regularization params for embedding layer: l1 for mag, l2 for dir
     l2_lambda = Float(default_value=0.00001)
@@ -46,11 +48,10 @@ class ModelOptions(HasTraits):
     dense_config = Unicode(default_value='20,20')
 
     def __repr__(self):
-        import json
         return json.dumps(self._trait_values, indent=2, sort_keys=True)
 
     def to_json(self):
-        return self._trait_values
+        return self.__repr__()
 
     @staticmethod
     def load(filename):

@@ -23,7 +23,7 @@ class FieldNames(object):
     DATE = 'date'
 
 
-class FilePaths(object):
+class DatasetPaths(object):
     BASE_DIR = '/net/nfs.corp/s2-research/citeomatic/naacl2017/'
 
     DBLP_GOLD_DIR = os.path.join(BASE_DIR, 'comparison/dblp/gold')

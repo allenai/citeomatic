@@ -7,6 +7,7 @@ from citeomatic.models.text_embeddings import (
     TextEmbedding, TextEmbeddingConv, TextEmbeddingLSTM, summed_embedding
 )
 from keras.engine import Model
+from keras.regularizers import l1, l2
 from keras.layers import Dense, Embedding, Highway, Input, Merge, Reshape
 from keras.layers.core import Flatten
 
@@ -43,7 +44,8 @@ def create_model(options: ModelOptions):
             return TextEmbedding(
                 n_features=options.n_features,
                 dense_dim=options.dense_dim,
-                l1_lambda=options.l1_lambda
+                l1_lambda=options.l1_lambda,
+                l2_lambda=options.l2_lambda
             )
         elif options.embedding_type == 'cnn':
             return TextEmbeddingConv(
@@ -55,7 +57,9 @@ def create_model(options: ModelOptions):
             )
         elif options.embedding_type == 'lstm':
             return TextEmbeddingLSTM(
-                n_features=options.n_features, dense_dim=options.dense_dim
+                n_features=options.n_features,
+                dense_dim=options.dense_dim,
+                l2_lambda=options.l2_lambda
             )
         else:
             assert False, 'Unknown embedding type %s' % options.embedding_type
@@ -110,7 +114,8 @@ def create_model(options: ModelOptions):
                 input_dim=options.n_features,
                 output_dim=1,
                 mask_zero=True,
-                name="%s-sparse-embedding" % field
+                name="%s-sparse-embedding" % field,
+                embeddings_regularizer=l1(options.l1_lambda)
             )
             elementwise_sparse = ZeroMaskedEntries(
             )(sparse_embedding(sparse_input))
@@ -125,7 +130,8 @@ def create_model(options: ModelOptions):
                 input_dim=options.n_features,
                 output_dim=options.dense_dim,
                 mask_zero=True,
-                name="%s-sparse-embedding" % field
+                name="%s-sparse-embedding" % field,
+                embeddings_regularizer=l1(options.l1_lambda)
             )
             elementwise_sparse = ZeroMaskedEntries(
             )(sparse_embedding(sparse_input))

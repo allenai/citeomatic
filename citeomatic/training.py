@@ -1,14 +1,20 @@
 import logging
 import resource
+import os
 from collections import defaultdict
 
 import tensorflow as tf
 import keras
 import numpy as np
 from citeomatic.neighbors import EmbeddingModel, make_ann
+from citeomatic.serialization import model_from_directory
 from citeomatic.features import DataGenerator
 from citeomatic.utils import import_from
 from citeomatic.models import layers
+from citeomatic.corpus import Corpus
+from citeomatic.common import DatasetPaths
+from citeomatic.features import Featurizer
+from citeomatic.models.options import ModelOptions
 from keras.callbacks import ReduceLROnPlateau, TensorBoard, Callback
 from keras.optimizers import TFOptimizer
 
@@ -169,7 +175,7 @@ def train_text_model(
     validation_generator = validation_dg.triplet_generator(
         paper_ids=corpus.valid_ids,
         candidate_ids=corpus.train_ids + corpus.valid_ids,
-        batch_size=10000,
+        batch_size=1024,
         neg_to_pos_ratio=model_options.neg_to_pos_ratio,
         margin_multiplier=model_options.margin_multiplier
     )
@@ -223,8 +229,77 @@ def train_text_model(
         max_q_size=2,
         pickle_safe=False,
         validation_data=validation_generator,
-        validation_steps=1
+        validation_steps=10
     )
 
     return model, embedding_model
+
+def end_to_end_training(model_options, dataset_type, models_dir):
+    # step 1: make the directory
+    if not os.path.exists(models_dir):
+        os.makedirs(models_dir)
+
+    # step 2: load the corpus DB
+    print("Loading corpus db...")
+    fp = DatasetPaths()
+    db_file = fp.get_db_path(dataset_type)
+    json_file = fp.get_json_path(dataset_type)
+    if not os.path.isfile(db_file):
+        print("Have to build the database! This may take a while, but should only happen once.")
+        Corpus.build(db_file, json_file)
+    corpus = Corpus.load(db_file, model_options.train_frac)
+
+    # step 3: load/make the featurizer (once per hyperopt run)
+    print("Making feautrizer")
+    featurizer_file = os.path.join(models_dir, 'featurizer.pickle')
+    if not os.path.isfile(featurizer_file):
+        featurizer = Featurizer(
+            max_features=model_options.max_features,
+            allow_duplicates=False
+        )
+        featurizer.fit(corpus)
+        file_util.write_pickle(featurizer_file, featurizer)
+    else:
+        featurizer = file_util.read_pickle(featurizer_file)
+
+    # step 4: train the model
+    # model_options = ModelOptions(**hyperopt.pyll.stochastic.sample(space))
+    model_options.n_authors = featurizer.n_authors
+    model_options.n_features = featurizer.n_features
+    model_options_file = os.path.join(models_dir, 'options.pickle')
+    file_util.write_pickle(model_options_file, model_options)
+
+    citeomatic_model, embedding_model = train_text_model(
+        corpus,
+        featurizer,
+        model_options,
+        embedding_model_for_ann=None,
+        debug=False,
+        tensorboard_dir=None
+    )
+
+    # step 5: save the model
+    citeomatic_model.save_weights(
+        os.path.join(models_dir, 'weights.h5'), overwrite=True
+    )
+
+    embedding_model.save_weights(
+        os.path.join(models_dir, 'embedding.h5'), overwrite=True
+    )
+
+    file_util.write_json(
+        os.path.join(models_dir, 'options.json'),
+        model_options.to_json(),
+    )
+
+    return corpus, featurizer, model_options, citeomatic_model, embedding_model
+
+def eval_text_model(
+    corpus,
+    featurizer,
+    model_options,
+    embedding_model_for_ann=None,
+    debug=False
+):
+    pass
 

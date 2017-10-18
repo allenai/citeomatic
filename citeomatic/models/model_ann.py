@@ -18,7 +18,8 @@ def create_model(options: ModelOptions):
     text_embeddings = TextEmbedding(
         n_features=options.n_features,
         dense_dim=options.dense_dim,
-        l1_lambda=options.l1_lambda
+        l1_lambda=options.l1_lambda,
+        l2_lambda=options.l2_lambda
     )
     scalar_sum_models = {}
     for field in FIELDS:
