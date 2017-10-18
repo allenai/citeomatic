@@ -1,6 +1,6 @@
 import re
 
-from citeomatic.features import Document
+from citeomatic.common import Document
 from citeomatic import display
 
 TEST_DOCS = [
@@ -9,7 +9,7 @@ TEST_DOCS = [
         abstract=
         '— This paper investigates into the colorization problem which converts a grayscale image to a colorful version. This is a very difficult problem and normally requires manual adjustment to achieve artifact-free quality. For instance , it normally requires human-labelled color scribbles on the grayscale target image or a careful selection of colorful reference images (e.g., capturing the same scene in the grayscale target image). Unlike the previous methods, this paper aims at a high-quality fully-automatic colorization method. With the assumption of a perfect patch matching technique, the use of an extremely large-scale reference database (that contains sufficient color images) is the most reliable solution to the colorization problem. However, patch matching noise will increase with respect to the size of the reference database in practice. Inspired by the recent success in deep learning techniques which provide amazing modeling of large-scale data, this paper re-formulates the colorization problem so that deep learning techniques can be directly employed. To ensure artifact-free quality, a joint bilateral filtering based post-processing step is proposed. We further develop an adaptive image clustering technique to incorporate the global image information. Numerous experiments demonstrate that our method outperforms the state-of-art algorithms both in terms of quality and speed.',
         authors=['Zezhou Cheng', 'Qingxiong Yang', 'Bin Sheng'],
-        citations=[],
+        out_citations=[],
         year=2015,
         id='6baaca1b6de31ac2a5b1f89e9b3baa61e41d52f9',
         venue='ICCV',
@@ -22,7 +22,7 @@ TEST_DOCS = [
         title='Deep Computing',
         abstract='',
         authors=['Louis V. Gerstner'],
-        citations=[],
+        out_citations=[],
         year=2000,
         id='100544cf556dd8d98e6871bf28ea9e87a6f0ecc9',
         venue='LOG IN',
@@ -33,7 +33,7 @@ TEST_DOCS = [
         title='Deep Blue',
         abstract='',
         authors=['Jim Ottaviani'],
-        citations=[],
+        out_citations=[],
         year=2006,
         id='60a5511f544d0ed5155f7c5f0a70b8c87337d2f7',
         venue='IASSIST Conference',

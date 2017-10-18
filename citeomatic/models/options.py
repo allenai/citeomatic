@@ -20,6 +20,7 @@ class ModelOptions(HasTraits):
     use_attention = Bool(default_value=False)
     use_holographic = Bool(default_value=False)
     use_src_tgt_embeddings = Bool(default_value=False)
+    optimizer = Unicode(default_value='tfopt')
 
     lr = Float(default_value=0.0001)
     margin_multiplier = Float(default_value=1)

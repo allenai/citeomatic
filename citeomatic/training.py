@@ -9,9 +9,8 @@ from citeomatic.neighbors import EmbeddingModel, make_ann
 from citeomatic.features import DataGenerator
 from citeomatic.utils import import_from
 from citeomatic.models import layers
-from keras.callbacks import ReduceLROnPlateau, TensorBoard
+from keras.callbacks import ReduceLROnPlateau, TensorBoard, Callback
 from keras.optimizers import TFOptimizer
-
 
 
 def rank_metrics(y, preds, max_num_true_multiplier=9):
@@ -202,15 +201,17 @@ def train_text_model(
             )
         )
     if model_options.reduce_lr_flag:
-        callbacks_list.append(
-            ReduceLROnPlateau(
-                verbose=1, patience=2, epsilon=0.01, min_lr=1e-6, factor=0.5
+        if model_options.optimizer != 'tfopt':
+            callbacks_list.append(
+                ReduceLROnPlateau(
+                    verbose=1, patience=2, epsilon=0.01, min_lr=1e-6, factor=0.5
+                )
             )
-        )
+            
     if model_options.use_nn_negatives:
         assert embedding_model_for_ann is not None
         callbacks_list.append(
-            UpdateANN(corpus, featurizer, embedding_model_for_ann, data_generator)
+            UpdateANN(corpus, featurizer, embedding_model_for_ann, training_generator)
         )
 
     # logic
@@ -226,3 +227,4 @@ def train_text_model(
     )
 
     return model, embedding_model
+

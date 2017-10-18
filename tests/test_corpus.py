@@ -1,14 +1,12 @@
 #!/usr/bin/env python
 import json
-import tempfile
-import time
 import os
 import random
+import time
 
-from citeomatic import features, file_util
+from citeomatic import features
+from citeomatic.common import FieldNames
 from citeomatic.corpus import Corpus
-from citeomatic.schema_pb2 import Document
-from google.protobuf.json_format import MessageToDict
 
 
 def _time(op):
@@ -133,18 +131,17 @@ def build_test_corpus(source_file, target_file):
 
     with open(source_file, 'w') as tf:
         for i in range(100):
-            json.dump(
-                dict(
-                    title=' '.join(random.sample(WORDS, 10)),
-                    paperAbstract=' '.join(random.sample(WORDS, 1000)),
-                    authors=[],
-                    outCitations=[
-                        str(x) for x in random.sample(range(1000), 10)
-                    ],
-                    year=2011,
-                    id=str(i),
-                    venue='',
-                ), tf
+            json.dump({
+                FieldNames.TITLE: ' '.join(random.sample(WORDS, 10)),
+                FieldNames.ABSTRACT: ' '.join(random.sample(WORDS, 1000)),
+                FieldNames.AUTHORS: [],
+                FieldNames.OUT_CITATIONS:[
+                    str(x) for x in random.sample(range(1000), 10)
+                ],
+                FieldNames.YEAR: 2011,
+                FieldNames.PAPER_ID: str(i),
+                FieldNames.VENUE:''
+            }, tf
             )
             tf.write('\n')
 
@@ -159,16 +156,13 @@ def test_data_gen():
     build_test_corpus('/tmp/foo.json', '/tmp/foo.sqlite')
     corpus = Corpus.load('/tmp/foo.sqlite')
     featurizer = features.Featurizer(
-        use_unigrams_from_corpus=True,
-        use_bigrams_from_corpus=True,
-        allow_duplicates=False,
-        training_fraction=0.9
+        allow_duplicates=False
     )
-    featurizer.fit(corpus, max_features=10000, max_df_frac=1.0)
+    featurizer.fit(corpus, max_df_frac=1.0)
     dg = features.DataGenerator(corpus, featurizer)
     gen = dg.triplet_generator(
-        id_pool=corpus.train_ids,
-        id_filter=corpus.train_ids,
+        paper_ids=corpus.train_ids,
+        candidate_ids=corpus.train_ids,
         batch_size=128,
         neg_to_pos_ratio=5
     )

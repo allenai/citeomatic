@@ -1,5 +1,5 @@
 Flask
-Keras==1.2.2
+Keras==2.0.5
 annoy
 blosc
 boto3
@@ -12,6 +12,8 @@ pandas==0.19.2
 pytest
 requests
 scikit-learn
-tensorflow
+tensorflow==1.2.0
 tqdm
 untangle
+hyperopt
+numpy==1.13

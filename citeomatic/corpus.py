@@ -26,6 +26,7 @@ def stream_papers(data_path):
 
 
 def build_corpus(db_filename, corpus_json):
+    """"""
     with sqlite3.connect(db_filename) as conn:
         conn.execute('PRAGMA synchronous=OFF')
         conn.execute('PRAGMA journal_mode=MEMORY')
@@ -91,6 +92,10 @@ class Corpus(object):
         logging.info('%d validation docs' % n_valid)
         logging.info('%d testing docs' % n_test)
 
+        logging.info("Loading documents into memory")
+        self.documents = [doc for doc in self._doc_generator()]
+        self.doc_id_to_index_dict = {doc.id: idx for idx, doc in enumerate(self.documents)}
+
     @staticmethod
     def load(data_path, train_frac=0.80):
         return load(data_path, train_frac)
@@ -99,31 +104,31 @@ class Corpus(object):
     def build(db_filename, source_json):
         return build_corpus(db_filename, source_json)
 
-    def __len__(self):
-        return self.n_docs
-
-    def __iter__(self):
+    def _doc_generator(self):
         with self._conn as tx:
             for row in tx.execute(
-                'SELECT payload from documents ORDER BY year'
+                    'SELECT payload from documents ORDER BY year'
             ):
                 doc = Document()
                 doc.ParseFromString(row[0])
                 yield doc
 
+    def __len__(self):
+        return self.n_docs
+
+    def __iter__(self):
+        for doc in self.documents:
+            yield doc
+
     def __contains__(self, id):
         return id in self._id_set
 
     def __getitem__(self, id):
-        doc = Document()
-        payload = self._conn.execute(
-            "SELECT payload from documents WHERE id IS ?", (id,)
-        ).fetchone()[0]
-        doc.ParseFromString(payload)
-        return doc
+        index = self.doc_id_to_index_dict[id]
+        return self.documents[index]
 
     def select(self, id_set):
-        for doc in self:
+        for doc in self.documents:
             if doc in id_set:
                 yield doc.id, doc
 
