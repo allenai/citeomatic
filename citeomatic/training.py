@@ -6,6 +6,7 @@ from collections import defaultdict
 import tensorflow as tf
 import keras
 import numpy as np
+from citeomatic import file_util
 from citeomatic.neighbors import EmbeddingModel, make_ann
 from citeomatic.serialization import model_from_directory
 from citeomatic.features import DataGenerator
@@ -118,34 +119,38 @@ class MemoryUsageCallback(keras.callbacks.Callback):
 
 
 class UpdateANN(keras.callbacks.Callback):
-    def __init__(self, corpus, featurizer, embedding_model, data_generator):
+    def __init__(self, corpus, featurizer, embedding_model, data_generator, embed_every_epoch=True):
         self.corpus = corpus
         self.featurizer = featurizer
         self.embedding_model = embedding_model
         self.data_generator = data_generator
+        self.embed_every_epoch = embed_every_epoch
+        if not self.embed_every_epoch:
+            self.on_epoch_end(epoch=-2)
 
     def on_epoch_end(self, epoch, logs=None):
-        logging.info(
-            'Epoch %d ended. Retraining approximate nearest neighbors model.',
-            epoch + 1
-        )
-        embedding_model_wrapped = EmbeddingModel(
-            self.featurizer, self.embedding_model
-        )
-        ann = make_ann(
-            embedding_model_wrapped,
-            self.corpus,
-            ann_trees=10,
-            build_ann_index=True
-        )
-        self.data_generator.ann = ann
+        if self.embed_every_epoch:
+            logging.info(
+                'Epoch %d ended. Retraining approximate nearest neighbors model.',
+                epoch + 1
+            )
+            embedding_model_wrapped = EmbeddingModel(
+                self.featurizer, self.embedding_model
+            )
+            ann = make_ann(
+                embedding_model_wrapped,
+                self.corpus,
+                ann_trees=10,
+                build_ann_index=True
+            )
+            self.data_generator.ann = ann
 
 
 def train_text_model(
     corpus,
     featurizer,
     model_options,
-    embedding_model_for_ann=None,
+    models_ann_dir=None,
     debug=False,
     tensorboard_dir=None
 ):
@@ -180,9 +185,15 @@ def train_text_model(
         margin_multiplier=model_options.margin_multiplier
     )
 
-    optimizer = TFOptimizer(
-        tf.contrib.opt.LazyAdamOptimizer(learning_rate=model_options.lr)
-    )
+    if model_options.optimizer == 'tfopt':
+        optimizer = TFOptimizer(
+            tf.contrib.opt.LazyAdamOptimizer(learning_rate=model_options.lr)
+        )
+    else:
+        optimizer = import_from(
+            'keras.optimizers', model_options.optimizer
+        )(lr=model_options.lr)
+
     model.compile(optimizer=optimizer, loss=layers.triplet_loss)
 
     # training calculation
@@ -215,9 +226,16 @@ def train_text_model(
             )
             
     if model_options.use_nn_negatives:
-        assert embedding_model_for_ann is not None
+        if models_ann_dir is None:
+            ann_featurizer = featurizer
+            ann_embedding_model = embedding_model
+            embed_every_epoch = True
+        else:
+            ann_featurizer, ann_models = model_from_directory(models_ann_dir)
+            ann_embedding_model = ann_models['embedding']
+            embed_every_epoch = False
         callbacks_list.append(
-            UpdateANN(corpus, featurizer, embedding_model_for_ann, training_generator)
+            UpdateANN(corpus, ann_featurizer, ann_embedding_model, training_dg, embed_every_epoch)
         )
 
     # logic
@@ -234,16 +252,16 @@ def train_text_model(
 
     return model, embedding_model
 
-def end_to_end_training(model_options, dataset_type, models_dir):
+def end_to_end_training(model_options, dataset_type, models_dir, models_ann_dir=None):
     # step 1: make the directory
     if not os.path.exists(models_dir):
         os.makedirs(models_dir)
 
     # step 2: load the corpus DB
     print("Loading corpus db...")
-    fp = DatasetPaths()
-    db_file = fp.get_db_path(dataset_type)
-    json_file = fp.get_json_path(dataset_type)
+    dp = DatasetPaths()
+    db_file = dp.get_db_path(dataset_type)
+    json_file = dp.get_json_path(dataset_type)
     if not os.path.isfile(db_file):
         print("Have to build the database! This may take a while, but should only happen once.")
         Corpus.build(db_file, json_file)
@@ -251,7 +269,7 @@ def end_to_end_training(model_options, dataset_type, models_dir):
 
     # step 3: load/make the featurizer (once per hyperopt run)
     print("Making feautrizer")
-    featurizer_file = os.path.join(models_dir, 'featurizer.pickle')
+    featurizer_file = os.path.join(models_dir, dp.FEATURIZER_FILENAME)
     if not os.path.isfile(featurizer_file):
         featurizer = Featurizer(
             max_features=model_options.max_features,
@@ -262,33 +280,31 @@ def end_to_end_training(model_options, dataset_type, models_dir):
     else:
         featurizer = file_util.read_pickle(featurizer_file)
 
-    # step 4: train the model
     # model_options = ModelOptions(**hyperopt.pyll.stochastic.sample(space))
     model_options.n_authors = featurizer.n_authors
     model_options.n_features = featurizer.n_features
-    model_options_file = os.path.join(models_dir, 'options.pickle')
-    file_util.write_pickle(model_options_file, model_options)
 
+    # step 4: train the model
     citeomatic_model, embedding_model = train_text_model(
         corpus,
         featurizer,
         model_options,
-        embedding_model_for_ann=None,
+        models_ann_dir=models_ann_dir,
         debug=False,
         tensorboard_dir=None
     )
 
     # step 5: save the model
     citeomatic_model.save_weights(
-        os.path.join(models_dir, 'weights.h5'), overwrite=True
+        os.path.join(models_dir, dp.CITEOMATIC_WEIGHTS_FILENAME), overwrite=True
     )
 
     embedding_model.save_weights(
-        os.path.join(models_dir, 'embedding.h5'), overwrite=True
+        os.path.join(models_dir, dp.EMBEDDING_WEIGHTS_FILENAME), overwrite=True
     )
 
     file_util.write_json(
-        os.path.join(models_dir, 'options.json'),
+        os.path.join(models_dir, dp.OPTIONS_FILENAME),
         model_options.to_json(),
     )
 

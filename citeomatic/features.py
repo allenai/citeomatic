@@ -461,9 +461,9 @@ class DataGenerator(object):
 
                 n_positive = len(true_citations)
                 n_per_type = {
-                    'hard_negatives':  np.ceil(n_positive * neg_to_pos_ratio / 3.0),
-                    'easy': np.ceil(n_positive * neg_to_pos_ratio / 3.0),
-                    'nn':  np.ceil(n_positive * neg_to_pos_ratio / 3.0)
+                    'hard_negatives':  int(np.ceil(n_positive * neg_to_pos_ratio / 3.0)),
+                    'easy': int(np.ceil(n_positive * neg_to_pos_ratio / 3.0)),
+                    'nn':  int(np.ceil(n_positive * neg_to_pos_ratio / 3.0))
                 }
 
                 if self.ann is not None:
@@ -565,8 +565,8 @@ class DataGenerator(object):
 
         # step 0: make sure we heed the limitations about NN negatives
         if self.ann is None:
-            n_per_type['easy'] += np.ceil(n_per_type['nn'] / 2.0)
-            n_per_type['hard_negatives'] += np.ceil(n_per_type['nn'] / 2.0)
+            n_per_type['easy'] += int(np.ceil(n_per_type['nn'] / 2.0))
+            n_per_type['hard_negatives'] += int(np.ceil(n_per_type['nn'] / 2.0))
             n_per_type['nn'] = 0
 
         # step 1: find hard citation negatives, and remove true positives from it
@@ -602,7 +602,7 @@ class DataGenerator(object):
         # step 3: get easy negatives
         if n_per_type['easy'] > 0:
             random_index = np.random.randint(len(candidate_ids_list))
-            random_index_range = np.arange(random_index, random_index + int(n_per_type['easy']))
+            random_index_range = np.arange(random_index, random_index + n_per_type['easy'])
             result_ids_dict['easy'] = set(np.take(candidate_ids_list, random_index_range, mode='wrap'))
             result_ids_dict['easy'].difference_update(doc_citations)
 

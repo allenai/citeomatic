@@ -35,7 +35,7 @@ class ModelOptions(HasTraits):
     total_samples = Int(default_value=5000000)
     reduce_lr_flag = Bool(default_value=False)
 
-    # regularization params for embedding layer: l1 for mag, l2 for dir
+    # regularization params for embedding layer: l1 for mag/sparse, l2 for dir
     l2_lambda = Float(default_value=0.00001)
     l1_lambda = Float(default_value=0.0000001)
 

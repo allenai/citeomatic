@@ -11,9 +11,9 @@ import pickle
 
 from citeomatic import file_util
 from citeomatic.utils import import_from
+from citeomatic.common import DatasetPaths
 from citeomatic.features import Featurizer
-from citeomatic.model.options import ModelOptions
-
+from citeomatic.models.options import ModelOptions
 
 class ModelLoader(pickle.Unpickler):
     def find_class(self, mod_name, klass_name):
@@ -30,12 +30,14 @@ def load_pickle(filename):
 
 
 def model_from_directory(dirname: str) -> Tuple[Featurizer, Any]:
+    dp = DatasetPaths()
+
     featurizer = file_util.read_pickle(
-        os.path.join(dirname, 'featurizer.pickle')
+        os.path.join(dirname, dp.FEATURIZER_FILENAME)
     )  # type: Featurizer
 
     options_json = file_util.read_json(
-        os.path.join(dirname, 'options.json'),
+        os.path.join(dirname, dp.OPTIONS_FILENAME),
     )
     options = ModelOptions(**json.loads(options_json))
     options.n_authors = featurizer.n_authors
@@ -44,18 +46,17 @@ def model_from_directory(dirname: str) -> Tuple[Featurizer, Any]:
         'citeomatic.models.%s' % options.model_name, 'create_model'
     )
     models = create_model(options)
-    citeomatic_model, embedding_model = models['citeomatic'], models['embedding']
 
     print("Loading model from %s " % dirname)
-    print(citeomatic_model.summary())
+    print(models['citeomatic'].summary())
     if dirname.startswith('s3://'):
-        citeomatic_model.load_weights(
-            file_util.cache_file(os.path.join(dirname, 'weights.h5'))
+        models['citeomatic'].load_weights(
+            file_util.cache_file(os.path.join(dirname, dp.CITEOMATIC_WEIGHTS_FILENAME))
         )
-        embedding_model.load_weights(
-            file_util.cache_file(os.path.join(dirname, 'embedding.h5'))
+        models['embedding'].load_weights(
+            file_util.cache_file(os.path.join(dirname, dp.EMBEDDING_WEIGHTS_FILENAME))
         )
     else:
-        citeomatic_model.load_weights(os.path.join(dirname, 'weights.h5'))
-        embedding_model.load_weights(os.path.join(dirname, 'embedding.h5'))
+        models['citeomatic'].load_weights(os.path.join(dirname, dp.CITEOMATIC_WEIGHTS_FILENAME))
+        models['embedding'].load_weights(os.path.join(dirname, dp.EMBEDDING_WEIGHTS_FILENAME))
     return featurizer, models

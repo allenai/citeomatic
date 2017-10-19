@@ -69,7 +69,7 @@ class ScalarMultiply(Layer):
     def build(self, input_shape):
         # Create a trainable weight variable for this layer.
         self.w = self.add_weight(
-            shape=(1, 1), initializer='one', trainable=True
+            shape=(1, 1), initializer='one', trainable=True, name='w'
         )
         super(ScalarMultiply, self).build(input_shape)
 

@@ -38,6 +38,11 @@ class DatasetPaths(object):
     OC_CORPUS_JSON = os.path.join(BASE_DIR, 'open_corpus/corpus.json')
     OC_DB_FILE = os.path.join(BASE_DIR, 'db/oc.sqlite.db')
 
+    FEATURIZER_FILENAME = 'featurizer.pickle'
+    OPTIONS_FILENAME = 'options.json'
+    CITEOMATIC_WEIGHTS_FILENAME = 'weights.h5'
+    EMBEDDING_WEIGHTS_FILENAME = 'embedding.h5'
+
     def get_json_path(self, corpus_name):
         if corpus_name.lower() == 'dblp':
             return self.DBLP_CORPUS_JSON
