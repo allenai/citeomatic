@@ -8,10 +8,9 @@ import flask
 import numpy as np
 from flask import Flask, request
 
-from citeomatic import display, elastic
+from citeomatic import display
 from citeomatic.common import Document, FieldNames
 from citeomatic.corpus import Corpus
-from citeomatic.elastic import fetch_citations
 from citeomatic.features import Featurizer
 from citeomatic.neighbors import ANN, EmbeddingModel
 
@@ -106,8 +105,8 @@ def document_from_dict(doc):
         FieldNames.YEAR: 2016,
         FieldNames.PAPER_ID: 0,
         FieldNames.VENUE: '',
-        FieldNames.IN_CITATIONS_COUNT: 0,
-        FieldNames.OUT_CITATIONS_COUNT: 0,
+        FieldNames.IN_CITATION_COUNT: 0,
+        FieldNames.OUT_CITATION_COUNT: 0,
         FieldNames.KEY_PHRASES: []
     }
     defaults.update(doc)

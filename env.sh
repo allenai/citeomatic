@@ -22,4 +22,4 @@ source ~/anaconda3/bin/activate ${CONDAENV}
 
 pip install -r requirements.in
 
-python setup.py install
+python setup.py develop

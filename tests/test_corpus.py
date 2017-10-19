@@ -139,6 +139,10 @@ def build_test_corpus(source_file, target_file):
                 FieldNames.OUT_CITATIONS: [
                     str(x) for x in random.sample(range(100), 10)
                 ],
+                FieldNames.IN_CITATION_COUNT: len([
+                    str(x) for x in random.sample(range(100), 10)
+                ]),
+                FieldNames.KEY_PHRASES: [' '.join(random.sample(WORDS, 3))],
                 FieldNames.YEAR: 2011,
                 FieldNames.PAPER_ID: str(i),
                 FieldNames.VENUE: ''

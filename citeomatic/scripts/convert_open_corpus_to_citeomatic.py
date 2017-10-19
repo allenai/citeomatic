@@ -30,7 +30,7 @@ class ConvertOpenCorpusToCiteomatic(App):
                     FieldNames.TITLE: obj['title'],
                     FieldNames.ABSTRACT: obj['paperAbstract'],
                     FieldNames.AUTHORS: [a['name'] for a in obj['authors']],
-                    FieldNames.IN_CITATIONS: obj['inCitations'],
+                    FieldNames.IN_CITATION_COUNT: len(obj['inCitations']),
                     FieldNames.KEY_PHRASES: obj['keyPhrases'],
                     FieldNames.OUT_CITATIONS: obj['outCitations'],
                     FieldNames.URLS: obj['pdfUrls'],

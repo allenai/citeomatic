@@ -3,10 +3,12 @@ message Document {
   string title = 1;
   string abstract = 2;
   repeated string authors = 3;
-  int32 year = 5;
-  string id = 6;
-  string venue = 7;
-  repeated string citations = 4;
+  repeated string out_citations = 4;
+  int32 in_citation_count = 5;
+  int32 year = 6;
+  string id = 7;
+  string venue = 8;
+  repeated string key_phrases = 9;
 }
 
 message Hit {

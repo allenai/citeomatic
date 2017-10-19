@@ -1,18 +1,18 @@
+import datetime
 import os
-import numpy as np
-import hyperopt
 from pprint import pprint
-from hyperopt import hp, fmin, tpe, Trials, STATUS_OK, STATUS_FAIL
+
+import numpy as np
+from hyperopt import hp, fmin, tpe, Trials
 from hyperopt.pyll.base import scope
+from traitlets import Int, Unicode, Enum
+
 from citeomatic import file_util
 from citeomatic.config import App
-from citeomatic.corpus import Corpus
-from citeomatic.features import Featurizer
-from citeomatic.common import DatasetPaths
-from citeomatic.training import train_text_model, end_to_end_training
 from citeomatic.models.options import ModelOptions
-from traitlets import Bool, Int, Unicode, Enum, Float
-import datetime
+from citeomatic.training import end_to_end_training
+from citeomatic.training import eval_text_model
+
 
 class CiteomaticHyperopt(App, ModelOptions):
 
@@ -111,7 +111,13 @@ class CiteomaticHyperopt(App, ModelOptions):
         training_outputs = end_to_end_training(model_options, self.dataset_type, self.models_dir)
         corpus, featurizer, model_options, model, embedding_model = training_outputs
         # TODO: insert call to eval function here
-
+        eval_text_model(
+            corpus=corpus,
+            featurizer=featurizer,
+            model_options=model_options,
+            citeomatic_model=model,
+            embedding_model_for_ann=embedding_model
+        )
         '''
         try:
             eval_file = os.path.join(

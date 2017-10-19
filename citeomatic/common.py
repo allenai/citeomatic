@@ -1,4 +1,5 @@
 import os
+from citeomatic.schema_pb2 import Document as ProtoDoc
 
 
 class FieldNames(object):
@@ -17,8 +18,8 @@ class FieldNames(object):
     URLS = "pdf_urls"
     S2_URL = "s2_url"
 
-    OUT_CITATIONS_COUNT = 'out_citation_count'
-    IN_CITATIONS_COUNT = 'in_citation_count'
+    OUT_CITATION_COUNT = 'out_citation_count'
+    IN_CITATION_COUNT = 'in_citation_count'
 
     DATE = 'date'
 
@@ -77,8 +78,8 @@ class Document(object):
         FieldNames.YEAR,
         FieldNames.PAPER_ID,
         FieldNames.VENUE,
-        FieldNames.IN_CITATIONS_COUNT,
-        FieldNames.OUT_CITATIONS_COUNT,
+        FieldNames.IN_CITATION_COUNT,
+        FieldNames.OUT_CITATION_COUNT,
         FieldNames.KEY_PHRASES,
         FieldNames.DATE
     ]
@@ -115,3 +116,19 @@ class Document(object):
 
     def _asdict(self):
         return dict(**self.__dict__)
+
+    @staticmethod
+    def from_proto_doc(doc: ProtoDoc):
+        out_citations = [c for c in doc.out_citations]
+        return Document(
+            title=doc.title,
+            abstract=doc.abstract,
+            authors=[a for a in doc.authors],
+            out_citations=out_citations,
+            in_citation_count=doc.in_citation_count,
+            year=doc.year,
+            id=doc.id,
+            venue=doc.venue,
+            out_citation_count=len(out_citations),
+            key_phrases=[p for p in doc.key_phrases],
+        )

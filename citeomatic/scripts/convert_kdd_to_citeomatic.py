@@ -4,6 +4,7 @@ import os
 from citeomatic import file_util
 from citeomatic.common import DatasetPaths, FieldNames
 from citeomatic.config import App
+from citeomatic.corpus import Corpus
 from citeomatic.service import document_from_dict, dict_from_document
 from citeomatic.traits import Enum
 import json
@@ -102,10 +103,7 @@ class ConvertKddToCiteomatic(App):
         for line in file_util.read_lines(venues_file):
             parts = line.split("\t")
             paper_id = int(parts[0])
-            if paper_id not in paper_venues:
-                paper_venues[paper_id] = []
-
-            paper_venues[paper_id].append(parts[1])
+            paper_venues[paper_id] = parts[1]
 
         test_paper_id = 13
         print("==== Test Paper Details ====")
@@ -144,11 +142,11 @@ class ConvertKddToCiteomatic(App):
                     FieldNames.YEAR: paper_years[id],
                     FieldNames.AUTHORS: paper_authors.get(id, []),
                     FieldNames.KEY_PHRASES: paper_keyphrases[id],
-                    FieldNames.OUT_CITATIONS_COUNT: len(paper_citations.get(id, [])),
-                    FieldNames.IN_CITATIONS_COUNT: len(paper_in_citations.get(id, [])),
+                    FieldNames.OUT_CITATION_COUNT: len(paper_citations.get(id, [])),
+                    FieldNames.IN_CITATION_COUNT: len(paper_in_citations.get(id, [])),
                     FieldNames.VENUE: paper_venues.get(id, '')
-                }
-            )
+                    }
+                )
             corpus[id] = doc
 
         with open(output_path, 'w') as f:
@@ -157,5 +155,7 @@ class ConvertKddToCiteomatic(App):
                 f.write(json.dumps(doc_json))
                 f.write("\n")
 
+        dp = DatasetPaths()
+        Corpus.build(dp.get_db_path(self.dataset_name), dp.get_json_path(self.dataset_name))
 
 ConvertKddToCiteomatic.run(__name__)

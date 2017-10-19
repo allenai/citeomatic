@@ -450,7 +450,7 @@ class DataGenerator(object):
                 examples = []
                 labels = []
                 query = self.corpus[doc_id]
-                true_citations = candidate_ids_set.intersection(query.citations)
+                true_citations = candidate_ids_set.intersection(query.out_citations)
                 if len(true_citations) < MIN_TRUE_CITATIONS:
                     continue
 
@@ -557,7 +557,7 @@ class DataGenerator(object):
             return document_ids
 
         # initialize some variables
-        doc_citations = set(document.citations)
+        doc_citations = set(document.out_citations)
         doc_citations.add(document.id)
         result_ids_dict = {}
         for key in self.KEYS:
@@ -574,7 +574,7 @@ class DataGenerator(object):
             result_ids_dict['hard_negatives'] = set(
                 flatten(
                     [
-                        list(self.corpus[id].citations) for id in document.citations
+                        list(self.corpus[id].out_citations) for id in document.out_citations
                         if id in self.corpus
                     ]
                 )

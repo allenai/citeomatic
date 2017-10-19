@@ -1,12 +1,13 @@
+import json
 import logging
 import sqlite3
 
 import tqdm
 
 from citeomatic import file_util
-from citeomatic.common import FieldNames
+from citeomatic.common import FieldNames, Document
 from citeomatic.utils import batchify
-from citeomatic.schema_pb2 import Document
+from citeomatic.schema_pb2 import Document as ProtoDoc
 
 
 def stream_papers(data_path):
@@ -14,14 +15,21 @@ def stream_papers(data_path):
         citations = set(line_json[FieldNames.OUT_CITATIONS])
         citations.discard(line_json[FieldNames.PAPER_ID])  # remove self-citations
         citations = list(citations)
-        yield Document(
+
+        in_citation_count = int(line_json[FieldNames.IN_CITATION_COUNT])
+
+        key_phrases = list(set(line_json[FieldNames.KEY_PHRASES]))
+
+        yield ProtoDoc(
             id=line_json[FieldNames.PAPER_ID],
             title=line_json[FieldNames.TITLE],
             abstract=line_json[FieldNames.ABSTRACT],
             authors=line_json[FieldNames.AUTHORS],
-            citations=citations,
+            out_citations=citations,
+            in_citation_count=in_citation_count,
             year=line_json.get(FieldNames.YEAR, 2017),
-            venue=None,
+            key_phrases=key_phrases,
+            venue=line_json.get(FieldNames.VENUE, ''),
         )
 
 
@@ -109,9 +117,9 @@ class Corpus(object):
             for row in tx.execute(
                     'SELECT payload from documents ORDER BY year'
             ):
-                doc = Document()
+                doc = ProtoDoc()
                 doc.ParseFromString(row[0])
-                yield doc
+                yield Document.from_proto_doc(doc)
 
     def __len__(self):
         return self.n_docs

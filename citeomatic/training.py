@@ -1,23 +1,22 @@
 import logging
-import resource
 import os
+import resource
 from collections import defaultdict
 
-import tensorflow as tf
 import keras
 import numpy as np
-from citeomatic import file_util
-from citeomatic.neighbors import EmbeddingModel, make_ann
-from citeomatic.serialization import model_from_directory
-from citeomatic.features import DataGenerator
-from citeomatic.utils import import_from
-from citeomatic.models import layers
-from citeomatic.corpus import Corpus
-from citeomatic.common import DatasetPaths
-from citeomatic.features import Featurizer
-from citeomatic.models.options import ModelOptions
-from keras.callbacks import ReduceLROnPlateau, TensorBoard, Callback
+import tensorflow as tf
+from keras.callbacks import ReduceLROnPlateau, TensorBoard
 from keras.optimizers import TFOptimizer
+
+from citeomatic import file_util
+from citeomatic.common import DatasetPaths
+from citeomatic.corpus import Corpus
+from citeomatic.features import DataGenerator
+from citeomatic.features import Featurizer
+from citeomatic.models import layers
+from citeomatic.neighbors import EmbeddingModel, make_ann, ANN
+from citeomatic.utils import import_from
 
 
 def rank_metrics(y, preds, max_num_true_multiplier=9):
@@ -252,6 +251,7 @@ def train_text_model(
 
     return model, embedding_model
 
+
 def end_to_end_training(model_options, dataset_type, models_dir, models_ann_dir=None):
     # step 1: make the directory
     if not os.path.exists(models_dir):
@@ -310,12 +310,26 @@ def end_to_end_training(model_options, dataset_type, models_dir, models_ann_dir=
 
     return corpus, featurizer, model_options, citeomatic_model, embedding_model
 
+
 def eval_text_model(
     corpus,
     featurizer,
     model_options,
+    citeomatic_model,
     embedding_model_for_ann=None,
-    debug=False
+    debug=False,
+    papers_source='valid'
 ):
+    if papers_source == 'valid':
+        paper_ids_for_eval = corpus.valid_ids
+    elif papers_source == 'train':
+        paper_ids_for_eval = corpus.train_ids
+    else:
+        logging.info("Using Test IDs")
+        paper_ids_for_eval = corpus.test_ids
+
+    for doc_id in paper_ids_for_eval:
+        citations = corpus[doc_id].citations
+
     pass
 

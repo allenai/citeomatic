@@ -12,7 +12,7 @@ pandas==0.19.2
 pytest
 requests
 scikit-learn
-tensorflow==1.2.0
+tensorflow-gpu==1.2.0
 tqdm
 untangle
 hyperopt
