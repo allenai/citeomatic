@@ -1,5 +1,5 @@
 from citeomatic.models.layers import L2Normalize, ScalarMul, Sum, ZeroMaskedEntries
-from keras.layers import Bidirectional, Embedding, Input, LSTM, merge
+from keras.layers import Bidirectional, Embedding, Input, LSTM, Concatenate
 from keras.layers.convolutional import Convolution1D
 from keras.layers.pooling import GlobalAveragePooling1D
 from keras.models import Model
@@ -8,19 +8,6 @@ from keras.regularizers import l1, l2
 
 def _prefix(tuple):
     return '-'.join(tuple)
-
-
-def summed_embedding(name, input, n_features, dense_dim, l2_lambda):
-    embed = Embedding(
-        output_dim=dense_dim,
-        input_dim=n_features,
-        embeddings_regularizer=l2(l2_lambda),
-        mask_zero=True
-    )
-    embedded_input = ZeroMaskedEntries()(embed(input))
-    sum = Sum.invoke(embedded_input, name='%s-sum-title' % name)
-    return L2Normalize.invoke(sum, name='%s-dir-norm' % name)
-
 
 class TextEmbedding(object):
     """
@@ -37,14 +24,14 @@ class TextEmbedding(object):
         self.embed_direction = Embedding(
             output_dim=self.dense_dim,
             input_dim=self.n_features,
-            embeddings_regularizer=l2(self.l2_lambda),
+            activity_regularizer=l2(self.l2_lambda),
             mask_zero=True
         )
         self.mask_direction = ZeroMaskedEntries()
         self.embed_magnitude = Embedding(
             output_dim=1,
             input_dim=self.n_features,
-            embeddings_regularizer=l1(self.l1_lambda),
+            activity_regularizer=l1(self.l1_lambda),
             # will induce sparsity if large enough
             mask_zero=True
         )
@@ -75,7 +62,7 @@ class TextEmbedding(object):
         else:
             outputs_list = [sum]
         return Model(
-            inputs=_input, outputs=outputs_list, name="%s-embedding-model"
+            inputs=_input, outputs=outputs_list, name="%s-embedding-model" % prefix
         ), outputs_list
 
 
@@ -98,14 +85,14 @@ class TextEmbeddingConv(object):
         self.embed_direction = Embedding(
             output_dim=self.dense_dim,
             input_dim=self.n_features,
-            embeddings_regularizer=l2(self.l2_lambda),
+            activity_regularizer=l2(self.l2_lambda),
             mask_zero=True
         )
         self.mask_direction = ZeroMaskedEntries()
         self.embed_magnitude = Embedding(
             output_dim=1,
             input_dim=n_features,
-            embeddings_regularizer=l1(self.l1_lambda),
+            activity_regularizer=l1(self.l1_lambda),
             mask_zero=True
         )
         self.mask_magnitude = ZeroMaskedEntries()
@@ -153,12 +140,9 @@ class TextEmbeddingConv(object):
         ]
         if len(list_of_gated_convs) > 1:
             # last axis should have size nb_filter * max_filter_length
-            concatted_embeddings = merge(
-                list_of_gated_convs,
-                mode='concat',
-                concat_axis=-1,
-                name='%s-concatted-embeddings' % prefix
-            )
+            concatted_embeddings = Concatenate(
+                axis=-1, name='%s-concatted-embeddings' % prefix
+            )(list_of_gated_convs)
         else:
             concatted_embeddings = list_of_gated_convs[0]
         # global max pool
@@ -193,7 +177,7 @@ class TextEmbeddingLSTM(object):
         self.embedding = Embedding(
             output_dim=self.dense_dim,
             input_dim=self.n_features,
-            embeddings_regularizer=l2(self.l2_lambda),
+            activity_regularizer=l2(self.l2_lambda),
             mask_zero=True
         )
         self.bilstm = Bidirectional(LSTM(lstm_dim))

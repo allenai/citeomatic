@@ -2,6 +2,7 @@ import tensorflow as tf
 from keras import backend as K
 from keras.engine.topology import Layer
 from keras.layers import Lambda
+from keras.layers import Concatenate, Dot, Reshape, Flatten
 
 class ZeroMaskedEntries(Layer):
     """
@@ -80,13 +81,21 @@ class ScalarMultiply(Layer):
         return input_shape[0], input_shape[1]
 
 
+def custom_dot(a, b, d, normalize=True):
+    # keras is terrible...
+    reshaped_a = Reshape((1, d))(a)
+    reshaped_b = Reshape((1, d))(b)
+    reshaped_in = [reshaped_a, reshaped_b]
+    dotted = Dot(axes=(2, 2), normalize=normalize)(reshaped_in)
+    return Flatten()(dotted)
+
+
 def triplet_loss(y_true, y_pred):
     y_pred = K.flatten(y_pred)
     y_true = K.flatten(y_true)
     pos = y_pred[::2]
     neg = y_pred[1::2]
-
-    # margin is given by the difference in label for the correct order
+    # margin is given by the difference in labels
     margin = y_true[::2] - y_true[1::2]
     delta = K.maximum(margin + neg - pos, 0)
     return K.mean(delta, axis=-1)

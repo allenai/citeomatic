@@ -1,19 +1,15 @@
 from citeomatic.models.options import ModelOptions
-from citeomatic.models.layers import L2Normalize, ScalarMultiply
-from citeomatic.models.text_embeddings import TextEmbedding
+from citeomatic.models.layers import L2Normalize, ScalarMultiply, custom_dot
+from citeomatic.models.text_embeddings import TextEmbedding, _prefix
 from keras.engine import Model
-from keras.layers import Dense, Merge, Reshape
+from keras.layers import Dense, Reshape, Add
 
 FIELDS = ['title', 'abstract']
 SOURCE_NAMES = ['query', 'candidate']
 
 
 def create_model(options: ModelOptions):
-    def reshaped(model):
-        return Reshape((1, options.dense_dim))(model)
-
-    def _prefix(tuple):
-        return '-'.join(tuple)
+    logging.info('Building model: %s' % options)
 
     text_embeddings = TextEmbedding(
         n_features=options.n_features,
@@ -39,18 +35,18 @@ def create_model(options: ModelOptions):
             normed_sum = embedding_models[prefix].outputs[0]
             weighted_normed_sums.append(scalar_sum_models[field](normed_sum))
 
-        weighted_sum = Merge(mode='sum')(weighted_normed_sums)
+        weighted_sum = Add()(weighted_normed_sums)
         normed_weighted_sum_of_normed_sums[source] = L2Normalize.invoke(
             weighted_sum, name='%s-l2_normed_sum' % source
         )
 
     # cos distance
-    query = reshaped(normed_weighted_sum_of_normed_sums['query'])
-    candidate = reshaped(normed_weighted_sum_of_normed_sums['candidate'])
-    cos_dist = Merge(mode='dot', dot_axes=(2, 2))([query, candidate])
-    text_output = Dense(
-        1, init='one', bias=False, activation='sigmoid'
-    )(Reshape((1,))(cos_dist))
+    text_output = custom_dot(
+        normed_weighted_sum_of_normed_sums['query'],
+        normed_weighted_sum_of_normed_sums['candidate'],
+        options.dense_dim,
+        normalize=False
+    )
 
     citeomatic_inputs = []
     for source in SOURCE_NAMES:

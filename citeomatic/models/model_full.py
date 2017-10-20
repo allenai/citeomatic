@@ -1,44 +1,22 @@
 import logging
 
 import tensorflow as tf
-from citeomatic.models.layers import Sum, ZeroMaskedEntries
+from citeomatic.models.layers import Sum, ZeroMaskedEntries, custom_dot
 from citeomatic.models.options import ModelOptions
 from citeomatic.models.text_embeddings import (
-    TextEmbedding, TextEmbeddingConv, TextEmbeddingLSTM, summed_embedding
+    TextEmbedding, TextEmbeddingConv, TextEmbeddingLSTM, _prefix
 )
 from keras.engine import Model
 from keras.regularizers import l1, l2
-from keras.layers import Dense, Embedding, Highway, Input, Merge, Reshape
-from keras.layers.core import Flatten
+from keras.layers import Dense, Embedding, Input, Reshape, Concatenate
 
 FIELDS = ['title', 'abstract']
 SOURCE_NAMES = ['query', 'candidate']
 
-
-def holographic_merge(inputs):
-    a, b = inputs
-    a_fft = tf.fft(tf.complex(a, 0.0))
-    b_fft = tf.fft(tf.complex(b, 0.0))
-    ifft = tf.ifft(tf.conj(a_fft) * b_fft)
-    return tf.cast(tf.real(ifft), 'float32')
-
-
-def holographic_output_shape(shapes):
-    return shapes[0]
-
-
 def create_model(options: ModelOptions):
     logging.info('Building model: %s' % options)
 
-    def _prefix(tuple):
-        return '-'.join(tuple)
-
-    def reshaped(model):
-        return Reshape((1, options.dense_dim))(model)
-
-    flatten = Flatten()
     embedders = {}
-
     def _make_embedder():
         if options.embedding_type == 'sum':
             return TextEmbedding(
@@ -73,20 +51,6 @@ def create_model(options: ModelOptions):
     embedding_models = {}
     normed_sums = {}
     intermediate_outputs = []
-
-    def _similarity(a, b):
-        if options.use_holographic:
-            return Merge(
-                mode=holographic_merge, output_shape=holographic_output_shape
-            )([reshaped(a), reshaped(b)])
-        else:
-            return Merge(
-                mode='dot', dot_axes=(2, 2)
-            )([reshaped(a), reshaped(b)])
-
-    def _sum(v):
-        return Sum()(v)
-
     citeomatic_inputs = []
     if options.use_dense:
         for source in SOURCE_NAMES:
@@ -102,10 +66,16 @@ def create_model(options: ModelOptions):
         for field in FIELDS:
             query = normed_sums[('query', field)]
             candidate = normed_sums[('candidate', field)]
-            intermediate_outputs.append(flatten(_similarity(query, candidate)))
+            cos_dist = custom_dot(
+                query,
+                candidate,
+                options.dense_dim,
+                normalize=False
+            )
+            intermediate_outputs.append(cos_dist)
 
     # lookup weights for the intersection of individual terms (computed by the feature generator.)
-    if options.sparse_option == 'linear':
+    if options.use_sparse:
         for field in FIELDS:
             sparse_input = Input(
                 name='query-candidate-%s-intersection' % field, shape=(None,)
@@ -115,33 +85,11 @@ def create_model(options: ModelOptions):
                 output_dim=1,
                 mask_zero=True,
                 name="%s-sparse-embedding" % field,
-                embeddings_regularizer=l1(options.l1_lambda)
+                activity_regularizer=l1(options.l1_lambda)
             )
             elementwise_sparse = ZeroMaskedEntries(
             )(sparse_embedding(sparse_input))
-            intermediate_outputs.append(_sum(elementwise_sparse))
-            citeomatic_inputs.append(sparse_input)
-    elif options.sparse_option == 'attention':
-        for field in FIELDS:
-            sparse_input = Input(
-                name='query-candidate-%s-intersection' % field, shape=(None,)
-            )
-            sparse_embedding = Embedding(
-                input_dim=options.n_features,
-                output_dim=options.dense_dim,
-                mask_zero=True,
-                name="%s-sparse-embedding" % field,
-                embeddings_regularizer=l1(options.l1_lambda)
-            )
-            elementwise_sparse = ZeroMaskedEntries(
-            )(sparse_embedding(sparse_input))
-            intermediate_outputs.append(
-                flatten(
-                    _similarity(
-                        normed_sums[('query', field)], _sum(elementwise_sparse)
-                    )
-                )
-            )
+            intermediate_outputs.append(Sum()(elementwise_sparse))
             citeomatic_inputs.append(sparse_input)
 
     if options.use_authors:
@@ -149,44 +97,27 @@ def create_model(options: ModelOptions):
         assert options.author_dim > 0
 
         # compute candidate-author interactions
-        author_input = Input(
-            name='candidate-authors', shape=(None,), dtype='int32'
+        author_embedder, outputs = TextEmbedding(
+                n_features=options.n_authors,
+                dense_dim=options.author_dim,
+                l1_lambda=options.l1_lambda,
+                l2_lambda=options.l2_lambda
+        ).create_text_embedding_model(
+            prefix='candidate-authors',
+            final_l2_norm=True
         )
-        citeomatic_inputs.append(author_input)
-        author_embeddings = summed_embedding(
-            name='authors',
-            input=author_input,
-            n_features=options.n_authors,
-            dense_dim=options.author_dim,
-            l2_lambda=options.l2_lambda
-        )
-
+        citeomatic_inputs.append(author_embedder.input)
+        author_embeddings = outputs[0]
         if options.author_dim != options.dense_dim:
             author_embeddings = Dense(options.dense_dim)(author_embeddings)
 
-        if options.use_holographic:
-            logging.info('Holographic authors.')
-            author_abstract_interaction = Merge(
-                mode=holographic_merge,
-                output_shape=holographic_output_shape,
-                name='author-abstract-interaction'
-            )(
-                [
-                    reshaped(author_embeddings),
-                    reshaped(normed_sums[('query', 'abstract')])
-                ]
-            )
-        else:
-            author_abstract_interaction = Merge(
-                mode='dot', dot_axes=(2, 2), name='author-abstract-interaction'
-            )(
-                [
-                    reshaped(author_embeddings),
-                    reshaped(normed_sums[('query', 'abstract')])
-                ]
-            )
-
-        intermediate_outputs.append(flatten(author_abstract_interaction))
+        author_abstract_interaction = custom_dot(
+            author_embeddings,
+            normed_sums[('query', 'abstract')],
+            options.dense_dim,
+            normalize=False
+        )
+        intermediate_outputs.append(author_abstract_interaction)
 
     if options.use_citations:
         citation_count_input = Input(
@@ -196,26 +127,22 @@ def create_model(options: ModelOptions):
         intermediate_outputs.append(citation_count_input)
 
     if len(intermediate_outputs) > 1:
-        cosine_dists_merged = Merge(mode='concat')(intermediate_outputs)
-        last = cosine_dists_merged
+        last = Concatenate()(intermediate_outputs)
     else:
         last = intermediate_outputs
 
     for i, layer_size in enumerate(options.dense_config.split(',')):
         layer_size = int(layer_size)
-        if options.dense_type == 'highway':
-            last = Highway(name='dense-%d' % i, activation='elu')(last)
-        else:
-            last = Dense(
-                layer_size, name='dense-%d' % i, activation='elu'
-            )(last)
+        last = Dense(
+            layer_size, name='dense-%d' % i, activation='elu'
+        )(last)
 
     text_output = Dense(
         1, kernel_initializer='one', name='final-output', activation='sigmoid'
     )(last)
 
     citeomatic_model = Model(inputs=citeomatic_inputs, outputs=text_output)
-    embedding_model, _ = embedders['query'].create_text_embedding_model(
+    embedding_model, _ = embedders['candidate'].create_text_embedding_model(
         prefix="doc"
     )
 

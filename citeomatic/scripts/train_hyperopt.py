@@ -3,15 +3,16 @@ import os
 from pprint import pprint
 
 import numpy as np
-from hyperopt import hp, fmin, tpe, Trials
+from hyperopt import hp, fmin, tpe, Trials, STATUS_OK, STATUS_FAIL
 from hyperopt.pyll.base import scope
 from traitlets import Int, Unicode, Enum
 
 from citeomatic import file_util
 from citeomatic.config import App
+from citeomatic.serialization import model_from_directory
 from citeomatic.models.options import ModelOptions
 from citeomatic.training import end_to_end_training
-from citeomatic.training import eval_text_model
+from citeomatic.training import eval_text_model, EVAL_DATASET_KEYS
 
 
 class CiteomaticHyperopt(App, ModelOptions):
@@ -22,6 +23,8 @@ class CiteomaticHyperopt(App, ModelOptions):
     max_evals_secondary = Int(default_value=10)
     total_samples_initial = Int(default_value=5000000)
     total_samples_secondary = Int(default_value=20000000)
+    n_eval = Int(default_value=1000, allow_none=True)
+    models_ann_dir = Unicode(default_value=None, allow_none=True)
     models_dir_base = Unicode(
         default_value='/net/nfs.corp/s2-research/citeomatic/'
     )
@@ -29,6 +32,8 @@ class CiteomaticHyperopt(App, ModelOptions):
 
     # to be filled in later
     models_dir = None
+    embedding_model_for_ann = None
+    featurizer_for_ann = None
 
     def main(self, args):
 
@@ -46,28 +51,42 @@ class CiteomaticHyperopt(App, ModelOptions):
 
         # the search space
         # note that the scope.int code is a hack to get integers out of the sampler
-        space = {
-            'dense_dim':
-                scope.int(hp.quniform('dense_dim', 25, 325, 25)),
-            'use_authors':
-                hp.choice('use_authors', [True, False]),
-            'use_citations':
-                hp.choice('use_citations', [True, False]),
-            'sparse_option':
-                hp.choice('sparse_option', ['none', 'linear', 'attention']),
-            'use_holographic':
-                hp.choice('use_holographic', [True, False]),
-            'use_src_tgt_embeddings':
-                hp.choice('use_src_tgt_embeddings', [True, False]),
-            'lr':
-                hp.choice('lr', [0.1, 0.01, 0.001, 0.0001, 0.00001]),
-            'l2_lambda':
-                hp.choice('l2_lambda', np.append(np.logspace(-7, 0, 8), 0)),
-            'l1_lambda':
-                hp.choice('l1_lambda', np.append(np.logspace(-7, 0, 8), 0)),
-            'margin_multiplier':
-                hp.choice('margin_multiplier', [0.5, 0.75, 1.0, 1.25, 1.5])
-        }
+        if self.model_name == 'model_full':
+            space = {
+                'total_samples':
+                    self.total_samples_initial,
+                'dense_dim':
+                    scope.int(hp.quniform('dense_dim', 25, 325, 25)),
+                'use_authors':
+                    hp.choice('use_authors', [True, False]),
+                'use_citations':
+                    hp.choice('use_citations', [True, False]),
+                'use_sparse':
+                    hp.choice('sparse_option', [True, False]),
+                'use_src_tgt_embeddings':
+                    hp.choice('use_src_tgt_embeddings', [True, False]),
+                'lr':
+                    hp.choice('lr', [0.1, 0.01, 0.001, 0.0001, 0.00001]),
+                'l2_lambda':
+                    hp.choice('l2_lambda', np.append(np.logspace(-7, -2, 6), 0)),
+                'l1_lambda':
+                    hp.choice('l1_lambda', np.append(np.logspace(-7, -2, 6), 0)),
+                'margin_multiplier':
+                    hp.choice('margin_multiplier', [0.5, 0.75, 1.0, 1.25, 1.5])
+            }
+        elif self.model_name == 'model_ann':
+            space = {
+                'total_samples':
+                    self.total_samples_initial,
+                'lr':
+                    hp.choice('lr', [0.1, 0.01, 0.001, 0.0001, 0.00001]),
+                'l2_lambda':
+                    hp.choice('l2_lambda', np.append(np.logspace(-7, -2, 6), 0)),
+                'l1_lambda':
+                    hp.choice('l1_lambda', np.append(np.logspace(-7, -2, 6), 0)),
+                'margin_multiplier':
+                    hp.choice('margin_multiplier', [0.5, 0.75, 1.0, 1.25, 1.5])
+            }
 
         # stage 1: run hyperopt for max_evals_initial
         # using a max of total_samples_initial samples
@@ -107,42 +126,63 @@ class CiteomaticHyperopt(App, ModelOptions):
 
     def eval_fn(self, params):
         model_options = ModelOptions(**params)
-
-        training_outputs = end_to_end_training(model_options, self.dataset_type, self.models_dir)
+        print(model_options)
+        # TODO: if self.models_ann_dir is not none, we still make the ANN every time.
+        # should be able to just do it once. Maybe need to restructure?
+        # This will be a bigger deal once we are using open corpus
+        training_outputs = end_to_end_training(
+            model_options,
+            self.dataset_type,
+            self.models_dir,
+            self.models_ann_dir
+        )
         corpus, featurizer, model_options, model, embedding_model = training_outputs
-        # TODO: insert call to eval function here
-        eval_text_model(
+        if self.models_ann_dir is None:
+            featurizer_for_ann = featurizer
+            embedding_model_for_ann = embedding_model
+        elif self.embedding_model_for_ann is None:
+            featurizer_for_ann, ann_models = model_from_directory(models_ann_dir)
+            embedding_model_for_ann = ann_models['embedding']
+            self.featurizer_for_ann = featurizer_for_ann
+            self.embedding_model_for_ann = embedding_model_for_ann
+        else:
+            embedding_model_for_ann = self.embedding_model_for_ann
+            featurizer_for_ann = self.featurizer_for_ann
+
+        results_training = eval_text_model(
             corpus=corpus,
             featurizer=featurizer,
             model_options=model_options,
             citeomatic_model=model,
-            embedding_model_for_ann=embedding_model
+            embedding_model_for_ann=embedding_model_for_ann,
+            featurizer_for_ann=featurizer_for_ann,
+            papers_source='train',
+            n_eval=self.n_eval
         )
-        '''
-        try:
-            eval_file = os.path.join(
-                self.models_dir, 'evaluation_results.pickle'
-            )
-            results = file_util.read_pickle(eval_file)
-            result = results[self.metric]
-            # clean up
-            eval_clean_cmd = 'rm ' + os.path.join(
-                self.models_dir, 'evaluation_results.pickle'
-            )
-            os.system(eval_clean_cmd)
-        except:
-            print('Could finish evaluation!')
-            result = -1
-            results = {}
+        results_validation = eval_text_model(
+            corpus=corpus,
+            featurizer=featurizer,
+            model_options=model_options,
+            citeomatic_model=model,
+            embedding_model_for_ann=embedding_model_for_ann,
+            featurizer_for_ann=featurizer_for_ann,
+            papers_source='valid',
+            n_eval=self.n_eval
+        )
+
+        p = results_validation['precision_1'][EVAL_DATASET_KEYS[self.dataset_type]]
+        r = results_validation['recall_1'][EVAL_DATASET_KEYS[self.dataset_type]]
+        f1 = 2 * p * r / (p + r)
 
         out = {
-            'loss': result * -1,
-            'other_losses': results,
-            'status': STATUS_FAIL if result == -1 else STATUS_OK,
+            'loss': -f1, # have to negate since we're minimizing
+            'losses_training': results_training,
+            'losses_validation': results_validation,
+            'status': STATUS_FAIL if np.isnan(f1) else STATUS_OK,
             'params': params
         }
 
         return out
-        '''
+
 
 CiteomaticHyperopt.run(__name__)

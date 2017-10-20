@@ -266,7 +266,7 @@ class Featurizer(object):
         )
 
         features = {
-            'query-authors':
+            'query-authors-txt':
                 source_features['authors'],
             'query-title-txt':
                 source_features['title'],
@@ -276,7 +276,7 @@ class Featurizer(object):
                 candidate_features['title'],
             'candidate-abstract-txt':
                 candidate_features['abstract'],
-            'candidate-authors':
+            'candidate-authors-txt':
                 candidate_features['authors'],
             'query-candidate-title-intersection':
                 query_candidate_title_intersection,

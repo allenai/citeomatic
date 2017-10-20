@@ -23,7 +23,10 @@ from citeomatic.serialization import model_from_directory
 from citeomatic.utils import import_from
 import collections
 
-EVAL_KEYS = [1, 5, 10, 20, 50, 100, 1000, 5000]
+EVAL_KEYS = [1, 5, 10, 20, 50, 100, 1000]
+EVAL_DATASET_KEYS = {'dblp': 5,
+                     'pubmed': 10,
+                     'oc': 20}
 
 
 def rank_metrics(y, preds, max_num_true_multiplier=9):
@@ -246,14 +249,12 @@ def train_text_model(
 
     # logic
     model.fit_generator(
-        training_generator,
+        generator=training_generator,
         steps_per_epoch=steps_per_epoch,
-        callbacks=callbacks_list,
         epochs=epochs,
-        max_q_size=2,
-        pickle_safe=False,
+        callbacks=callbacks_list,
         validation_data=validation_generator,
-        validation_steps=10
+        validation_steps=10,
     )
 
     return model, embedding_model
@@ -413,6 +414,7 @@ def eval_text_model(
         model_options: ModelOptions,
         citeomatic_model: Model,
         embedding_model_for_ann: Model = None,
+        featurizer_for_ann: Featurizer = None,
         papers_source='valid',
         ann: ANN = None,
         min_citations=1,
@@ -430,12 +432,17 @@ def eval_text_model(
         candidate_ids_pool = corpus.train_ids + corpus.valid_ids + corpus.test_ids
 
     if n_eval is not None:
-        assert n_eval >= len(paper_ids_for_eval)
-        logging.info("Selecting a random sample of {} papers for evaluation".format(n_eval))
-        paper_ids_for_eval = np.random.choice(paper_ids_for_eval, n_eval, replace=False)
+        if n_eval < len(paper_ids_for_eval):
+            logging.info("Selecting a random sample of {} papers for evaluation.".format(n_eval))
+            paper_ids_for_eval = np.random.choice(paper_ids_for_eval, n_eval, replace=False)
+        else:
+            logging.info("Using all {} papers for evaluation.".format(len(paper_ids_for_eval)))
 
     candidate_ids_pool = set(candidate_ids_pool)
-    ann_embedding_model = EmbeddingModel(featurizer, embedding_model_for_ann)
+
+    if featurizer_for_ann is None:
+        featurizer_for_ann = featurizer
+    ann_embedding_model = EmbeddingModel(featurizer_for_ann, embedding_model_for_ann)
 
     if ann is None:
         ann = make_ann(ann_embedding_model, corpus)

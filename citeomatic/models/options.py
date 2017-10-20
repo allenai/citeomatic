@@ -17,9 +17,7 @@ class ModelOptions(HasTraits):
     use_citations = Bool(default_value=True)
     use_authors = Bool(default_value=False)
     author_dim = Int(default_value=10)
-    sparse_option = Enum(values=['none', 'linear', 'attention'], default_value='linear')
-    use_attention = Bool(default_value=False)
-    use_holographic = Bool(default_value=False)
+    use_sparse = Bool(default_value=True)
     use_src_tgt_embeddings = Bool(default_value=False)
     optimizer = Unicode(default_value='tfopt')
 
@@ -44,7 +42,6 @@ class ModelOptions(HasTraits):
     max_filter_len = Int()
 
     # dense layers
-    dense_type = Unicode(default_value='dense')
     dense_config = Unicode(default_value='20,20')
 
     num_ann_nbrs_to_fetch = Int(default_value=100)
