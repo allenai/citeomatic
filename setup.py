@@ -7,23 +7,8 @@ setuptools.setup(
     url='http://github.com/allenai/s2-research',
     packages=setuptools.find_packages(),
     install_requires=[
-        'Flask',
-        'Keras==2.0.5',
-        'annoy',
-        'elasticsearch',
-        'luigi',
-        'pandas',
-        'requests',
-        'scikit-learn',
-        'tensorflow-gpu==1.2.0',
-        'tqdm',
-        'untangle',
-        'arrow',
-        'boto3'
     ],
     tests_require=[
-        'pytest',
-        'yapf',
     ],
     zip_safe=False,
     test_suite='py.test',

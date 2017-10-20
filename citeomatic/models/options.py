@@ -47,6 +47,11 @@ class ModelOptions(HasTraits):
     dense_type = Unicode(default_value='dense')
     dense_config = Unicode(default_value='20,20')
 
+    num_ann_nbrs_to_fetch = Int(default_value=100)
+    num_candidates_to_rank = Int(default_value=100) # No. of candidates to fetch from ANN at eval time
+    extend_candidate_citations = Bool(default_value=True) # Whether to include citations of ANN
+    # similar docs as possible candidates or not
+
     def __repr__(self):
         return json.dumps(self._trait_values, indent=2, sort_keys=True)
 

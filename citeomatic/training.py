@@ -6,17 +6,24 @@ from collections import defaultdict
 import keras
 import numpy as np
 import tensorflow as tf
+import tqdm
 from keras.callbacks import ReduceLROnPlateau, TensorBoard
+from keras.engine import Model
 from keras.optimizers import TFOptimizer
 
 from citeomatic import file_util
-from citeomatic.common import DatasetPaths
+from citeomatic.common import DatasetPaths, Document
 from citeomatic.corpus import Corpus
 from citeomatic.features import DataGenerator
 from citeomatic.features import Featurizer
 from citeomatic.models import layers
+from citeomatic.models.options import ModelOptions
 from citeomatic.neighbors import EmbeddingModel, make_ann, ANN
+from citeomatic.serialization import model_from_directory
 from citeomatic.utils import import_from
+import collections
+
+EVAL_KEYS = [1, 5, 10, 20, 50, 100, 1000, 5000]
 
 
 def rank_metrics(y, preds, max_num_true_multiplier=9):
@@ -45,7 +52,7 @@ def rank_metrics(y, preds, max_num_true_multiplier=9):
 
 
 def test_model(
-    model, corpus, test_generator, n=None, print_results=False, debug=False
+        model, corpus, test_generator, n=None, print_results=False, debug=False
 ):
     """
     Utility function to test citation prediction for one query document at a time.
@@ -146,12 +153,12 @@ class UpdateANN(keras.callbacks.Callback):
 
 
 def train_text_model(
-    corpus,
-    featurizer,
-    model_options,
-    models_ann_dir=None,
-    debug=False,
-    tensorboard_dir=None
+        corpus,
+        featurizer,
+        model_options,
+        models_ann_dir=None,
+        debug=False,
+        tensorboard_dir=None
 ):
     """
     Utility function for training citeomatic models.
@@ -223,7 +230,7 @@ def train_text_model(
                     verbose=1, patience=2, epsilon=0.01, min_lr=1e-6, factor=0.5
                 )
             )
-            
+
     if model_options.use_nn_negatives:
         if models_ann_dir is None:
             ann_featurizer = featurizer
@@ -311,25 +318,194 @@ def end_to_end_training(model_options, dataset_type, models_dir, models_ann_dir=
     return corpus, featurizer, model_options, citeomatic_model, embedding_model
 
 
+def fetch_candidates(
+        corpus: Corpus,
+        candidate_ids_pool: set,
+        doc: Document,
+        ann_embedding_model: EmbeddingModel,
+        ann: ANN,
+        top_n: int,
+        extend_candidate_citations: bool
+):
+    doc_embedding = ann_embedding_model.embed(doc)
+    # 1. Fetch candidates from ANN index
+    nn_candidates = ann.get_nns_by_vector(doc_embedding, top_n + 1)
+    # 2. Remove the current document from candidate list
+    if doc.id in nn_candidates:
+        nn_candidates.remove(doc.id)
+    candidate_ids = nn_candidates[:top_n]
+
+    # 3. Check if we need to include citations of candidates found so far.
+    if extend_candidate_citations:
+        extended_candidate_ids = []
+        for candidate_id in candidate_ids:
+            extended_candidate_ids.extend(corpus[candidate_id].out_citations)
+        candidate_ids = candidate_ids + extended_candidate_ids
+    logging.info("Number of candidates found: {}".format(len(candidate_ids)))
+    candidate_ids = set(candidate_ids).intersection(candidate_ids_pool)
+    candidates = [corpus[candidate_id] for candidate_id in candidate_ids]
+
+    return candidates
+
+
+def eval_metrics(predictions: list, corpus: Corpus, doc_id: str, min_citations):
+
+    def _mrr(p):
+        try:
+            idx = p.index(True)
+            return 1. / (idx + 1)
+        except ValueError:
+            return 0.0
+
+    gold_citations = set(corpus[doc_id].out_citations)
+    if doc_id in gold_citations:
+        gold_citations.remove(doc_id)
+    citations_of_citations = []
+    for c in gold_citations:
+        citations_of_citations.extend(corpus[c].out_citations)
+    gold_citations_2 = set(citations_of_citations).union(gold_citations)
+    if doc_id in gold_citations_2:
+        gold_citations_2.remove(doc_id)
+
+    if len(gold_citations) < min_citations:
+        return None
+
+    paper_results = []
+
+    for prediction in predictions:
+        paper_results.append(
+            {
+                'correct_1': prediction['document'].id in gold_citations,
+                'correct_2': prediction['document'].id in gold_citations_2,
+                'score': prediction['score'],
+                'num_gold_1': len(gold_citations),
+                'num_gold_2': len(gold_citations_2)
+            }
+        )
+
+    p1 = [p['correct_1'] for p in paper_results]
+    mrr1 = _mrr(p1)
+    p2 = [p['correct_2'] for p in paper_results]
+    mrr2 = _mrr(p2)
+
+    logging.info('Level 1 P@10 = %f ' % np.mean(p1[:10]))
+    logging.info('Level 2 P@10 = %f ' % np.mean(p2[:10]))
+    logging.info('Level 1 MRR = %f' % mrr1)
+    logging.info('Level 2 MRR = %f' % mrr2)
+    candidate_set_recall = np.sum(p1) / len(gold_citations)
+    logging.info('Candidate set recall = {} '.format(candidate_set_recall))
+
+    return {
+        'id': doc_id,
+        'predictions': paper_results,
+        'num_gold_1': len(gold_citations),
+        'num_gold_2': len(gold_citations_2),
+        'mrr_1': mrr1,
+        'mrr_2': mrr2,
+        'p1': p1,
+        'p2': p2
+    }
+
+
 def eval_text_model(
-    corpus,
-    featurizer,
-    model_options,
-    citeomatic_model,
-    embedding_model_for_ann=None,
-    debug=False,
-    papers_source='valid'
+        corpus: Corpus,
+        featurizer: Featurizer,
+        model_options: ModelOptions,
+        citeomatic_model: Model,
+        embedding_model_for_ann: Model = None,
+        papers_source='valid',
+        ann: ANN = None,
+        min_citations=1,
+        n_eval = None
 ):
     if papers_source == 'valid':
         paper_ids_for_eval = corpus.valid_ids
+        candidate_ids_pool = corpus.train_ids + corpus.valid_ids
     elif papers_source == 'train':
         paper_ids_for_eval = corpus.train_ids
+        candidate_ids_pool = corpus.train_ids
     else:
         logging.info("Using Test IDs")
         paper_ids_for_eval = corpus.test_ids
+        candidate_ids_pool = corpus.train_ids + corpus.valid_ids + corpus.test_ids
 
-    for doc_id in paper_ids_for_eval:
-        citations = corpus[doc_id].citations
+    if n_eval is not None:
+        assert n_eval >= len(paper_ids_for_eval)
+        logging.info("Selecting a random sample of {} papers for evaluation".format(n_eval))
+        paper_ids_for_eval = np.random.choice(paper_ids_for_eval, n_eval, replace=False)
 
-    pass
+    candidate_ids_pool = set(candidate_ids_pool)
+    ann_embedding_model = EmbeddingModel(featurizer, embedding_model_for_ann)
 
+    if ann is None:
+        ann = make_ann(ann_embedding_model, corpus)
+
+    eval_doc_predictions = []
+    results = []
+    for doc_id in tqdm.tqdm(paper_ids_for_eval):
+        query = corpus[doc_id]
+        candidates = fetch_candidates(
+            corpus=corpus,
+            candidate_ids_pool=candidate_ids_pool,
+            doc=query,
+            ann_embedding_model=ann_embedding_model,
+            ann=ann,
+            top_n=model_options.num_ann_nbrs_to_fetch,
+            extend_candidate_citations=model_options.extend_candidate_citations)
+
+        logging.info('Featurizing... %d documents ' % len(candidates))
+        features = featurizer.transform_query_and_results(query, candidates)
+        logging.info('Predicting...')
+        scores = citeomatic_model.predict(features, batch_size=1024).flatten()
+        best_matches = np.argsort(scores)[::-1]
+
+        predictions = []
+        query_doc_citations = set(query.out_citations)
+        for i, match_idx in enumerate(best_matches[:model_options.num_candidates_to_rank]):
+            predictions.append(
+                {
+                    'score':float(scores[match_idx]),
+                    'document': candidates[match_idx],
+                    'position': i,
+                    'is_cited': candidates[match_idx].id in query_doc_citations
+
+                }
+            )
+        logging.info("Done! Found %s predictions." % len(predictions))
+        eval_doc_predictions.append(predictions)
+        r = eval_metrics(predictions, corpus, doc_id, min_citations)
+        if r is not None:
+            results.append(r)
+
+    precision_at_1 = collections.defaultdict(list)
+    recall_at_1 = collections.defaultdict(list)
+
+    precision_at_2 = collections.defaultdict(list)
+    recall_at_2 = collections.defaultdict(list)
+
+    for r in results:
+        p1 = r['p1']
+        p2 = r['p2']
+        for k in EVAL_KEYS:
+            patk = np.mean(p1[:k])
+            ratk = np.sum(p1[:k]) / r['num_gold_1']
+            precision_at_1[k].append(patk)
+            recall_at_1[k].append(ratk)
+
+            patk = np.mean(p2[:k])
+            ratk = np.sum(p2[:k]) / r['num_gold_2']
+            precision_at_2[k].append(patk)
+            recall_at_2[k].append(ratk)
+
+    return {
+        'precision_1': {k: np.mean(v)
+                        for (k, v) in precision_at_1.items()},
+        'recall_1': {k: np.mean(v)
+                     for (k, v) in recall_at_1.items()},
+        'precision_2': {k: np.mean(v)
+                        for (k, v) in precision_at_2.items()},
+        'recall_2': {k: np.mean(v)
+                     for (k, v) in recall_at_2.items()},
+        'mrr_1': np.mean([r['mrr_1'] for r in results]),
+        'mrr_2': np.mean([r['mrr_2'] for r in results]),
+    }

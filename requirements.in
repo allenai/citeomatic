@@ -12,8 +12,9 @@ pandas==0.19.2
 pytest
 requests
 scikit-learn
-tensorflow-gpu==1.2.0
 tqdm
 untangle
 hyperopt
 numpy==1.13
+arrow
+networkx==1.11

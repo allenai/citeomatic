@@ -15,6 +15,7 @@ from citeomatic.common import DatasetPaths
 from citeomatic.features import Featurizer
 from citeomatic.models.options import ModelOptions
 
+
 class ModelLoader(pickle.Unpickler):
     def find_class(self, mod_name, klass_name):
         if mod_name[:4] == 'ai2.':

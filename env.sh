@@ -15,11 +15,23 @@ fi
 
 export PATH=$HOME/anaconda3/bin:$PATH
 
+source ~/anaconda3/bin/deactivate ${CONDAENV}
+
+conda remove -y --name ${CONDAENV} --all
+
 conda create -n ${CONDAENV} -y python==3.5.2 numpy scikit-learn notebook scikit-learn spacy pandas cython pytest || true
 
 echo "Activating Conda Environment ----->"
 source ~/anaconda3/bin/activate ${CONDAENV}
 
 pip install -r requirements.in
+
+TF_VERSION=1.2.0
+
+if [ "$TEAM_CITY_AGENT" ]; then
+    pip install tensorflow==${TF_VERSION}
+else
+	pip install tensorflow-gpu==${TF_VERSION}
+fi
 
 python setup.py develop
