@@ -18,7 +18,7 @@ from citeomatic.features import DataGenerator
 from citeomatic.features import Featurizer
 from citeomatic.models import layers
 from citeomatic.models.options import ModelOptions
-from citeomatic.neighbors import EmbeddingModel, make_ann, ANN
+from citeomatic.neighbors import EmbeddingModel, ANN
 from citeomatic.serialization import model_from_directory
 from citeomatic.utils import import_from
 import collections
@@ -143,15 +143,8 @@ class UpdateANN(keras.callbacks.Callback):
                 'Epoch %d ended. Retraining approximate nearest neighbors model.',
                 epoch + 1
             )
-            embedding_model_wrapped = EmbeddingModel(
-                self.featurizer, self.embedding_model
-            )
-            ann = make_ann(
-                embedding_model_wrapped,
-                self.corpus,
-                ann_trees=10,
-                build_ann_index=True
-            )
+            embedder = EmbeddingModel(self.featurizer, self.embedding_model)
+            ann = ANN.build(embedder, self.corpus, ann_trees=10)
             self.data_generator.ann = ann
 
 
@@ -446,7 +439,7 @@ def eval_text_model(
     ann_embedding_model = EmbeddingModel(featurizer_for_ann, embedding_model_for_ann)
 
     if ann is None:
-        ann = make_ann(ann_embedding_model, corpus)
+        ann = ANN.build(ann_embedding_model, corpus)
 
     eval_doc_predictions = []
     results = []

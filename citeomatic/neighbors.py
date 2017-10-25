@@ -11,35 +11,6 @@ from citeomatic.schema_pb2 import Document
 from citeomatic.serialization import load_pickle
 
 
-def hit_to_document(hit):
-    """
-    Convert hit from Elasticsearch into a Citeomatic document.
-    :param hit: dictionary from ES
-    :return: Document
-    """
-    date_str = hit['_source'].get('earliestAcquisitionDate')
-    if date_str:
-        date = arrow.get(date_str)
-    else:
-        date = None
-
-    return Document(
-        title=hit['_source']['title'],
-        id=hit['_id'],
-        abstract=hit['_source']['paperAbstract'],
-        authors=flatten(
-            [author['name'] for author in hit['_source']['authors']]
-        ),
-        year=hit['_source'].get('year', 2016),
-        venue=hit['_source'].get('venue', ''),
-        date=date,
-        citations=[],
-        in_citation_count=0,
-        out_citation_count=0,
-        key_phrases=[]
-    )
-
-
 class ANN(object):
     """
     Wraps an Annoy index and a docid mapping.
@@ -56,6 +27,25 @@ class ANN(object):
             self.annoy = annoy_index
         else:
             self.annoy = None
+
+    @classmethod
+    def build(cls, embedding_model, corpus, ann_trees=100):
+        docid_to_idx = {}
+        embedding_gen = embedding_model.embed_documents(corpus)
+        doc_embeddings = np.zeros((len(corpus), embedding_model.output_shape))
+        for i, (doc, embedding) in enumerate(
+                zip(tqdm.tqdm(corpus), embedding_gen)):
+            docid_to_idx[doc.id] = i
+            doc_embeddings[i] = embedding
+
+        annoy_index = AnnoyIndex(embedding_model.output_shape)
+        for i, embedding in enumerate(tqdm.tqdm(doc_embeddings)):
+            annoy_index.add_item(i, embedding)
+
+        annoy_index.build(ann_trees)
+        ann = cls(doc_embeddings, annoy_index, docid_to_idx)
+
+        return ann
 
     def save(self, target):
         if self.annoy is not None:
@@ -116,30 +106,5 @@ class EmbeddingModel(object):
 
         return batch_apply(generator, _run_embedding)
 
-    def embed_hits(self, generator: Iterator[dict]) -> Iterator[np.ndarray]:
-        return self.embed_documents(map(hit_to_document, generator))
-
     def embed(self, doc):
         return np.asarray(list(self.embed_documents([doc])))[0]
-
-
-def make_ann(embedding_model, corpus, ann_trees=100, build_ann_index=True):
-    docid_to_idx = {}
-    embedding_gen = embedding_model.embed_documents(corpus)
-    doc_embeddings = np.zeros((len(corpus), embedding_model.output_shape))
-    for i, (doc, embedding) in enumerate(zip(tqdm.tqdm(corpus), embedding_gen)):
-        docid_to_idx[doc.id] = i
-        doc_embeddings[i] = embedding
-
-    if build_ann_index:
-        annoy_index = AnnoyIndex(embedding_model.output_shape)
-        for i, embedding in enumerate(tqdm.tqdm(doc_embeddings)):
-            annoy_index.add_item(i, embedding)
-
-        annoy_index.build(ann_trees)
-    else:
-        annoy_index = None
-
-    ann = ANN(doc_embeddings, annoy_index, docid_to_idx)
-
-    return ann
