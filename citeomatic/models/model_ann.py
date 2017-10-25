@@ -1,8 +1,11 @@
-from citeomatic.models.options import ModelOptions
-from citeomatic.models.layers import L2Normalize, ScalarMultiply, custom_dot
-from citeomatic.models.text_embeddings import TextEmbedding, _prefix
+import logging
+
 from keras.engine import Model
-from keras.layers import Dense, Reshape, Add
+from keras.layers import Add
+
+from citeomatic.models.layers import L2Normalize, ScalarMultiply, custom_dot
+from citeomatic.models.options import ModelOptions
+from citeomatic.models.text_embeddings import TextEmbedding, _prefix
 
 FIELDS = ['title', 'abstract']
 SOURCE_NAMES = ['query', 'candidate']
@@ -54,11 +57,11 @@ def create_model(options: ModelOptions):
             key = _prefix((source, field))
             citeomatic_inputs.append(embedding_models[key].input)
 
-    citeomatic_model = Model(input=citeomatic_inputs, output=text_output)
+    citeomatic_model = Model(inputs=citeomatic_inputs, outputs=text_output)
 
     embedding_model = Model(
-        input=citeomatic_inputs[0:len(SOURCE_NAMES)],
-        output=normed_weighted_sum_of_normed_sums['query']
+        inputs=citeomatic_inputs[0:len(SOURCE_NAMES)],
+        outputs=normed_weighted_sum_of_normed_sums['query']
     )
 
     models = {'embedding': embedding_model, 'citeomatic': citeomatic_model}

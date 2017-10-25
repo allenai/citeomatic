@@ -13,10 +13,12 @@ from keras.layers import Dense, Embedding, Input, Reshape, Concatenate
 FIELDS = ['title', 'abstract']
 SOURCE_NAMES = ['query', 'candidate']
 
+
 def create_model(options: ModelOptions):
     logging.info('Building model: %s' % options)
 
     embedders = {}
+
     def _make_embedder():
         if options.embedding_type == 'sum':
             return TextEmbedding(
@@ -142,12 +144,10 @@ def create_model(options: ModelOptions):
     )(last)
 
     citeomatic_model = Model(inputs=citeomatic_inputs, outputs=text_output)
-    embedding_model, _ = embedders['candidate'].create_text_embedding_model(
-        prefix="doc"
-    )
 
+    # Setting embedding model to None to avoid its inadvertent usage for ANN embeddings
     models = {
-        'embedding': embedding_model,
+        'embedding': None,
         'citeomatic': citeomatic_model,
     }
 

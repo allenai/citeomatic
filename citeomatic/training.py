@@ -307,9 +307,10 @@ def end_to_end_training(model_options, dataset_type, models_dir, models_ann_dir=
         os.path.join(models_dir, dp.CITEOMATIC_WEIGHTS_FILENAME), overwrite=True
     )
 
-    embedding_model.save_weights(
-        os.path.join(models_dir, dp.EMBEDDING_WEIGHTS_FILENAME), overwrite=True
-    )
+    if embedding_model is not None:
+        embedding_model.save_weights(
+            os.path.join(models_dir, dp.EMBEDDING_WEIGHTS_FILENAME), overwrite=True
+        )
 
     file_util.write_json(
         os.path.join(models_dir, dp.OPTIONS_FILENAME),
@@ -342,7 +343,7 @@ def fetch_candidates(
         for candidate_id in candidate_ids:
             extended_candidate_ids.extend(corpus[candidate_id].out_citations)
         candidate_ids = candidate_ids + extended_candidate_ids
-    logging.info("Number of candidates found: {}".format(len(candidate_ids)))
+    logging.debug("Number of candidates found: {}".format(len(candidate_ids)))
     candidate_ids = set(candidate_ids).intersection(candidate_ids_pool)
     candidates = [corpus[candidate_id] for candidate_id in candidate_ids]
 
@@ -389,12 +390,12 @@ def eval_metrics(predictions: list, corpus: Corpus, doc_id: str, min_citations):
     p2 = [p['correct_2'] for p in paper_results]
     mrr2 = _mrr(p2)
 
-    logging.info('Level 1 P@10 = %f ' % np.mean(p1[:10]))
-    logging.info('Level 2 P@10 = %f ' % np.mean(p2[:10]))
-    logging.info('Level 1 MRR = %f' % mrr1)
-    logging.info('Level 2 MRR = %f' % mrr2)
+    logging.debug('Level 1 P@10 = %f ' % np.mean(p1[:10]))
+    logging.debug('Level 2 P@10 = %f ' % np.mean(p2[:10]))
+    logging.debug('Level 1 MRR = %f' % mrr1)
+    logging.debug('Level 2 MRR = %f' % mrr2)
     candidate_set_recall = np.sum(p1) / len(gold_citations)
-    logging.info('Candidate set recall = {} '.format(candidate_set_recall))
+    logging.debug('Candidate set recall = {} '.format(candidate_set_recall))
 
     return {
         'id': doc_id,
@@ -460,9 +461,9 @@ def eval_text_model(
             top_n=model_options.num_ann_nbrs_to_fetch,
             extend_candidate_citations=model_options.extend_candidate_citations)
 
-        logging.info('Featurizing... %d documents ' % len(candidates))
+        logging.debug('Featurizing... %d documents ' % len(candidates))
         features = featurizer.transform_query_and_results(query, candidates)
-        logging.info('Predicting...')
+        logging.debug('Predicting...')
         scores = citeomatic_model.predict(features, batch_size=1024).flatten()
         best_matches = np.argsort(scores)[::-1]
 
@@ -478,7 +479,7 @@ def eval_text_model(
 
                 }
             )
-        logging.info("Done! Found %s predictions." % len(predictions))
+        logging.debug("Done! Found %s predictions." % len(predictions))
         eval_doc_predictions.append(predictions)
         r = eval_metrics(predictions, corpus, doc_id, min_citations)
         if r is not None:

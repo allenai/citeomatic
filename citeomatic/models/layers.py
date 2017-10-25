@@ -77,7 +77,7 @@ class ScalarMultiply(Layer):
     def call(self, x, mask=None):
         return self.w * x
 
-    def get_output_shape_for(self, input_shape):
+    def compute_output_shape(self, input_shape):
         return input_shape[0], input_shape[1]
 
 

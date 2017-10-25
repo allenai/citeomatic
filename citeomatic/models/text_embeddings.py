@@ -9,6 +9,7 @@ from keras.regularizers import l1, l2
 def _prefix(tuple):
     return '-'.join(tuple)
 
+
 class TextEmbedding(object):
     """
     Text embedding models class.

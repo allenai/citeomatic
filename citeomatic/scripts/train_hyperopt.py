@@ -1,4 +1,5 @@
 import datetime
+import logging
 import os
 from pprint import pprint
 
@@ -8,17 +9,26 @@ from hyperopt.pyll.base import scope
 from traitlets import Int, Unicode, Enum
 
 from citeomatic import file_util
+from citeomatic.common import PAPER_EMBEDDING_MODEL
 from citeomatic.config import App
-from citeomatic.serialization import model_from_directory
 from citeomatic.models.options import ModelOptions
+from citeomatic.serialization import model_from_directory
 from citeomatic.training import end_to_end_training
 from citeomatic.training import eval_text_model, EVAL_DATASET_KEYS
+import pickle
 
 
 class CiteomaticHyperopt(App, ModelOptions):
 
-    # hyperopt parameters
     dataset_type = Enum(('dblp', 'pubmed', 'oc'), default_value='dblp')
+
+    # Whether to train based on given options or to run a hyperopt
+    mode = Enum(('train', 'hyperopt'))
+
+    # Training parameters
+    hyperopts_results_pkl = Unicode(default_value=None, allow_none=True)
+
+    # hyperopt parameters
     max_evals_initial = Int(default_value=75)
     max_evals_secondary = Int(default_value=10)
     total_samples_initial = Int(default_value=5000000)
@@ -28,6 +38,7 @@ class CiteomaticHyperopt(App, ModelOptions):
     models_dir_base = Unicode(
         default_value='/net/nfs.corp/s2-research/citeomatic/'
     )
+    run_identifier = Unicode(default_value=None, allow_none=True)
     version = Unicode(default_value='v0')
 
     # to be filled in later
@@ -37,17 +48,43 @@ class CiteomaticHyperopt(App, ModelOptions):
 
     def main(self, args):
 
+        if self.mode == 'hyperopt':
+            self.run_hyperopt()
+        elif self.mode == 'train':
+            self.run_train()
+        else:
+            assert False
+
+    def run_train(self):
+        model_kw = {name: getattr(self, name) for name in ModelOptions.class_traits().keys()}
+        if self.hyperopts_results_pkl is not None:
+            params = pickle.load(open(self.hyperopts_results_pkl, "rb"))
+            for k, v in params[1][0]['result']['params'].items():
+                model_kw[k] = v
+        if self.model_name == 'model_ann':
+            self.models_ann_dir = None
+            self.models_dir = os.path.join(self.models_dir_base, PAPER_EMBEDDING_MODEL)
+
+        self.eval_fn(model_kw)
+
+    def run_hyperopt(self):
         # run identifier
-        run_identifier = '_'.join(
-            [
-                'citeomatic_hyperopt',
-                self.model_name,
-                self.dataset_type,
-                datetime.datetime.now().strftime("%Y-%m-%d"),
-                self.version
-            ]
-        )
-        self.models_dir = os.path.join(self.models_dir_base, run_identifier)
+        if self.run_identifier is None:
+            self.run_identifier = '_'.join(
+                [
+                    'citeomatic_hyperopt',
+                    self.model_name,
+                    self.dataset_type,
+                    datetime.datetime.now().strftime("%Y-%m-%d"),
+                    self.version
+                ]
+            )
+
+        self.models_dir = os.path.join(self.models_dir_base, self.run_identifier)
+        if self.model_name == 'model_ann':
+            self.models_ann_dir = None
+        else:
+            self.models_ann_dir = os.path.join(self.models_dir_base, self.run_identifier)
 
         # the search space
         # note that the scope.int code is a hack to get integers out of the sampler
@@ -117,7 +154,7 @@ class CiteomaticHyperopt(App, ModelOptions):
         )
 
         # save and display results
-        results_save_file = 'hyperopt_results_' + run_identifier + '.pickle'
+        results_save_file = 'hyperopt_results.pickle'
         file_util.write_pickle(
             os.path.join(self.models_dir, results_save_file),
             (sorted_results_stage_1, sorted_results_stage_2)
@@ -126,7 +163,10 @@ class CiteomaticHyperopt(App, ModelOptions):
 
     def eval_fn(self, params):
         model_options = ModelOptions(**params)
+        print("====== OPTIONS =====")
         print(model_options)
+        print("======")
+
         # TODO: if self.models_ann_dir is not none, we still make the ANN every time.
         # should be able to just do it once. Maybe need to restructure?
         # This will be a bigger deal once we are using open corpus
@@ -141,7 +181,7 @@ class CiteomaticHyperopt(App, ModelOptions):
             featurizer_for_ann = featurizer
             embedding_model_for_ann = embedding_model
         elif self.embedding_model_for_ann is None:
-            featurizer_for_ann, ann_models = model_from_directory(models_ann_dir)
+            featurizer_for_ann, ann_models = model_from_directory(self.models_ann_dir)
             embedding_model_for_ann = ann_models['embedding']
             self.featurizer_for_ann = featurizer_for_ann
             self.embedding_model_for_ann = embedding_model_for_ann
@@ -170,12 +210,21 @@ class CiteomaticHyperopt(App, ModelOptions):
             n_eval=self.n_eval
         )
 
+        logging.info("===== Validation Results ===== ")
+        logging.info(results_validation['precision_1'])
+        logging.info(results_validation['recall_1'])
+
         p = results_validation['precision_1'][EVAL_DATASET_KEYS[self.dataset_type]]
         r = results_validation['recall_1'][EVAL_DATASET_KEYS[self.dataset_type]]
         f1 = 2 * p * r / (p + r)
 
+        if self.model_name == 'model_ann':
+            l = -1 * results_validation['recall_1'][100]
+        else:
+            l = -f1
+
         out = {
-            'loss': -f1, # have to negate since we're minimizing
+            'loss': l, # have to negate since we're minimizing
             'losses_training': results_training,
             'losses_validation': results_validation,
             'status': STATUS_FAIL if np.isnan(f1) else STATUS_OK,

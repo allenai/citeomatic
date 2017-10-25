@@ -1,6 +1,8 @@
 import os
 from citeomatic.schema_pb2 import Document as ProtoDoc
 
+PAPER_EMBEDDING_MODEL = 'paper_embedder'
+CITATION_RANKER_MODEL = 'citation_ranker'
 
 class FieldNames(object):
     PAPER_ID = "id"
