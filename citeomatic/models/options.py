@@ -1,10 +1,11 @@
 import json
 from citeomatic import file_util
+from citeomatic.common import PAPER_EMBEDDING_MODEL, CITATION_RANKER_MODEL
 from traitlets import Bool, HasTraits, Int, Unicode, Enum, Float
 
 
 class ModelOptions(HasTraits):
-    model_name = Enum(values=['model_ann', 'model_full'], default_value='model_full')
+    model_name = Enum(values=[PAPER_EMBEDDING_MODEL, CITATION_RANKER_MODEL], default_value=PAPER_EMBEDDING_MODEL)
     n_features = Int()
     n_authors = Int()
 

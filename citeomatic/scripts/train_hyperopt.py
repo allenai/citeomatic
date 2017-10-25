@@ -9,7 +9,7 @@ from hyperopt.pyll.base import scope
 from traitlets import Int, Unicode, Enum
 
 from citeomatic import file_util
-from citeomatic.common import PAPER_EMBEDDING_MODEL
+from citeomatic.common import PAPER_EMBEDDING_MODEL, CITATION_RANKER_MODEL
 from citeomatic.config import App
 from citeomatic.models.options import ModelOptions
 from citeomatic.serialization import model_from_directory
@@ -61,7 +61,7 @@ class CiteomaticHyperopt(App, ModelOptions):
             params = pickle.load(open(self.hyperopts_results_pkl, "rb"))
             for k, v in params[1][0]['result']['params'].items():
                 model_kw[k] = v
-        if self.model_name == 'model_ann':
+        if self.model_name == PAPER_EMBEDDING_MODEL:
             self.models_ann_dir = None
             self.models_dir = os.path.join(self.models_dir_base, PAPER_EMBEDDING_MODEL)
 
@@ -81,14 +81,14 @@ class CiteomaticHyperopt(App, ModelOptions):
             )
 
         self.models_dir = os.path.join(self.models_dir_base, self.run_identifier)
-        if self.model_name == 'model_ann':
+        if self.model_name == PAPER_EMBEDDING_MODEL:
             self.models_ann_dir = None
         else:
             self.models_ann_dir = os.path.join(self.models_dir_base, self.run_identifier)
 
         # the search space
         # note that the scope.int code is a hack to get integers out of the sampler
-        if self.model_name == 'model_full':
+        if self.model_name == CITATION_RANKER_MODEL:
             space = {
                 'total_samples':
                     self.total_samples_initial,
@@ -111,7 +111,7 @@ class CiteomaticHyperopt(App, ModelOptions):
                 'margin_multiplier':
                     hp.choice('margin_multiplier', [0.5, 0.75, 1.0, 1.25, 1.5])
             }
-        elif self.model_name == 'model_ann':
+        elif self.model_name == PAPER_EMBEDDING_MODEL:
             space = {
                 'total_samples':
                     self.total_samples_initial,
@@ -218,7 +218,7 @@ class CiteomaticHyperopt(App, ModelOptions):
         r = results_validation['recall_1'][EVAL_DATASET_KEYS[self.dataset_type]]
         f1 = 2 * p * r / (p + r)
 
-        if self.model_name == 'model_ann':
+        if self.model_name == PAPER_EMBEDDING_MODEL:
             l = -1 * results_validation['recall_1'][100]
         else:
             l = -f1
