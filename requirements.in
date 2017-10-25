@@ -1,22 +1,18 @@
-Flask
 Keras==2.0.8
 arrow
 annoy
-blosc
 boto3
+flask
 gunicorn
-h5py
 honcho
 hyperopt
 luigi
 mmh3
-numpy==1.13.3
-pandas==0.19.2
+numpy
+pandas
 pytest
 requests
 scikit-learn
 tqdm
 untangle
-hyperopt
-arrow
-networkx==1.11
+networkx==1.11 # required for hyperopt
