@@ -78,10 +78,10 @@ class Corpus(object):
     training_ranges = {
         'dblp': (1966, 2007),  # both years inclusive
         'pubmed': (1966, 2008),  # both years inclusive
-        None: None
+        'oc': None
     }
-    validation_ranges = {'dblp': (2008, 2008), 'pubmed': (2009, 2009), None: None}
-    testing_ranges = {'dblp': (2009, 2011), 'pubmed': (2010, 2013), None: None}
+    validation_ranges = {'dblp': (2008, 2008), 'pubmed': (2009, 2009), 'oc': None}
+    testing_ranges = {'dblp': (2009, 2011), 'pubmed': (2010, 2013), 'oc': None}
 
     def _fetch_paper_ids(self, date_range=None):
         """
@@ -120,9 +120,9 @@ class Corpus(object):
         elif 'pubmed' in data_path:
             self.corpus_type = 'pubmed'
         else:
-            self.corpus_type = None
+            self.corpus_type = 'oc'
 
-        if self.corpus_type is None:
+        if self.corpus_type is 'oc':
             all_ids = self._fetch_paper_ids()
             n = len(all_ids)
             n_train = int(self.train_frac * n)

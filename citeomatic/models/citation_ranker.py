@@ -4,7 +4,7 @@ import tensorflow as tf
 from citeomatic.models.layers import Sum, ZeroMaskedEntries, custom_dot
 from citeomatic.models.options import ModelOptions
 from citeomatic.models.text_embeddings import (
-    TextEmbedding, TextEmbeddingConv, TextEmbeddingLSTM, _prefix
+    TextEmbeddingSum, TextEmbeddingConv, TextEmbeddingLSTM, _prefix
 )
 from keras.engine import Model
 from keras.regularizers import l1, l2
@@ -14,18 +14,19 @@ FIELDS = ['title', 'abstract']
 SOURCE_NAMES = ['query', 'candidate']
 
 
-def create_model(options: ModelOptions):
+def create_model(options: ModelOptions, pretrained_embeddings=None):
     logging.info('Building model: %s' % options)
 
     embedders = {}
 
     def _make_embedder():
         if options.embedding_type == 'sum':
-            return TextEmbedding(
+            return TextEmbeddingSum(
                 n_features=options.n_features,
                 dense_dim=options.dense_dim,
                 l1_lambda=options.l1_lambda,
-                l2_lambda=options.l2_lambda
+                l2_lambda=options.l2_lambda,
+                pretrained_embeddings=pretrained_embeddings
             )
         elif options.embedding_type == 'cnn':
             return TextEmbeddingConv(
@@ -33,13 +34,15 @@ def create_model(options: ModelOptions):
                 dense_dim=options.dense_dim,
                 n_filter=options.n_filter,
                 max_filter_length=options.max_filter_len,
-                l1_lambda=options.l1_lambda
+                l1_lambda=options.l1_lambda,
+                pretrained_embeddings=pretrained_embeddings
             )
         elif options.embedding_type == 'lstm':
             return TextEmbeddingLSTM(
                 n_features=options.n_features,
                 dense_dim=options.dense_dim,
-                l2_lambda=options.l2_lambda
+                l2_lambda=options.l2_lambda,
+                pretrained_embeddings=pretrained_embeddings
             )
         else:
             assert False, 'Unknown embedding type %s' % options.embedding_type
@@ -99,7 +102,7 @@ def create_model(options: ModelOptions):
         assert options.author_dim > 0
 
         # compute candidate-author interactions
-        author_embedder, outputs = TextEmbedding(
+        author_embedder, outputs = TextEmbeddingSum(
                 n_features=options.n_authors,
                 dense_dim=options.author_dim,
                 l1_lambda=options.l1_lambda,

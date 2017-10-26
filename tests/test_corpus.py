@@ -160,9 +160,7 @@ def test_corpus_conversion():
 def test_data_gen():
     build_test_corpus('/tmp/foo.json', '/tmp/foo.sqlite')
     corpus = Corpus.load('/tmp/foo.sqlite')
-    featurizer = features.Featurizer(
-        allow_duplicates=False
-    )
+    featurizer = features.Featurizer()
     featurizer.fit(corpus, max_df_frac=1.0)
     dg = features.DataGenerator(corpus, featurizer)
     gen = dg.triplet_generator(
@@ -185,9 +183,7 @@ def test_data_isolation():
     assert len(set(corpus.train_ids).intersection(set(corpus.test_ids))) == 0
     assert len(set(corpus.valid_ids).intersection(set(corpus.test_ids))) == 0
 
-    featurizer = features.Featurizer(
-        allow_duplicates=False
-    )
+    featurizer = features.Featurizer()
     featurizer.fit(corpus, max_df_frac=1.0)
     dg = features.DataGenerator(corpus, featurizer)
 

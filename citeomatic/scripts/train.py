@@ -56,16 +56,16 @@ class TrainCiteomatic(App, ModelOptions):
             assert False
 
     def run_train(self):
-        model_kw = {name: getattr(self, name) for name in ModelOptions.class_traits().keys()}
+        eval_params = {}
         if self.hyperopts_results_pkl is not None:
             params = pickle.load(open(self.hyperopts_results_pkl, "rb"))
             for k, v in params[1][0]['result']['params'].items():
-                model_kw[k] = v
+                eval_params[k] = v
         if self.model_name == PAPER_EMBEDDING_MODEL:
             self.models_ann_dir = None
             self.models_dir = os.path.join(self.models_dir_base, PAPER_EMBEDDING_MODEL)
 
-        self.eval_fn(model_kw)
+        self.eval_fn(eval_params)
 
     def run_hyperopt(self):
         # run identifier
@@ -86,14 +86,20 @@ class TrainCiteomatic(App, ModelOptions):
         else:
             self.models_ann_dir = os.path.join(self.models_dir_base, self.run_identifier)
 
+        # pretrained changes things
+        if self.use_pretrained:
+            l2_lambda_choice = 0
+            dense_dim_choice = self.dense_dim_pretrained
+        else:
+            l2_lambda_choice = hp.choice('l2_lambda', np.append(np.logspace(-7, -2, 6), 0))
+            dense_dim_choice = scope.int(hp.quniform('dense_dim', 25, 325, 25))
+
         # the search space
         # note that the scope.int code is a hack to get integers out of the sampler
         if self.model_name == CITATION_RANKER_MODEL:
             space = {
                 'total_samples':
                     self.total_samples_initial,
-                'dense_dim':
-                    scope.int(hp.quniform('dense_dim', 25, 325, 25)),
                 'use_authors':
                     hp.choice('use_authors', [True, False]),
                 'use_citations':
@@ -102,10 +108,12 @@ class TrainCiteomatic(App, ModelOptions):
                     hp.choice('sparse_option', [True, False]),
                 'use_src_tgt_embeddings':
                     hp.choice('use_src_tgt_embeddings', [True, False]),
+                'dense_dim':
+                    dense_dim_choice,
                 'lr':
                     hp.choice('lr', [0.1, 0.01, 0.001, 0.0001, 0.00001]),
                 'l2_lambda':
-                    hp.choice('l2_lambda', np.append(np.logspace(-7, -2, 6), 0)),
+                    l2_lambda_choice,
                 'l1_lambda':
                     hp.choice('l1_lambda', np.append(np.logspace(-7, -2, 6), 0)),
                 'margin_multiplier':
@@ -115,10 +123,12 @@ class TrainCiteomatic(App, ModelOptions):
             space = {
                 'total_samples':
                     self.total_samples_initial,
+                'dense_dim':
+                    dense_dim_choice,
                 'lr':
                     hp.choice('lr', [0.1, 0.01, 0.001, 0.0001, 0.00001]),
                 'l2_lambda':
-                    hp.choice('l2_lambda', np.append(np.logspace(-7, -2, 6), 0)),
+                    l2_lambda_choice,
                 'l1_lambda':
                     hp.choice('l1_lambda', np.append(np.logspace(-7, -2, 6), 0)),
                 'margin_multiplier':
@@ -161,8 +171,10 @@ class TrainCiteomatic(App, ModelOptions):
         )
         pprint(sorted_results_stage_2[0])
 
-    def eval_fn(self, params):
-        model_options = ModelOptions(**params)
+    def eval_fn(self, eval_params):
+        model_kw = {name: getattr(self, name) for name in ModelOptions.class_traits().keys()}
+        model_kw.update(eval_params)
+        model_options = ModelOptions(**model_kw)
         print("====== OPTIONS =====")
         print(model_options)
         print("======")

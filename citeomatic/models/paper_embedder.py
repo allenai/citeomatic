@@ -5,20 +5,21 @@ from keras.layers import Add
 
 from citeomatic.models.layers import L2Normalize, ScalarMultiply, custom_dot
 from citeomatic.models.options import ModelOptions
-from citeomatic.models.text_embeddings import TextEmbedding, _prefix
+from citeomatic.models.text_embeddings import TextEmbeddingSum, _prefix
 
 FIELDS = ['title', 'abstract']
 SOURCE_NAMES = ['query', 'candidate']
 
 
-def create_model(options: ModelOptions):
+def create_model(options: ModelOptions, pretrained_embeddings=None):
     logging.info('Building model: %s' % options)
 
-    text_embeddings = TextEmbedding(
+    text_embeddings = TextEmbeddingSum(
         n_features=options.n_features,
         dense_dim=options.dense_dim,
         l1_lambda=options.l1_lambda,
-        l2_lambda=options.l2_lambda
+        l2_lambda=options.l2_lambda,
+        pretrained_embeddings=pretrained_embeddings
     )
     scalar_sum_models = {}
     for field in FIELDS:

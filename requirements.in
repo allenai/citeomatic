@@ -4,6 +4,7 @@ annoy
 boto3
 flask
 gunicorn
+h5py
 honcho
 hyperopt
 luigi
@@ -13,6 +14,7 @@ pandas
 pytest
 requests
 scikit-learn
+spacy
 tqdm
 untangle
 networkx==1.11 # required for hyperopt

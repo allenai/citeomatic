@@ -1,6 +1,6 @@
 import collections
 import logging
-import math
+import mmh3
 import re
 import resource
 
@@ -12,6 +12,11 @@ from keras.preprocessing.sequence import pad_sequences
 from sklearn.feature_extraction.text import CountVectorizer
 
 from citeomatic.utils import flatten
+from citeomatic.common import DatasetPaths
+from citeomatic.models.options import ModelOptions
+
+model_options = ModelOptions()
+dp = DatasetPaths()
 
 CLEAN_TEXT_RE = re.compile('[^ a-z]')
 
@@ -37,40 +42,6 @@ def label_for_doc(d, offset):
     sigmoid = 1 / (1 + np.exp(-d.in_citation_count * CITATION_SLOPE))
     return offset + (sigmoid * MAX_CITATION_BOOST)
 
-def order_preserving_unique(seq):
-    """
-    A function that returns the unique values from a sequence while preserving their order.
-    """
-    seen = {}
-    result = []
-    for item in seq:
-        if item in seen:
-            continue
-        seen[item] = 1
-        result.append(item)
-    return result
-
-
-def merge_two_dicts(x, y):
-    z = x.copy()
-    z.update(y)
-    return z
-
-
-def agresti_coull_interval(p, n, z=1.96):
-    """
-    Binomial proportion confidence interval.
-    from: https://en.wikipedia.org/wiki/Binomial_proportion_confidence_interval#Agresti-Coull_Interval
-    """
-    n = float(n)
-    n_tilde = n + z**2
-    successes = np.round(p * n)
-    p_tilde = (successes + 0.5 * z**2) / n_tilde
-    bound_val = z * np.sqrt(p_tilde * (1 - p_tilde) / n_tilde)
-    lower_bound = np.maximum(0, p_tilde - bound_val)
-    upper_bound = np.minimum(1, p_tilde + bound_val)
-    return lower_bound, upper_bound
-
 
 def jaccard(featurizer, x, y):
     x_title, x_abstract = featurizer._cleaned_document_words(x)
@@ -79,17 +50,6 @@ def jaccard(featurizer, x, y):
     b = set(y_title + y_abstract)
     c = a.intersection(b)
     return float(len(c)) / (len(a) + len(b) - len(c))
-
-
-def build_index_dict(sequences, offset=1):
-    """
-    Builds a dictionary mapping words to indices.
-    """
-    unique_symbols = set()
-    for seq in sequences:
-        for c in seq:
-            unique_symbols.add(c)
-    return {c: i + offset for (i, c) in enumerate(unique_symbols)}
 
 
 def _clean(text, text_pre_tokenized=True):
@@ -117,21 +77,18 @@ class Featurizer(object):
         'the', 'we', 'our', 'which'
     }
 
-    MIN_AUTHOR_PAPERS = 5  # minimum number of papers for an author to get an embedding.
-
     def __init__(
         self,
         max_features=200000,
         max_title_len=32,
         max_abstract_len=256,
-        allow_duplicates=True
+        use_pretrained=False
     ):
         self.max_features = max_features
         self.max_title_len = max_title_len
         self.max_abstract_len = max_abstract_len
-        self.allow_duplicates = allow_duplicates
+        self.use_pretrained = use_pretrained
 
-        self.word_count = {}
         self.author_to_index = {}
         self.word_indexer = None
 
@@ -156,45 +113,48 @@ class Featurizer(object):
                 author_counts.update(doc.authors)
 
         for author, count in author_counts.items():
-            if count >= Featurizer.MIN_AUTHOR_PAPERS:
+            if count >= model_options.min_author_papers:
                 self.author_to_index[author] = 1 + len(self.author_to_index)
 
-        # Step 1: filter out some words and make a word_count dictionary
-        logging.info('Cleaning text.')
-        all_docs_text = [
-            ' '.join((_clean(doc.title), _clean(doc.abstract)))
-            for doc in tqdm.tqdm(corpus)
-            if doc.id in corpus.train_ids
-        ]
-
-        logging.info('Fitting vectorizer...')
-        if self.max_features is not None:
-            count_vectorizer = CountVectorizer(
-                max_df=max_df_frac,
-                max_features=self.max_features,
-                stop_words=self.STOPWORDS
-            )
+        # Step 1: filter out some words and make a vocab
+        if self.use_pretrained:
+            vocab_file = dp.vocab_for_corpus('shared')
+            with open(vocab_file, 'r') as f: vocab = f.read().split()
         else:
-            count_vectorizer = CountVectorizer(
-                max_df=max_df_frac,
-                min_df=min_df_frac,
-                stop_words=self.STOPWORDS
-            )
-        count_vectorizer.fit(tqdm.tqdm(all_docs_text))
-        self.word_count = count_vectorizer.vocabulary_
+            logging.info('Cleaning text.')
+            all_docs_text = [
+                ' '.join((_clean(doc.title), _clean(doc.abstract)))
+                for doc in tqdm.tqdm(corpus)
+                if doc.id in corpus.train_ids
+            ]
+
+            logging.info('Fitting vectorizer...')
+            if self.max_features is not None:
+                count_vectorizer = CountVectorizer(
+                    max_df=max_df_frac,
+                    max_features=self.max_features,
+                    stop_words=self.STOPWORDS
+                )
+            else:
+                count_vectorizer = CountVectorizer(
+                    max_df=max_df_frac,
+                    min_df=min_df_frac,
+                    stop_words=self.STOPWORDS
+                )
+            count_vectorizer.fit(tqdm.tqdm(all_docs_text))
+            vocab = count_vectorizer.vocabulary_
 
         logging.info(
             'Usage after word count: %s',
             resource.getrusage(resource.RUSAGE_SELF).ru_maxrss / 1e6
         )
-        logging.info('Number of words = %d' % len(self.word_count))
 
         # Step 4: Initialize mapper from word to index
-        self.n_features = (1 + len(self.word_count))
-
         self.word_indexer = FeatureIndexer(
-            word_count=self.word_count, allow_duplicates=self.allow_duplicates
+            vocab=vocab,
+            use_pretrained=self.use_pretrained
         )
+        self.n_features = 1 + len(self.word_indexer.word_to_index)
 
         logging.info(
             'Usage after word_indexer: %s',
@@ -227,15 +187,9 @@ class Featurizer(object):
             feats_intersection[i, :len(intersection)] = intersection
         return feats_intersection
 
-    def _words_from_text(self, text):
-        return [word for word in text if word in self.word_count]
-
     def _text_features(self, text, max_len):
         return np.asarray(
-            pad_sequences(
-                self.word_indexer.transform([self._words_from_text(text)]),
-                max_len
-            )[0],
+            pad_sequences(self.word_indexer.transform([text]), max_len)[0],
             dtype=np.int32
         )
 
@@ -371,40 +325,52 @@ class FeatureIndexer(object):
 
     Parameters
     ----------
-    word_count : dict/set/list
+    vocab : dict/set/list
         The set of words to index.
 
     offset : int, default=1
         Index offset. Default is 1 because Keras reserves index 0 for the mask.
     """
 
-    def __init__(self, word_count, allow_duplicates=True, offset=1):
+    def __init__(self, vocab, offset=1, use_pretrained=False):
         self.word_to_index = {}
         self.offset = offset
-        for i, word in enumerate(word_count):
+        self.use_pretrained = use_pretrained
+        for i, word in enumerate(vocab):
             self.word_to_index[word] = i + offset
-        self.allow_duplicates = allow_duplicates
+
+        if use_pretrained: # OOV hashing stuff
+            num_words = len(vocab)
+            for i in range(1, model_options.num_oov_buckets + 1):
+                word = model_options.oov_term_prefix + str(i)
+                self.word_to_index[word] = num_words + i
 
     def transform(self, raw_X):
         """
         Transforms raw strings into hashed indices.
 
-        Input should be e.g. raw_X = [['the', 'first', 'string'],['the', 'second']],
+        Input should be e.g. raw_X = [['the', 'first', 'string'], ['the', 'second']],
         """
-
-        if not self.allow_duplicates:
-            for i, raw_x in enumerate(raw_X):
-                raw_X[i] = order_preserving_unique(raw_x)
-
         indexed_X = []
         for raw_x in raw_X:
-            indexed_x = [
-                self.word_to_index[word] for word in raw_x
-                if word in self.word_to_index
-            ]
+            indexed_x = [self.word_to_id(word) for word in raw_x]
+            indexed_x = [i for i in indexed_x if i is not None]
             indexed_X.append(indexed_x)
-
         return indexed_X
+
+    def word_to_id(self, word):
+        """
+        Takes a word and returns the index
+        """
+        if word in self.word_to_index:
+            return self.word_to_index[word]
+        elif self.use_pretrained:
+            hash_id = (mmh3.hash(word) % model_options.num_oov_buckets) + 1
+            word = model_options.oov_term_prefix + str(hash_id)
+            return self.word_to_index[word]
+        else:
+            return None
+
 
 
 class DataGenerator(object):

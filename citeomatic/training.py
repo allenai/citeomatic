@@ -2,6 +2,7 @@ import logging
 import os
 import resource
 from collections import defaultdict
+import h5py
 
 import keras
 import numpy as np
@@ -160,11 +161,20 @@ def train_text_model(
     Utility function for training citeomatic models.
     """
 
+    # load pretrained embeddings
+    if model_options.use_pretrained:
+        dp = DatasetPaths()
+        pretrained_embeddings_file = dp.embeddings_weights_for_corpus('shared')
+        with h5py.File(pretrained_embeddings_file, 'r') as f:
+            pretrained_embeddings = f['embedding'][...]
+    else:
+        pretrained_embeddings = None
+
     create_model = import_from(
         'citeomatic.models.%s' % model_options.model_name,
         'create_model'
     )
-    models = create_model(model_options)
+    models = create_model(model_options, pretrained_embeddings)
     model, embedding_model = models['citeomatic'], models['embedding']
 
     logging.info(model.summary())
@@ -274,7 +284,7 @@ def end_to_end_training(model_options, dataset_type, models_dir, models_ann_dir=
     if not os.path.isfile(featurizer_file):
         featurizer = Featurizer(
             max_features=model_options.max_features,
-            allow_duplicates=False
+            use_pretrained=model_options.use_pretrained
         )
         featurizer.fit(corpus)
         file_util.write_pickle(featurizer_file, featurizer)
@@ -284,6 +294,8 @@ def end_to_end_training(model_options, dataset_type, models_dir, models_ann_dir=
     # model_options = ModelOptions(**hyperopt.pyll.stochastic.sample(space))
     model_options.n_authors = featurizer.n_authors
     model_options.n_features = featurizer.n_features
+    if model_options.use_pretrained:
+        model_options.dense_dim = model_options.dense_dim_pretrained
 
     # step 4: train the model
     citeomatic_model, embedding_model = train_text_model(

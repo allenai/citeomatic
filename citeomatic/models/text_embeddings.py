@@ -1,3 +1,6 @@
+from abc import ABC
+import numpy as np
+
 from citeomatic.models.layers import L2Normalize, ScalarMul, Sum, ZeroMaskedEntries
 from keras.layers import Bidirectional, Embedding, Input, LSTM, Concatenate
 from keras.layers.convolutional import Convolution1D
@@ -5,30 +8,49 @@ from keras.layers.pooling import GlobalAveragePooling1D
 from keras.models import Model
 from keras.regularizers import l1, l2
 
+import keras.backend as K
+
 
 def _prefix(tuple):
     return '-'.join(tuple)
 
+'''
+TODO: we reuse a lot of code across the three TextEmbedding classes.
+There should be a parent class that does all the embedding initialization logic.
+Like this: class TextEmbedding(abc)
+'''
 
-class TextEmbedding(object):
+class TextEmbeddingSum(object):
     """
     Text embedding models class.
     """
 
-    def __init__(self, n_features, dense_dim, l1_lambda=0, l2_lambda=0):
+    def __init__(
+            self,
+            n_features,
+            dense_dim,
+            l1_lambda=0,
+            l2_lambda=0,
+            pretrained_embeddings=None
+    ):
         self.n_features = n_features
         self.dense_dim = dense_dim
         self.l1_lambda = l1_lambda
-        self.l2_lambda = l2_lambda
+        self.l2_lambda = l2_lambda * (pretrained_embeddings is None)
 
         # shared layers
         self.embed_direction = Embedding(
             output_dim=self.dense_dim,
             input_dim=self.n_features,
             activity_regularizer=l2(self.l2_lambda),
-            mask_zero=True
+            mask_zero=True,
+            trainable=pretrained_embeddings is None
         )
         self.mask_direction = ZeroMaskedEntries()
+        if pretrained_embeddings is not None:
+            self.embed_direction.build((None,))
+            set_embedding_layer_weights(self.embed_direction, pretrained_embeddings)
+
         self.embed_magnitude = Embedding(
             output_dim=1,
             input_dim=self.n_features,
@@ -54,14 +76,14 @@ class TextEmbedding(object):
         _embedding = ScalarMul.invoke(
             [direction, magnitude], name='%s-embed' % prefix
         )
-        sum = Sum.invoke(_embedding, name='%s-sum-title' % prefix)
+        summed = Sum.invoke(_embedding, name='%s-sum-title' % prefix)
         if final_l2_norm:
             normed_sum = L2Normalize.invoke(
-                sum, name='%s-l2_normed_sum' % prefix
+                summed, name='%s-l2_normed_sum' % prefix
             )
             outputs_list = [normed_sum]
         else:
-            outputs_list = [sum]
+            outputs_list = [summed]
         return Model(
             inputs=_input, outputs=outputs_list, name="%s-embedding-model" % prefix
         ), outputs_list
@@ -73,7 +95,14 @@ class TextEmbeddingConv(object):
     """
 
     def __init__(
-        self, n_features, dense_dim, n_filter, max_filter_length, l1_lambda=0, l2_lambda=0
+            self,
+            n_features,
+            dense_dim,
+            n_filter,
+            max_filter_length,
+            l1_lambda=0,
+            l2_lambda=0,
+            pretrained_embeddings=None
     ):
         self.n_features = n_features
         self.dense_dim = dense_dim
@@ -86,10 +115,15 @@ class TextEmbeddingConv(object):
         self.embed_direction = Embedding(
             output_dim=self.dense_dim,
             input_dim=self.n_features,
-            activity_regularizer=l2(self.l2_lambda),
-            mask_zero=True
+            activity_regularizer=l2(self.l2_lambda) * (pretrained_embeddings is None),
+            mask_zero=True,
+            trainable=pretrained_embeddings is None
         )
         self.mask_direction = ZeroMaskedEntries()
+        if pretrained_embeddings is not None:
+            self.embed_direction.build((None,))
+            set_embedding_layer_weights(self.embed_direction, pretrained_embeddings)
+
         self.embed_magnitude = Embedding(
             output_dim=1,
             input_dim=n_features,
@@ -168,7 +202,14 @@ class TextEmbeddingLSTM(object):
     Text embedding models class.
     """
 
-    def __init__(self, n_features, dense_dim, lstm_dim, l2_lambda=0, **kw):
+    def __init__(
+            self,
+            n_features,
+            dense_dim,
+            lstm_dim,
+            l2_lambda=0,
+            pretrained_embeddings=None
+    ):
         self.n_features = n_features
         self.dense_dim = dense_dim
         self.lstm_dim = lstm_dim
@@ -178,9 +219,14 @@ class TextEmbeddingLSTM(object):
         self.embedding = Embedding(
             output_dim=self.dense_dim,
             input_dim=self.n_features,
-            activity_regularizer=l2(self.l2_lambda),
-            mask_zero=True
+            activity_regularizer=l2(self.l2_lambda) * (pretrained_embeddings is None),
+            mask_zero=True,
+            trainable=pretrained_embeddings is None
         )
+        if pretrained_embeddings is not None:
+            self.embed_direction.build((None,))
+            set_embedding_layer_weights(self.embedding, pretrained_embeddings)
+
         self.bilstm = Bidirectional(LSTM(lstm_dim))
 
     def create_text_embedding_model(self, prefix="", final_l2_norm=True):
@@ -202,3 +248,8 @@ class TextEmbeddingLSTM(object):
         return Model(
             inputs=_input, outputs=outputs_list, name="%s-embedding-model"
         ), outputs_list
+
+def set_embedding_layer_weights(embedding, pretrained_embeddings):
+    dense_dim = pretrained_embeddings.shape[1]
+    weights = np.vstack((np.zeros(dense_dim), pretrained_embeddings))
+    embedding.set_weights([weights])
