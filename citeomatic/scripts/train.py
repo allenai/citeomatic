@@ -18,7 +18,7 @@ from citeomatic.training import eval_text_model, EVAL_DATASET_KEYS
 import pickle
 
 
-class CiteomaticHyperopt(App, ModelOptions):
+class TrainCiteomatic(App, ModelOptions):
 
     dataset_type = Enum(('dblp', 'pubmed', 'oc'), default_value='dblp')
 
@@ -234,4 +234,4 @@ class CiteomaticHyperopt(App, ModelOptions):
         return out
 
 
-CiteomaticHyperopt.run(__name__)
+TrainCiteomatic.run(__name__)
