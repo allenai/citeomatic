@@ -240,7 +240,7 @@ class TrainCiteomatic(App, ModelOptions):
             'losses_training': results_training,
             'losses_validation': results_validation,
             'status': STATUS_FAIL if np.isnan(f1) else STATUS_OK,
-            'params': params
+            'params': eval_params
         }
 
         return out
