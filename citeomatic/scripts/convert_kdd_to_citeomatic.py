@@ -1,8 +1,10 @@
 import logging
 import os
 
+import tqdm
+
 from citeomatic import file_util
-from citeomatic.common import DatasetPaths, FieldNames
+from citeomatic.common import DatasetPaths, FieldNames, global_tokenizer
 from citeomatic.config import App
 from citeomatic.corpus import Corpus
 from citeomatic.service import document_from_dict, dict_from_document
@@ -129,22 +131,26 @@ class ConvertKddToCiteomatic(App):
         _print_len(paper_authors, ' Authors')
         _print_len(paper_venues, ' Venues')
 
+        logging.info("Skipped {} papers due to insufficient data".format(len(bad_ids)))
+
         corpus = {}
-        for id, title in paper_titles.items():
+        for id, title in tqdm.tqdm(paper_titles.items()):
             if id in bad_ids:
                 continue
             doc = document_from_dict(
                 {
                     FieldNames.PAPER_ID: str(id),
-                    FieldNames.TITLE: title,
-                    FieldNames.ABSTRACT: paper_abstracts[id],
+                    FieldNames.TITLE: ' '.join(global_tokenizer(title)),
+                    FieldNames.ABSTRACT: ' '.join(global_tokenizer(paper_abstracts[id])),
                     FieldNames.OUT_CITATIONS: paper_citations.get(id, []),
                     FieldNames.YEAR: paper_years[id],
                     FieldNames.AUTHORS: paper_authors.get(id, []),
                     FieldNames.KEY_PHRASES: paper_keyphrases[id],
                     FieldNames.OUT_CITATION_COUNT: len(paper_citations.get(id, [])),
                     FieldNames.IN_CITATION_COUNT: len(paper_in_citations.get(id, [])),
-                    FieldNames.VENUE: paper_venues.get(id, '')
+                    FieldNames.VENUE: paper_venues.get(id, ''),
+                    FieldNames.TITLE_RAW: title,
+                    FieldNames.ABSTRACT_RAW: paper_abstracts[id]
                     }
                 )
             corpus[id] = doc

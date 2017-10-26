@@ -34,4 +34,6 @@ else
 	pip install tensorflow-gpu==${TF_VERSION}
 fi
 
+sudo apt-get install protobuf-compiler
+python -m spacy download en
 python setup.py develop

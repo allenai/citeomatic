@@ -1,8 +1,30 @@
 import os
 from citeomatic.schema_pb2 import Document as ProtoDoc
+import spacy
 
 PAPER_EMBEDDING_MODEL = 'paper_embedder'
 CITATION_RANKER_MODEL = 'citation_ranker'
+
+nlp = spacy.load("en")
+RESTRICTED_POS_TAGS = {'PUNCT', 'SYM', 'DET', 'NUM', 'SPACE', 'PART'}
+
+
+def global_tokenizer(text, restrict_by_pos=False, lowercase=True, filter_empty_token=True):
+    if restrict_by_pos:
+        token_list = [
+            w.text for w in nlp(text) if w.pos_ not in RESTRICTED_POS_TAGS
+        ]
+    else:
+        token_list = [w.text for w in nlp(text)]
+
+    if lowercase:
+        token_list = [w.lower() for w in token_list]
+
+    if filter_empty_token:
+        token_list = [w for w in token_list if len(w) > 0]
+
+    return token_list
+
 
 class FieldNames(object):
     PAPER_ID = "id"
@@ -24,6 +46,9 @@ class FieldNames(object):
     IN_CITATION_COUNT = 'in_citation_count'
 
     DATE = 'date'
+
+    TITLE_RAW = "title_raw"
+    ABSTRACT_RAW = "abstract_raw"
 
 
 class DatasetPaths(object):
@@ -83,7 +108,9 @@ class Document(object):
         FieldNames.IN_CITATION_COUNT,
         FieldNames.OUT_CITATION_COUNT,
         FieldNames.KEY_PHRASES,
-        FieldNames.DATE
+        FieldNames.DATE,
+        FieldNames.TITLE_RAW,
+        FieldNames.ABSTRACT_RAW,
     ]
 
     def __init__(
@@ -98,7 +125,10 @@ class Document(object):
             in_citation_count,
             out_citation_count,
             key_phrases,
+            title_raw,
+            abstract_raw,
             date=None
+
     ):
         self.title = title
         self.abstract = abstract
@@ -111,6 +141,9 @@ class Document(object):
         self.out_citation_count = out_citation_count
         self.key_phrases = key_phrases
         self.date = date
+
+        self.title_raw = title_raw
+        self.abstract_raw = abstract_raw
 
     def __iter__(self):
         for k in self._fields:
@@ -133,4 +166,6 @@ class Document(object):
             venue=doc.venue,
             out_citation_count=len(out_citations),
             key_phrases=[p for p in doc.key_phrases],
+            title_raw=doc.title_raw,
+            abstract_raw=doc.abstract_raw,
         )

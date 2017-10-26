@@ -92,8 +92,11 @@ def build_index_dict(sequences, offset=1):
     return {c: i + offset for (i, c) in enumerate(unique_symbols)}
 
 
-def _clean(text):
-    return CLEAN_TEXT_RE.sub(' ', text.lower())
+def _clean(text, text_pre_tokenized=True):
+    if not text_pre_tokenized:
+        return CLEAN_TEXT_RE.sub(' ', text.lower())
+    else:
+        return text
 
 
 class Featurizer(object):

@@ -9,6 +9,8 @@ message Document {
   string id = 7;
   string venue = 8;
   repeated string key_phrases = 9;
+  string title_raw = 10;
+  string abstract_raw = 11;
 }
 
 message Hit {

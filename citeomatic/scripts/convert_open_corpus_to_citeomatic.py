@@ -2,7 +2,7 @@ import logging
 
 import tqdm
 
-from citeomatic.common import DatasetPaths, FieldNames
+from citeomatic.common import DatasetPaths, FieldNames, global_tokenizer
 from citeomatic.config import App
 from citeomatic.traits import Unicode
 import os
@@ -27,8 +27,8 @@ class ConvertOpenCorpusToCiteomatic(App):
                     continue
                 translated_obj = {
                     FieldNames.PAPER_ID: obj['id'],
-                    FieldNames.TITLE: obj['title'],
-                    FieldNames.ABSTRACT: obj['paperAbstract'],
+                    FieldNames.TITLE_RAW: obj['title'],
+                    FieldNames.ABSTRACT_RAW: obj['paperAbstract'],
                     FieldNames.AUTHORS: [a['name'] for a in obj['authors']],
                     FieldNames.IN_CITATION_COUNT: len(obj['inCitations']),
                     FieldNames.KEY_PHRASES: obj['keyPhrases'],
@@ -36,7 +36,9 @@ class ConvertOpenCorpusToCiteomatic(App):
                     FieldNames.URLS: obj['pdfUrls'],
                     FieldNames.S2_URL: obj['s2Url'],
                     FieldNames.VENUE: obj['venue'],
-                    FieldNames.YEAR: obj['year']
+                    FieldNames.YEAR: obj['year'],
+                    FieldNames.TITLE: ' '.join(global_tokenizer(obj['title'])),
+                    FieldNames.ABSTRACT: ' '.join(global_tokenizer(obj['paperAbstract']))
                 }
                 f.write(json.dumps(translated_obj))
                 f.write("\n")
