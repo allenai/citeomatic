@@ -2,7 +2,7 @@ from abc import ABC
 import numpy as np
 
 from citeomatic.models.layers import L2Normalize, ScalarMul, Sum, ZeroMaskedEntries
-from citeomatic.models import ModelOptions
+from citeomatic.models.options import ModelOptions
 from keras.layers import Bidirectional, Embedding, Input, LSTM, Concatenate, SpatialDropout1D
 from keras.layers.convolutional import Convolution1D
 from keras.layers.pooling import GlobalAveragePooling1D
