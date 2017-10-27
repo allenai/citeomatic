@@ -43,8 +43,8 @@ class TrainCiteomatic(App, ModelOptions):
 
     # to be filled in later
     models_dir = None
-    embedding_model_for_ann = None
-    featurizer_for_ann = None
+    paper_embedding_model = None
+    ann = None
 
     def main(self, args):
 
@@ -183,48 +183,58 @@ class TrainCiteomatic(App, ModelOptions):
         print(model_options)
         print("======")
 
-        # TODO: if self.models_ann_dir is not none, we still make the ANN every time.
-        # should be able to just do it once. Maybe need to restructure?
-        # This will be a bigger deal once we are using open corpus
         training_outputs = end_to_end_training(
             model_options,
             self.dataset_type,
             self.models_dir,
             self.models_ann_dir
         )
-        corpus, featurizer, model_options, model, embedding_model = training_outputs
-        if self.models_ann_dir is None:
-            featurizer_for_ann = featurizer
-            embedding_model_for_ann = embedding_model
-        elif self.embedding_model_for_ann is None:
-            featurizer_for_ann, ann_models = model_from_directory(self.models_ann_dir)
-            embedding_model_for_ann = ann_models['embedding']
-            self.featurizer_for_ann = featurizer_for_ann
-            self.embedding_model_for_ann = embedding_model_for_ann
-        else:
-            embedding_model_for_ann = self.embedding_model_for_ann
-            featurizer_for_ann = self.featurizer_for_ann
+        corpus, featurizer, model_options, citeomatic_model, embedding_model = training_outputs
 
-        results_training = eval_text_model(
+        # if no ann_dir is provided, then we use the model that was just trained
+        # and have to rebuild the ANN
+        if self.models_ann_dir is None:
+            self.paper_embedding_model = EmbeddingModel(featurizer, embedding_model)
+            self.ann = ANN.build(paper_embedding_model, corpus)
+        # if a dir is provided, but has not been loaded yet, then go ahead and load it
+        # in this way, the ANN should only be built once
+        elif self.ann is None:
+            featurizer_for_ann, ann_models = model_from_directory(self.models_ann_dir)
+            self.paper_embedding_model = EmbeddingModel(featurizer_for_ann, ann_models['embedding'])
+            self.ann = ANN.build(self.paper_embedding_model, corpus)
+        # otherwise use the pre-loaded one
+        else:
+            pass
+
+        candidate_selector = ANNCandidateSelector(
+            corpus=corpus,
+            ann=self.ann,
+            paper_embedding_model=self.paper_embedding_model,
+            top_k=model_options.num_ann_nbrs_to_fetch,
+            extend_candidate_citations=model_options.extend_candidate_citations
+        )
+
+        ranker = Ranker(
             corpus=corpus,
             featurizer=featurizer,
-            model_options=model_options,
-            citeomatic_model=model,
-            embedding_model_for_ann=embedding_model_for_ann,
-            featurizer_for_ann=featurizer_for_ann,
+            citation_ranker=citeomatic_model
+        )
+
+        results_training = eval_text_model(
+            corpus,
+            candidate_selector,
+            ranker,
             papers_source='train',
             n_eval=self.n_eval
         )
         results_validation = eval_text_model(
-            corpus=corpus,
-            featurizer=featurizer,
-            model_options=model_options,
-            citeomatic_model=model,
-            embedding_model_for_ann=embedding_model_for_ann,
-            featurizer_for_ann=featurizer_for_ann,
+            corpus,
+            candidate_selector,
+            ranker,
             papers_source='valid',
             n_eval=self.n_eval
         )
+
 
         logging.info("===== Validation Results ===== ")
         logging.info(results_validation['precision_1'])

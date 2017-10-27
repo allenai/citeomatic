@@ -22,6 +22,8 @@ from citeomatic.models.options import ModelOptions
 from citeomatic.neighbors import EmbeddingModel, ANN
 from citeomatic.serialization import model_from_directory
 from citeomatic.utils import import_from
+from citeomatic.candidate_selectors import ANNCandidateSelector, CandidateSelector
+from citeomatic.ranker import Ranker
 import collections
 
 EVAL_KEYS = [1, 5, 10, 20, 50, 100, 1000]
@@ -240,14 +242,14 @@ def train_text_model(
     if model_options.use_nn_negatives:
         if models_ann_dir is None:
             ann_featurizer = featurizer
-            ann_embedding_model = embedding_model
+            paper_embedding_model = embedding_model
             embed_every_epoch = True
         else:
             ann_featurizer, ann_models = model_from_directory(models_ann_dir)
-            ann_embedding_model = ann_models['embedding']
+            paper_embedding_model = ann_models['embedding']
             embed_every_epoch = False
         callbacks_list.append(
-            UpdateANN(corpus, ann_featurizer, ann_embedding_model, training_dg, embed_every_epoch)
+            UpdateANN(corpus, ann_featurizer, paper_embedding_model, training_dg, embed_every_epoch)
         )
 
     # logic
@@ -325,36 +327,6 @@ def end_to_end_training(model_options, dataset_type, models_dir, models_ann_dir=
     return corpus, featurizer, model_options, citeomatic_model, embedding_model
 
 
-def fetch_candidates(
-        corpus: Corpus,
-        candidate_ids_pool: set,
-        doc: Document,
-        ann_embedding_model: EmbeddingModel,
-        ann: ANN,
-        top_n: int,
-        extend_candidate_citations: bool
-):
-    doc_embedding = ann_embedding_model.embed(doc)
-    # 1. Fetch candidates from ANN index
-    nn_candidates = ann.get_nns_by_vector(doc_embedding, top_n + 1)
-    # 2. Remove the current document from candidate list
-    if doc.id in nn_candidates:
-        nn_candidates.remove(doc.id)
-    candidate_ids = nn_candidates[:top_n]
-
-    # 3. Check if we need to include citations of candidates found so far.
-    if extend_candidate_citations:
-        extended_candidate_ids = []
-        for candidate_id in candidate_ids:
-            extended_candidate_ids.extend(corpus[candidate_id].out_citations)
-        candidate_ids = candidate_ids + extended_candidate_ids
-    logging.debug("Number of candidates found: {}".format(len(candidate_ids)))
-    candidate_ids = set(candidate_ids).intersection(candidate_ids_pool)
-    candidates = [corpus[candidate_id] for candidate_id in candidate_ids]
-
-    return candidates
-
-
 def eval_metrics(predictions: list, corpus: Corpus, doc_id: str, min_citations):
 
     def _mrr(p):
@@ -416,15 +388,11 @@ def eval_metrics(predictions: list, corpus: Corpus, doc_id: str, min_citations):
 
 def eval_text_model(
         corpus: Corpus,
-        featurizer: Featurizer,
-        model_options: ModelOptions,
-        citeomatic_model: Model,
-        embedding_model_for_ann: Model = None,
-        featurizer_for_ann: Featurizer = None,
+        candidate_selector: CandidateSelector,
+        ranker: Ranker,
         papers_source='valid',
-        ann: ANN = None,
         min_citations=1,
-        n_eval = None
+        n_eval=None
 ):
     if papers_source == 'valid':
         paper_ids_for_eval = corpus.valid_ids
@@ -437,6 +405,8 @@ def eval_text_model(
         paper_ids_for_eval = corpus.test_ids
         candidate_ids_pool = corpus.train_ids + corpus.valid_ids + corpus.test_ids
 
+    candidate_ids_pool = set(candidate_ids_pool)
+
     if n_eval is not None:
         if n_eval < len(paper_ids_for_eval):
             logging.info("Selecting a random sample of {} papers for evaluation.".format(n_eval))
@@ -444,46 +414,12 @@ def eval_text_model(
         else:
             logging.info("Using all {} papers for evaluation.".format(len(paper_ids_for_eval)))
 
-    candidate_ids_pool = set(candidate_ids_pool)
-
-    if featurizer_for_ann is None:
-        featurizer_for_ann = featurizer
-    ann_embedding_model = EmbeddingModel(featurizer_for_ann, embedding_model_for_ann)
-
-    if ann is None:
-        ann = ANN.build(ann_embedding_model, corpus)
-
     eval_doc_predictions = []
     results = []
     for doc_id in tqdm.tqdm(paper_ids_for_eval):
-        query = corpus[doc_id]
-        candidates = fetch_candidates(
-            corpus=corpus,
-            candidate_ids_pool=candidate_ids_pool,
-            doc=query,
-            ann_embedding_model=ann_embedding_model,
-            ann=ann,
-            top_n=model_options.num_ann_nbrs_to_fetch,
-            extend_candidate_citations=model_options.extend_candidate_citations)
+        candidate_ids = candidate_selector.fetch_candidates(doc_id, candidate_ids_pool)
+        predictions = ranker.rank(doc_id, candidate_ids)
 
-        logging.debug('Featurizing... %d documents ' % len(candidates))
-        features = featurizer.transform_query_and_results(query, candidates)
-        logging.debug('Predicting...')
-        scores = citeomatic_model.predict(features, batch_size=1024).flatten()
-        best_matches = np.argsort(scores)[::-1]
-
-        predictions = []
-        query_doc_citations = set(query.out_citations)
-        for i, match_idx in enumerate(best_matches[:model_options.num_candidates_to_rank]):
-            predictions.append(
-                {
-                    'score':float(scores[match_idx]),
-                    'document': candidates[match_idx],
-                    'position': i,
-                    'is_cited': candidates[match_idx].id in query_doc_citations
-
-                }
-            )
         logging.debug("Done! Found %s predictions." % len(predictions))
         eval_doc_predictions.append(predictions)
         r = eval_metrics(predictions, corpus, doc_id, min_citations)
