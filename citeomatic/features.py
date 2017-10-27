@@ -488,7 +488,7 @@ class DataGenerator(object):
         # easy negatives (e.g. very bad results) should be further away from a true positive than hard negatives
         # (less embarrassing).
         for q, ex, labels in self._listwise_examples(paper_ids, candidate_ids, neg_to_pos_ratio, margin_multiplier):
-            num_true = len([l for l in labels if l >= TRUE_CITATION_OFFSET])
+            num_true = len([l for l in labels if l >= TRUE_CITATION_OFFSET * margin_multiplier])
             # ignore cases where we didn't find enough negatives...
             if len(labels) < num_true * 2:
                 continue
