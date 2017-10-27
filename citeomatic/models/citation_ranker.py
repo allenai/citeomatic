@@ -21,29 +21,11 @@ def create_model(options: ModelOptions, pretrained_embeddings=None):
 
     def _make_embedder():
         if options.embedding_type == 'sum':
-            return TextEmbeddingSum(
-                n_features=options.n_features,
-                dense_dim=options.dense_dim,
-                l1_lambda=options.l1_lambda,
-                l2_lambda=options.l2_lambda,
-                pretrained_embeddings=pretrained_embeddings
-            )
+            return TextEmbeddingSum(options, pretrained_embeddings)
         elif options.embedding_type == 'cnn':
-            return TextEmbeddingConv(
-                n_features=options.n_features,
-                dense_dim=options.dense_dim,
-                n_filter=options.n_filter,
-                max_filter_length=options.max_filter_len,
-                l1_lambda=options.l1_lambda,
-                pretrained_embeddings=pretrained_embeddings
-            )
+            return TextEmbeddingConv(options, pretrained_embeddings)
         elif options.embedding_type == 'lstm':
-            return TextEmbeddingLSTM(
-                n_features=options.n_features,
-                dense_dim=options.dense_dim,
-                l2_lambda=options.l2_lambda,
-                pretrained_embeddings=pretrained_embeddings
-            )
+            return TextEmbeddingLSTM(options, pretrained_embeddings)
         else:
             assert False, 'Unknown embedding type %s' % options.embedding_type
 
@@ -103,10 +85,7 @@ def create_model(options: ModelOptions, pretrained_embeddings=None):
 
         # compute candidate-author interactions
         author_embedder, outputs = TextEmbeddingSum(
-                n_features=options.n_authors,
-                dense_dim=options.author_dim,
-                l1_lambda=options.l1_lambda,
-                l2_lambda=options.l2_lambda
+            options=options
         ).create_text_embedding_model(
             prefix='candidate-authors',
             final_l2_norm=True

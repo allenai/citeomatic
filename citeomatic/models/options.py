@@ -36,6 +36,7 @@ class ModelOptions(HasTraits):
     # regularization params for embedding layer: l1 for mag/sparse, l2 for dir
     l2_lambda = Float(default_value=0.00001)
     l1_lambda = Float(default_value=0.0000001)
+    dropout_p = Float(default_value=0)
 
     # convolutions
     n_filter = Int()

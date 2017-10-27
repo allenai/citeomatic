@@ -2,7 +2,8 @@ from abc import ABC
 import numpy as np
 
 from citeomatic.models.layers import L2Normalize, ScalarMul, Sum, ZeroMaskedEntries
-from keras.layers import Bidirectional, Embedding, Input, LSTM, Concatenate
+from citeomatic.models import ModelOptions
+from keras.layers import Bidirectional, Embedding, Input, LSTM, Concatenate, SpatialDropout1D
 from keras.layers.convolutional import Convolution1D
 from keras.layers.pooling import GlobalAveragePooling1D
 from keras.models import Model
@@ -25,18 +26,12 @@ class TextEmbeddingSum(object):
     Text embedding models class.
     """
 
-    def __init__(
-            self,
-            n_features,
-            dense_dim,
-            l1_lambda=0,
-            l2_lambda=0,
-            pretrained_embeddings=None
-    ):
-        self.n_features = n_features
-        self.dense_dim = dense_dim
-        self.l1_lambda = l1_lambda
-        self.l2_lambda = l2_lambda * (pretrained_embeddings is None)
+    def __init__(self, options: ModelOptions, pretrained_embeddings=None):
+        self.n_features = options.n_features
+        self.dense_dim = options.dense_dim
+        self.l1_lambda = options.l1_lambda
+        self.l2_lambda = options.l2_lambda * (pretrained_embeddings is None)
+        self.dropout_p = options.dropout_p
 
         # shared layers
         self.embed_direction = Embedding(
@@ -76,6 +71,7 @@ class TextEmbeddingSum(object):
         _embedding = ScalarMul.invoke(
             [direction, magnitude], name='%s-embed' % prefix
         )
+        _embedding = SpatialDropout1D(self.dropout_p)(_embedding)
         summed = Sum.invoke(_embedding, name='%s-sum-title' % prefix)
         if final_l2_norm:
             normed_sum = L2Normalize.invoke(
@@ -94,22 +90,14 @@ class TextEmbeddingConv(object):
     Text embedding models class.
     """
 
-    def __init__(
-            self,
-            n_features,
-            dense_dim,
-            n_filter,
-            max_filter_length,
-            l1_lambda=0,
-            l2_lambda=0,
-            pretrained_embeddings=None
-    ):
-        self.n_features = n_features
-        self.dense_dim = dense_dim
-        self.nb_filter = n_filter
-        self.max_filter_length = max_filter_length
-        self.l1_lambda = l1_lambda
-        self.l2_lambda = l2_lambda
+    def __init__(self, options: ModelOptions, pretrained_embeddings=None):
+        self.n_features = options.n_features
+        self.dense_dim = options.dense_dim
+        self.nb_filter = options.n_filter
+        self.max_filter_length = options.max_filter_length
+        self.l1_lambda = options.l1_lambda
+        self.l2_lambda = options.l2_lambda * (pretrained_embeddings is None)
+        self.dropout_p = options.dropout_p
 
         # shared embedding layers
         self.embed_direction = Embedding(
@@ -167,6 +155,7 @@ class TextEmbeddingConv(object):
         _embedding = ScalarMul.invoke(
             [direction, magnitude], name='%s-embed' % prefix
         )
+        _embedding = SpatialDropout1D(self.dropout_p)(_embedding)
         # perform convolutions of various lengths and concat them all
         # we are multiply the convolutions by their "gates"
         list_of_gated_convs = [
@@ -202,18 +191,12 @@ class TextEmbeddingLSTM(object):
     Text embedding models class.
     """
 
-    def __init__(
-            self,
-            n_features,
-            dense_dim,
-            lstm_dim,
-            l2_lambda=0,
-            pretrained_embeddings=None
-    ):
-        self.n_features = n_features
-        self.dense_dim = dense_dim
-        self.lstm_dim = lstm_dim
-        self.l2_lambda = l2_lambda
+    def __init__(self, options: ModelOptions, pretrained_embeddings=None):
+        self.n_features = options.n_features
+        self.dense_dim = options.dense_dim
+        self.lstm_dim = options.lstm_dim
+        self.l2_lambda = options.l2_lambda * (pretrained_embeddings is None)
+        self.dropout_p = options.dropout_p
 
         # shared embedding layers
         self.embedding = Embedding(
@@ -224,7 +207,7 @@ class TextEmbeddingLSTM(object):
             trainable=pretrained_embeddings is None
         )
         if pretrained_embeddings is not None:
-            self.embed_direction.build((None,))
+            self.embedding.build((None,))
             set_embedding_layer_weights(self.embedding, pretrained_embeddings)
 
         self.bilstm = Bidirectional(LSTM(lstm_dim))
@@ -237,6 +220,7 @@ class TextEmbeddingLSTM(object):
         """
         _input = Input(shape=(None,), dtype='int32', name='%s-txt' % prefix)
         _embedding = self.embedding(_input)
+        _embedding = SpatialDropout1D(self.dropout_p)(_embedding)
         lstm_embedding = self.bilstm(_embedding)
         if final_l2_norm:
             normed_lstm_embedding = L2Normalize.invoke(
@@ -249,7 +233,7 @@ class TextEmbeddingLSTM(object):
             inputs=_input, outputs=outputs_list, name="%s-embedding-model"
         ), outputs_list
 
-def set_embedding_layer_weights(embedding, pretrained_embeddings):
+def set_embedding_layer_weights(embedding_layer, pretrained_embeddings):
     dense_dim = pretrained_embeddings.shape[1]
     weights = np.vstack((np.zeros(dense_dim), pretrained_embeddings))
-    embedding.set_weights([weights])
+    embedding_layer.set_weights([weights])

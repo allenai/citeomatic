@@ -116,6 +116,8 @@ class TrainCiteomatic(App, ModelOptions):
                     l2_lambda_choice,
                 'l1_lambda':
                     hp.choice('l1_lambda', np.append(np.logspace(-7, -2, 6), 0)),
+                'dropout_p':
+                    hp.quniform('dropout_p', 0.0, 0.75, 0.05),
                 'margin_multiplier':
                     hp.choice('margin_multiplier', [0.5, 0.75, 1.0, 1.25, 1.5])
             }
@@ -131,6 +133,8 @@ class TrainCiteomatic(App, ModelOptions):
                     l2_lambda_choice,
                 'l1_lambda':
                     hp.choice('l1_lambda', np.append(np.logspace(-7, -2, 6), 0)),
+                'dropout_p':
+                    hp.quniform('dropout_p', 0.0, 0.75, 0.05),
                 'margin_multiplier':
                     hp.choice('margin_multiplier', [0.5, 0.75, 1.0, 1.25, 1.5])
             }

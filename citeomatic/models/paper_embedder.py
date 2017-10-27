@@ -14,13 +14,7 @@ SOURCE_NAMES = ['query', 'candidate']
 def create_model(options: ModelOptions, pretrained_embeddings=None):
     logging.info('Building model: %s' % options)
 
-    text_embeddings = TextEmbeddingSum(
-        n_features=options.n_features,
-        dense_dim=options.dense_dim,
-        l1_lambda=options.l1_lambda,
-        l2_lambda=options.l2_lambda,
-        pretrained_embeddings=pretrained_embeddings
-    )
+    text_embeddings = TextEmbeddingSum(options, pretrained_embeddings)
     scalar_sum_models = {}
     for field in FIELDS:
         scalar_sum_models[field] = ScalarMultiply(name='scalar-mult-' + field)
