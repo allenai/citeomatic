@@ -2,10 +2,11 @@ import numpy as np
 
 
 class Ranker:
-    def __init__(self, corpus, featurizer, citation_ranker):
+    def __init__(self, corpus, featurizer, citation_ranker, num_candidates_to_rank):
         self.corpus = corpus
         self.featurizer = featurizer
         self.citation_ranker = citation_ranker
+        self.num_candidates_to_rank = num_candidates_to_rank
 
     def rank(self, query_id, candidate_ids):
         query = self.corpus[query_id]
@@ -16,7 +17,7 @@ class Ranker:
 
         predictions = []
         query_doc_citations = set(query.out_citations)
-        for i, match_idx in enumerate(best_matches[:model_options.num_candidates_to_rank]):
+        for i, match_idx in enumerate(best_matches[:self.num_candidates_to_rank]):
             predictions.append(
                 {
                     'score':float(scores[match_idx]),

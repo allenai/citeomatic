@@ -18,3 +18,4 @@ spacy
 tqdm
 untangle
 networkx==1.11 # required for hyperopt
+Whoosh

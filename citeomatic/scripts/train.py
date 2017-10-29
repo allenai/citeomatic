@@ -198,7 +198,7 @@ class TrainCiteomatic(App, ModelOptions):
         # and have to rebuild the ANN
         if self.models_ann_dir is None:
             self.paper_embedding_model = EmbeddingModel(featurizer, embedding_model)
-            self.ann = ANN.build(paper_embedding_model, corpus)
+            self.ann = ANN.build(self.paper_embedding_model, corpus)
         # if a dir is provided, but has not been loaded yet, then go ahead and load it
         # in this way, the ANN should only be built once
         elif self.ann is None:
@@ -220,7 +220,8 @@ class TrainCiteomatic(App, ModelOptions):
         ranker = Ranker(
             corpus=corpus,
             featurizer=featurizer,
-            citation_ranker=citeomatic_model
+            citation_ranker=citeomatic_model,
+            num_candidates_to_rank=model_options.num_candidates_to_rank
         )
 
         results_training = eval_text_model(
@@ -237,7 +238,6 @@ class TrainCiteomatic(App, ModelOptions):
             papers_source='valid',
             n_eval=self.n_eval
         )
-
 
         logging.info("===== Validation Results ===== ")
         logging.info(results_validation['precision_1'])

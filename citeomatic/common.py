@@ -1,12 +1,17 @@
 import os
 from citeomatic.schema_pb2 import Document as ProtoDoc
 import spacy
+from whoosh.fields import *
 
 PAPER_EMBEDDING_MODEL = 'paper_embedder'
 CITATION_RANKER_MODEL = 'citation_ranker'
 
 nlp = spacy.load("en")
 RESTRICTED_POS_TAGS = {'PUNCT', 'SYM', 'DET', 'NUM', 'SPACE', 'PART'}
+
+schema = Schema(title=TEXT,
+                abstract=TEXT,
+                id=ID(stored=True))
 
 
 def global_tokenizer(text, restrict_by_pos=False, lowercase=True, filter_empty_token=True):
@@ -57,14 +62,17 @@ class DatasetPaths(object):
     DBLP_GOLD_DIR = os.path.join(BASE_DIR, 'comparison/dblp/gold')
     DBLP_CORPUS_JSON = os.path.join(BASE_DIR, 'comparison/dblp/corpus.json')
     DBLP_DB_FILE = os.path.join(BASE_DIR, 'db/dblp.sqlite.db')
+    DBLP_BM25_INDEX = os.path.join(BASE_DIR, 'bm25_index/dblp/')
 
     PUBMED_GOLD_DIR = os.path.join(BASE_DIR, 'comparison/pubmed/gold')
     PUBMED_CORPUS_JSON = os.path.join(BASE_DIR, 'comparison/pubmed/corpus.json')
     PUBMED_DB_FILE = os.path.join(BASE_DIR, 'db/pubmed.sqlite.db')
+    PUBMED_BM25_INDEX = os.path.join(BASE_DIR, 'bm25_index/pubmed/')
 
     OC_FILE = os.path.join(BASE_DIR, 'open_corpus/papers-2017-02-21.json.gz')
     OC_CORPUS_JSON = os.path.join(BASE_DIR, 'open_corpus/corpus.json')
     OC_DB_FILE = os.path.join(BASE_DIR, 'db/oc.sqlite.db')
+    OC_BM25_INDEX = os.path.join(BASE_DIR, 'bm25_index/oc/')
 
     PRETRAINED_DIR = os.path.join(BASE_DIR, 'pretrained')
     EMBEDDING_WEIGHTS_FILENAME = 'embedding.h5'
@@ -94,6 +102,18 @@ class DatasetPaths(object):
               or corpus_name.lower() == 'open_corpus'
               or corpus_name.lower() == 'opencorpus'):
             return self.OC_CORPUS_JSON
+        else:
+            return None
+
+    def get_bm25_index_path(self, corpus_name):
+        if corpus_name.lower() == 'dblp':
+            return self.DBLP_BM25_INDEX
+        elif corpus_name.lower() == 'pubmed':
+            return self.PUBMED_BM25_INDEX
+        elif (corpus_name.lower() == 'oc'
+              or corpus_name.lower() == 'open_corpus'
+              or corpus_name.lower() == 'opencorpus'):
+            return self.OC_BM25_INDEX
         else:
             return None
 
