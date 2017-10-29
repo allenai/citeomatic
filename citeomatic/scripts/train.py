@@ -11,8 +11,11 @@ from traitlets import Int, Unicode, Enum
 from citeomatic import file_util
 from citeomatic.common import PAPER_EMBEDDING_MODEL, CITATION_RANKER_MODEL
 from citeomatic.config import App
+from citeomatic.candidate_selectors import ANNCandidateSelector
 from citeomatic.models.options import ModelOptions
 from citeomatic.serialization import model_from_directory
+from citeomatic.neighbors import EmbeddingModel, ANN
+from citeomatic.ranker import Ranker
 from citeomatic.training import end_to_end_training
 from citeomatic.training import eval_text_model, EVAL_DATASET_KEYS
 import pickle
@@ -92,7 +95,7 @@ class TrainCiteomatic(App, ModelOptions):
             dense_dim_choice = self.dense_dim_pretrained
         else:
             l2_lambda_choice = hp.choice('l2_lambda', np.append(np.logspace(-7, -2, 6), 0))
-            dense_dim_choice = scope.int(hp.quniform('dense_dim', 25, 325, 25))
+            dense_dim_choice = scope.int(hp.quniform('dense_dim', 25, 225, 25))
 
         # the search space
         # note that the scope.int code is a hack to get integers out of the sampler
