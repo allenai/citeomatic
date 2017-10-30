@@ -23,3 +23,9 @@ class Ranker:
             pred_scores.append(float(scores[match_idx]))
 
         return predictions, pred_scores
+
+
+class NoneRanker(object):
+
+    def rank(self, query_id, candidate_ids):
+        return candidate_ids, [1/idx for idx, _ in enumerate(candidate_ids)]

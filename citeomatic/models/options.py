@@ -5,6 +5,10 @@ from traitlets import Bool, HasTraits, Int, Unicode, Enum, Float
 
 
 class ModelOptions(HasTraits):
+
+    candidate_selector_type = Enum(('ann', 'bm25'), default_value='ann')
+    citation_ranker_type = Enum(('neural', 'none'), default_value='neural')
+
     model_name = Enum(values=[PAPER_EMBEDDING_MODEL, CITATION_RANKER_MODEL], default_value=PAPER_EMBEDDING_MODEL)
     n_features = Int()
     n_authors = Int()

@@ -9,13 +9,13 @@ from hyperopt.pyll.base import scope
 from traitlets import Int, Unicode, Enum
 
 from citeomatic import file_util
-from citeomatic.common import PAPER_EMBEDDING_MODEL, CITATION_RANKER_MODEL
+from citeomatic.common import PAPER_EMBEDDING_MODEL, CITATION_RANKER_MODEL, DatasetPaths
 from citeomatic.config import App
-from citeomatic.candidate_selectors import ANNCandidateSelector
+from citeomatic.candidate_selectors import ANNCandidateSelector, BM25CandidateSelector
 from citeomatic.models.options import ModelOptions
 from citeomatic.serialization import model_from_directory
 from citeomatic.neighbors import EmbeddingModel, ANN
-from citeomatic.ranker import Ranker
+from citeomatic.ranker import Ranker, NoneRanker
 from citeomatic.training import end_to_end_training
 from citeomatic.training import eval_text_model, EVAL_DATASET_KEYS
 import pickle
@@ -68,26 +68,9 @@ class TrainCiteomatic(App, ModelOptions):
             self.models_ann_dir = None
             self.models_dir = os.path.join(self.models_dir_base, PAPER_EMBEDDING_MODEL)
 
-        self.eval_fn(eval_params)
+        self.train_and_evaluate(eval_params)
 
-    def run_hyperopt(self):
-        # run identifier
-        if self.run_identifier is None:
-            self.run_identifier = '_'.join(
-                [
-                    'citeomatic_hyperopt',
-                    self.model_name,
-                    self.dataset_type,
-                    datetime.datetime.now().strftime("%Y-%m-%d"),
-                    self.version
-                ]
-            )
-
-        self.models_dir = os.path.join(self.models_dir_base, self.run_identifier)
-        if self.model_name == PAPER_EMBEDDING_MODEL:
-            self.models_ann_dir = None
-        else:
-            self.models_ann_dir = os.path.join(self.models_dir_base, self.run_identifier)
+    def _hyperopt_space(self):
 
         # pretrained changes things
         if self.use_pretrained:
@@ -141,12 +124,38 @@ class TrainCiteomatic(App, ModelOptions):
                 'margin_multiplier':
                     hp.choice('margin_multiplier', [0.5, 0.75, 1.0, 1.25, 1.5])
             }
+        else:
+            # Should not come here. Adding this to make pycharm happy.
+            assert False
+
+        return space
+
+    def run_hyperopt(self):
+        # run identifier
+        if self.run_identifier is None:
+            self.run_identifier = '_'.join(
+                [
+                    'citeomatic_hyperopt',
+                    self.model_name,
+                    self.dataset_type,
+                    datetime.datetime.now().strftime("%Y-%m-%d"),
+                    self.version
+                ]
+            )
+
+        self.models_dir = os.path.join(self.models_dir_base, self.run_identifier)
+        if self.model_name == PAPER_EMBEDDING_MODEL:
+            self.models_ann_dir = None
+        else:
+            self.models_ann_dir = os.path.join(self.models_dir_base, self.run_identifier)
+
+        space = self._hyperopt_space()
 
         # stage 1: run hyperopt for max_evals_initial
         # using a max of total_samples_initial samples
         trials = Trials()
         _ = fmin(
-            fn=self.eval_fn,
+            fn=self.train_and_evaluate,
             space=space,
             algo=tpe.suggest,
             max_evals=self.max_evals_initial,
@@ -163,7 +172,7 @@ class TrainCiteomatic(App, ModelOptions):
         for result in sorted_results_stage_1[:self.max_evals_secondary]:
             params = result['result']['params']
             params['total_samples'] = self.total_samples_secondary
-            out = self.eval_fn(params)
+            out = self.train_and_evaluate(params)
             results_stage_2.append({'params': params, 'result': out})
 
         sorted_results_stage_2 = sorted(
@@ -178,7 +187,7 @@ class TrainCiteomatic(App, ModelOptions):
         )
         pprint(sorted_results_stage_2[0])
 
-    def eval_fn(self, eval_params):
+    def train_and_evaluate(self, eval_params):
         model_kw = {name: getattr(self, name) for name in ModelOptions.class_traits().keys()}
         model_kw.update(eval_params)
         model_options = ModelOptions(**model_kw)
@@ -209,28 +218,50 @@ class TrainCiteomatic(App, ModelOptions):
         else:
             pass
 
-        candidate_selector = ANNCandidateSelector(
-            corpus=corpus,
-            ann=self.ann,
-            paper_embedding_model=self.paper_embedding_model,
-            top_k=model_options.num_ann_nbrs_to_fetch,
-            extend_candidate_citations=model_options.extend_candidate_citations
-        )
+        if self.candidate_selector_type == 'ann':
+            candidate_selector = ANNCandidateSelector(
+                corpus=corpus,
+                ann=self.ann,
+                paper_embedding_model=self.paper_embedding_model,
+                top_k=model_options.num_ann_nbrs_to_fetch,
+                extend_candidate_citations=model_options.extend_candidate_citations
+            )
+        elif self.candidate_selector_type == 'bm25':
+            dp = DatasetPaths()
+            candidate_selector = BM25CandidateSelector(
+                corpus=corpus,
+                index_path=dp.get_bm25_index_path(self.dataset_type),
+                top_k=model_options.num_ann_nbrs_to_fetch,
+                extend_candidate_citations=model_options.extend_candidate_citations
+            )
+        else:
+            # Should not come here. Adding this to make pycharm happy.
+            assert False
 
-        ranker = Ranker(
-            corpus=corpus,
-            featurizer=featurizer,
-            citation_ranker=citeomatic_model,
-            num_candidates_to_rank=model_options.num_candidates_to_rank
-        )
+        if self.citation_ranker_type == 'neural':
+            ranker = Ranker(
+                corpus=corpus,
+                featurizer=featurizer,
+                citation_ranker=citeomatic_model,
+                num_candidates_to_rank=model_options.num_candidates_to_rank
+            )
+        elif self.citation_ranker_type == 'none':
+            ranker = NoneRanker()
+        else:
+            # Should not come here. Adding this to make pycharm happy.
+            assert False
 
-        results_training = eval_text_model(
-            corpus,
-            candidate_selector,
-            ranker,
-            papers_source='train',
-            n_eval=self.n_eval
-        )
+        if self.mode != 'hyperopt' or model_options.total_samples == self.total_samples_secondary:
+            results_training = eval_text_model(
+                corpus,
+                candidate_selector,
+                ranker,
+                papers_source='train',
+                n_eval=self.n_eval
+            )
+        else:
+            results_training = {}
+
         results_validation = eval_text_model(
             corpus,
             candidate_selector,
