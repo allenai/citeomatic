@@ -240,15 +240,14 @@ class TrainCiteomatic(App, ModelOptions):
         )
 
         logging.info("===== Validation Results ===== ")
-        logging.info(results_validation['precision_1'])
-        logging.info(results_validation['recall_1'])
+        logging.info("Validation Precision\n\n{}".format(results_validation['precision_1']))
+        logging.info("Validation Recall\n\n{}".format(results_validation['recall_1']))
 
-        p = results_validation['precision_1'][EVAL_DATASET_KEYS[self.dataset_type]]
         r = results_validation['recall_1'][EVAL_DATASET_KEYS[self.dataset_type]]
-        f1 = 2 * p * r / (p + r)
+        f1 = results_validation['f1_1'][EVAL_DATASET_KEYS[self.dataset_type]]
 
         if self.model_name == PAPER_EMBEDDING_MODEL:
-            l = -1 * results_validation['recall_1'][100]
+            l = -r
         else:
             l = -f1
 

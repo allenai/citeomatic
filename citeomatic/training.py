@@ -1,30 +1,28 @@
+import collections
 import logging
 import os
 import resource
-from collections import defaultdict
-import h5py
 
+import h5py
 import keras
 import numpy as np
 import tensorflow as tf
 import tqdm
 from keras.callbacks import ReduceLROnPlateau, TensorBoard
-from keras.engine import Model
 from keras.optimizers import TFOptimizer
 
 from citeomatic import file_util
-from citeomatic.common import DatasetPaths, Document
+from citeomatic.candidate_selectors import CandidateSelector
+from citeomatic.common import DatasetPaths
 from citeomatic.corpus import Corpus
 from citeomatic.features import DataGenerator
 from citeomatic.features import Featurizer
 from citeomatic.models import layers
-from citeomatic.models.options import ModelOptions
 from citeomatic.neighbors import EmbeddingModel, ANN
+from citeomatic.ranker import Ranker
 from citeomatic.serialization import model_from_directory
 from citeomatic.utils import import_from
-from citeomatic.candidate_selectors import ANNCandidateSelector, CandidateSelector
-from citeomatic.ranker import Ranker
-import collections
+from citeomatic.eval_metrics import precision_recall_f1_at_ks, average_results
 
 EVAL_KEYS = [1, 5, 10, 20, 50, 100, 1000]
 EVAL_DATASET_KEYS = {'dblp': 5,
@@ -32,94 +30,26 @@ EVAL_DATASET_KEYS = {'dblp': 5,
                      'oc': 20}
 
 
-def rank_metrics(y, preds, max_num_true_multiplier=9):
-    """
-    Compute various ranking metrics for citation prediction problem.
-    """
-    y = np.array(y)
-    preds = np.array(preds)
-    argsort_y = np.argsort(y)[::-1]
-    y = y[argsort_y]
-    preds = preds[argsort_y]
-    sorted_inds = np.argsort(preds)[::-1]  # high to lower
-    num_true = int(np.sum(y))
-    K = int(np.minimum(len(y) / num_true, max_num_true_multiplier))
-    precision_at_num_positive = []
-    recall_at_num_positive = []
-    # precision at i*num_true
-    for i in range(1, K + 1):
-        correct = np.sum(y[sorted_inds[:num_true * i]])
-        precision_at_num_positive.append(correct / float(num_true * i))
-        recall_at_num_positive.append(correct / float(num_true))
-    # mean rank of the true indices
-    rank_of_true = np.argsort(sorted_inds)[y == 1]
-    mean_rank = np.mean(rank_of_true) + 1
-    return mean_rank, precision_at_num_positive, recall_at_num_positive
-
-
-def test_model(
-        model, corpus, test_generator, n=None, print_results=False, debug=False
-):
-    """
-    Utility function to test citation prediction for one query document at a time.
-    """
-    metrics = defaultdict(list)  # this function supports multiple outputs
-    if n is None:
-        n = len(corpus.test_ids)
-    for i in range(n):
-        data, labels = next(test_generator)
-        predictions = model.predict(data)
-        if len(predictions) == len(labels):
-            predictions = [predictions]
-        for i in range(len(predictions)):
-            preds = predictions[i].flatten()
-            metrics_loop = rank_metrics(labels, preds)
-            metrics[i].append(metrics_loop)
-            if debug:
-                print(metrics_loop)
-                print()
-
-    rank = {}
-    precision = {}
-    recall = {}
-    for i in range(len(metrics)):
-        r, pr, rec = zip(*metrics[i])
-        min_len = np.min([len(i) for i in pr])
-        rank[i] = r
-        precision[i] = [i[:min_len] for i in pr]
-        recall[i] = [i[:min_len] for i in rec]
-        if print_results:
-            print("Mean rank:", np.round(np.mean(rank[i], 0), 2))
-            print(
-                "Average Precisions at multiples of num_true:",
-                np.round(np.mean(precision[i], 0), 2)
-            )
-            print(
-                "Average Recalls at multiples of num_true:",
-                np.round(np.mean(recall[i], 0), 2)
-            )
-
-    return rank, precision, recall
-
-
 class ValidationCallback(keras.callbacks.Callback):
-    def __init__(self, model, corpus, validation_generator):
+    def __init__(self, corpus, candidate_selector, ranker, n_valid):
         super().__init__()
-        self.model = model
+        self.candidate_selector = candidate_selector
         self.corpus = corpus
-        self.validation_generator = validation_generator
+        self.ranker = ranker
         self.losses = []
+        self.n_valid = n_valid
 
     def on_epoch_end(self, epoch, logs={}):
         self.losses.append(logs.get('loss'))
-        test_model(
-            self.model,
+        p_r_f1_mrr = eval_text_model(
             self.corpus,
-            test_generator=self.validation_generator,
-            n=1000,
-            print_results=True
+            self.candidate_selector,
+            self.ranker,
+            papers_source='valid',
+            n_eval=self.n_valid
         )
-        logging.info()
+        for k, v in p_r_f1_mrr.items():
+            logs[k] = v
 
 
 class MemoryUsageCallback(keras.callbacks.Callback):
@@ -327,63 +257,28 @@ def end_to_end_training(model_options, dataset_type, models_dir, models_ann_dir=
     return corpus, featurizer, model_options, citeomatic_model, embedding_model
 
 
-def eval_metrics(predictions: list, corpus: Corpus, doc_id: str, min_citations):
+def _gold_citations(doc_id: str, corpus: Corpus, min_citations: int, candidate_ids_pool: set):
+    gold_citations_1 = set(corpus[doc_id].out_citations)
 
-    def _mrr(p):
-        try:
-            idx = p.index(True)
-            return 1. / (idx + 1)
-        except ValueError:
-            return 0.0
+    if doc_id in gold_citations_1:
+        gold_citations_1.remove(doc_id)
 
-    gold_citations = set(corpus[doc_id].out_citations)
-    if doc_id in gold_citations:
-        gold_citations.remove(doc_id)
     citations_of_citations = []
-    for c in gold_citations:
+    for c in gold_citations_1:
         citations_of_citations.extend(corpus[c].out_citations)
-    gold_citations_2 = set(citations_of_citations).union(gold_citations)
+
+    gold_citations_2 = set(citations_of_citations).union(gold_citations_1)
+
     if doc_id in gold_citations_2:
         gold_citations_2.remove(doc_id)
 
-    if len(gold_citations) < min_citations:
-        return None
+    gold_citations_1 = gold_citations_1.intersection(candidate_ids_pool)
+    gold_citations_2 = gold_citations_2.intersection(candidate_ids_pool)
 
-    paper_results = []
+    if len(gold_citations_1) < min_citations:
+        return [], []
 
-    for prediction in predictions:
-        paper_results.append(
-            {
-                'correct_1': prediction['document'].id in gold_citations,
-                'correct_2': prediction['document'].id in gold_citations_2,
-                'score': prediction['score'],
-                'num_gold_1': len(gold_citations),
-                'num_gold_2': len(gold_citations_2)
-            }
-        )
-
-    p1 = [p['correct_1'] for p in paper_results]
-    mrr1 = _mrr(p1)
-    p2 = [p['correct_2'] for p in paper_results]
-    mrr2 = _mrr(p2)
-
-    logging.debug('Level 1 P@10 = %f ' % np.mean(p1[:10]))
-    logging.debug('Level 2 P@10 = %f ' % np.mean(p2[:10]))
-    logging.debug('Level 1 MRR = %f' % mrr1)
-    logging.debug('Level 2 MRR = %f' % mrr2)
-    candidate_set_recall = np.sum(p1) / len(gold_citations)
-    logging.debug('Candidate set recall = {} '.format(candidate_set_recall))
-
-    return {
-        'id': doc_id,
-        'predictions': paper_results,
-        'num_gold_1': len(gold_citations),
-        'num_gold_2': len(gold_citations_2),
-        'mrr_1': mrr1,
-        'mrr_2': mrr2,
-        'p1': p1,
-        'p2': p2
-    }
+    return gold_citations_1, gold_citations_2
 
 
 def eval_text_model(
@@ -414,47 +309,47 @@ def eval_text_model(
         else:
             logging.info("Using all {} papers for evaluation.".format(len(paper_ids_for_eval)))
 
-    eval_doc_predictions = []
-    results = []
+    # eval_doc_predictions = []
+    results_1 = []
+    results_2 = []
     for doc_id in tqdm.tqdm(paper_ids_for_eval):
         candidate_ids = candidate_selector.fetch_candidates(doc_id, candidate_ids_pool)
-        predictions = ranker.rank(doc_id, candidate_ids)
+        predictions, scores = ranker.rank(doc_id, candidate_ids)
 
         logging.debug("Done! Found %s predictions." % len(predictions))
-        eval_doc_predictions.append(predictions)
-        r = eval_metrics(predictions, corpus, doc_id, min_citations)
-        if r is not None:
-            results.append(r)
+        # eval_doc_predictions.append(predictions)
+        gold_citations_1, gold_citations_2 = _gold_citations(doc_id, corpus, min_citations, candidate_ids_pool)
+        if len(gold_citations_1) == 0:
+            logging.debug("Skipping doc id : {}".format(doc_id))
+            continue
 
-    precision_at_1 = collections.defaultdict(list)
-    recall_at_1 = collections.defaultdict(list)
+        r_1 = precision_recall_f1_at_ks(
+            gold_y=gold_citations_1,
+            predictions=predictions,
+            scores=None,
+            k_list=EVAL_KEYS
+        )
 
-    precision_at_2 = collections.defaultdict(list)
-    recall_at_2 = collections.defaultdict(list)
+        r_2 = precision_recall_f1_at_ks(
+            gold_y=gold_citations_2,
+            predictions=predictions,
+            scores=None,
+            k_list=EVAL_KEYS
+        )
 
-    for r in results:
-        p1 = r['p1']
-        p2 = r['p2']
-        for k in EVAL_KEYS:
-            patk = np.mean(p1[:k])
-            ratk = np.sum(p1[:k]) / r['num_gold_1']
-            precision_at_1[k].append(patk)
-            recall_at_1[k].append(ratk)
+        results_1.append(r_1)
+        results_2.append(r_2)
 
-            patk = np.mean(p2[:k])
-            ratk = np.sum(p2[:k]) / r['num_gold_2']
-            precision_at_2[k].append(patk)
-            recall_at_2[k].append(ratk)
+    averaged_results_1 = average_results(results_1)
+    averaged_results_2 = average_results(results_2)
 
     return {
-        'precision_1': {k: np.mean(v)
-                        for (k, v) in precision_at_1.items()},
-        'recall_1': {k: np.mean(v)
-                     for (k, v) in recall_at_1.items()},
-        'precision_2': {k: np.mean(v)
-                        for (k, v) in precision_at_2.items()},
-        'recall_2': {k: np.mean(v)
-                     for (k, v) in recall_at_2.items()},
-        'mrr_1': np.mean([r['mrr_1'] for r in results]),
-        'mrr_2': np.mean([r['mrr_2'] for r in results]),
+        'precision_1': {k: v for k, v in zip(EVAL_KEYS, averaged_results_1['precision'])},
+        'recall_1': {k: v for k, v in zip(EVAL_KEYS, averaged_results_1['recall'])},
+        'f1_1': {k: v for k, v in zip(EVAL_KEYS, averaged_results_1['f1'])},
+        'precision_2': {k: v for k, v in zip(EVAL_KEYS, averaged_results_2['precision'])},
+        'recall_2': {k: v for k, v in zip(EVAL_KEYS, averaged_results_2['recall'])},
+        'f1_2': {k: v for k, v in zip(EVAL_KEYS, averaged_results_2['f1'])},
+        'mrr_1': averaged_results_1['mrr'],
+        'mrr_2': averaged_results_2['mrr'],
     }

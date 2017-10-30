@@ -59,8 +59,10 @@ class ANNCandidateSelector(CandidateSelector):
             candidate_ids = candidate_ids + extended_candidate_ids
         logging.debug("Number of candidates found: {}".format(len(candidate_ids)))
         candidate_ids_pool = set(candidate_ids_pool)
-        candidate_ids = [c_id for c_id in candidate_ids if c_id in candidate_ids_pool and c_id != doc_id]
-        return candidate_ids
+        candidate_ids = set(candidate_ids).intersection(candidate_ids_pool)
+        if doc_id in candidate_ids:
+            candidate_ids.remove(doc_id)
+        return list(candidate_ids)
 
 
 class BM25CandidateSelector(CandidateSelector):

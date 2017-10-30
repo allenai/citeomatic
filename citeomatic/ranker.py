@@ -16,16 +16,10 @@ class Ranker:
         best_matches = np.argsort(scores)[::-1]
 
         predictions = []
-        query_doc_citations = set(query.out_citations)
+        pred_scores = []
+
         for i, match_idx in enumerate(best_matches[:self.num_candidates_to_rank]):
-            predictions.append(
-                {
-                    'score':float(scores[match_idx]),
-                    'document': candidates[match_idx],
-                    'position': i,
-                    'is_cited': candidates[match_idx].id in query_doc_citations
+            predictions.append(candidates[match_idx].id)
+            pred_scores.append(float(scores[match_idx]))
 
-                }
-            )
-
-        return predictions
+        return predictions, pred_scores
