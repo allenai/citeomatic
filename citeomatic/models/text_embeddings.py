@@ -1,7 +1,7 @@
 from abc import ABC
 import numpy as np
 
-from citeomatic.models.layers import L2Normalize, ScalarMul, Sum, ZeroMaskedEntries
+from citeomatic.models.layers import L2Normalize, ScalarMul, Sum, EmbeddingZero
 from citeomatic.models.options import ModelOptions
 from keras.layers import Bidirectional, Embedding, Input, LSTM, Concatenate, SpatialDropout1D
 from keras.layers.convolutional import Convolution1D
@@ -34,26 +34,24 @@ class TextEmbeddingSum(object):
         self.dropout_p = options.dropout_p
 
         # shared layers
-        self.embed_direction = Embedding(
+        self.embed_direction = EmbeddingZero(
             output_dim=self.dense_dim,
             input_dim=self.n_features,
             activity_regularizer=l2(self.l2_lambda),
-            mask_zero=True,
+            mask_zero=False,
             trainable=pretrained_embeddings is None
         )
-        self.mask_direction = ZeroMaskedEntries()
         if pretrained_embeddings is not None:
             self.embed_direction.build((None,))
             set_embedding_layer_weights(self.embed_direction, pretrained_embeddings)
 
-        self.embed_magnitude = Embedding(
+        self.embed_magnitude = EmbeddingZero(
             output_dim=1,
             input_dim=self.n_features,
             activity_regularizer=l1(self.l1_lambda),
             # will induce sparsity if large enough
-            mask_zero=True
+            mask_zero=False
         )
-        self.mask_magnitude = ZeroMaskedEntries()
 
     def create_text_embedding_model(self, prefix="", final_l2_norm=True):
         """
@@ -62,15 +60,10 @@ class TextEmbeddingSum(object):
         word embeddings that occur in the document.
         """
         _input = Input(shape=(None,), dtype='int32', name='%s-txt' % prefix)
-        dir_embedding = self.mask_direction(self.embed_direction(_input))
-
-        direction = L2Normalize.invoke(
-            dir_embedding, name='%s-dir-norm' % prefix
-        )
-        magnitude = self.mask_magnitude(self.embed_magnitude(_input))
-        _embedding = ScalarMul.invoke(
-            [direction, magnitude], name='%s-embed' % prefix
-        )
+        dir_embedding = self.embed_direction(_input)
+        direction = L2Normalize.invoke(dir_embedding, name='%s-dir-norm' % prefix)
+        magnitude = self.embed_magnitude(_input)
+        _embedding = ScalarMul.invoke([direction, magnitude], name='%s-embed' % prefix)
         _embedding = SpatialDropout1D(self.dropout_p)(_embedding)
         summed = Sum.invoke(_embedding, name='%s-sum-title' % prefix)
         if final_l2_norm:
@@ -100,25 +93,23 @@ class TextEmbeddingConv(object):
         self.dropout_p = options.dropout_p
 
         # shared embedding layers
-        self.embed_direction = Embedding(
+        self.embed_direction = EmbeddingZero(
             output_dim=self.dense_dim,
             input_dim=self.n_features,
             activity_regularizer=l2(self.l2_lambda) * (pretrained_embeddings is None),
-            mask_zero=True,
+            mask_zero=False,
             trainable=pretrained_embeddings is None
         )
-        self.mask_direction = ZeroMaskedEntries()
         if pretrained_embeddings is not None:
             self.embed_direction.build((None,))
             set_embedding_layer_weights(self.embed_direction, pretrained_embeddings)
 
-        self.embed_magnitude = Embedding(
+        self.embed_magnitude = EmbeddingZero(
             output_dim=1,
             input_dim=n_features,
             activity_regularizer=l1(self.l1_lambda),
-            mask_zero=True
+            mask_zero=False
         )
-        self.mask_magnitude = ZeroMaskedEntries()
 
         # shared convolution layers
         self.conv_layers = []
@@ -146,18 +137,13 @@ class TextEmbeddingConv(object):
         word embeddings that occur in the document.
         """
         _input = Input(shape=(None,), dtype='int32', name='%s-txt' % prefix)
-        dir_embedding = self.mask_direction(self.embed_direction(_input))
-
-        direction = L2Normalize.invoke(
-            dir_embedding, name='%s-dir-norm' % prefix
-        )
-        magnitude = self.mask_magnitude(self.embed_magnitude(_input))
-        _embedding = ScalarMul.invoke(
-            [direction, magnitude], name='%s-embed' % prefix
-        )
+        dir_embedding = self.embed_direction(_input)
+        direction = L2Normalize.invoke(dir_embedding, name='%s-dir-norm' % prefix)
+        magnitude = self.embed_magnitude(_input)
+        _embedding = ScalarMul.invoke([direction, magnitude], name='%s-embed' % prefix)
         _embedding = SpatialDropout1D(self.dropout_p)(_embedding)
         # perform convolutions of various lengths and concat them all
-        # we are multiply the convolutions by their "gates"
+        # we multiply the convolutions by their "gates"
         list_of_gated_convs = [
             ScalarMul.invoke([conv(_embedding), conv_gate(_embedding)])
             for conv, conv_gate in zip(self.conv_layers, self.conv_gate_layers)
@@ -199,7 +185,7 @@ class TextEmbeddingLSTM(object):
         self.dropout_p = options.dropout_p
 
         # shared embedding layers
-        self.embedding = Embedding(
+        self.embedding = EmbeddingZero(
             output_dim=self.dense_dim,
             input_dim=self.n_features,
             activity_regularizer=l2(self.l2_lambda) * (pretrained_embeddings is None),
