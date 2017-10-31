@@ -235,7 +235,7 @@ def end_to_end_training(model_options, dataset_type, models_dir, models_ann_dir=
         featurizer,
         model_options,
         models_ann_dir=models_ann_dir,
-        debug=False,
+        debug=True,
         tensorboard_dir=None
     )
 
