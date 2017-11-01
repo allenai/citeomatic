@@ -153,8 +153,6 @@ class TrainCiteomatic(App, ModelOptions):
         self.models_dir = os.path.join(self.models_dir_base, self.run_identifier)
         if self.model_name == PAPER_EMBEDDING_MODEL:
             self.models_ann_dir = None
-        else:
-            self.models_ann_dir = os.path.join(self.models_dir_base, self.run_identifier)
 
         space = self._hyperopt_space()
 
