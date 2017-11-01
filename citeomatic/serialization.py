@@ -8,6 +8,7 @@ import os
 import json
 import importlib
 import pickle
+import tensorflow as tf
 
 from citeomatic import file_util
 from citeomatic.utils import import_from
@@ -30,7 +31,7 @@ def load_pickle(filename):
         return ModelLoader(f).load()
 
 
-def model_from_directory(dirname: str) -> Tuple[Featurizer, Any]:
+def model_from_directory(dirname: str, on_cpu=False) -> Tuple[Featurizer, Any]:
     dp = DatasetPaths()
 
     featurizer = file_util.read_pickle(
@@ -46,7 +47,11 @@ def model_from_directory(dirname: str) -> Tuple[Featurizer, Any]:
     create_model = import_from(
         'citeomatic.models.%s' % options.model_name, 'create_model'
     )
-    models = create_model(options)
+    if on_cpu:
+        with tf.device('/cpu:0'):
+            models = create_model(options)
+    else:
+        models = create_model(options)
 
     print("Loading model from %s " % dirname)
     print(models['citeomatic'].summary())

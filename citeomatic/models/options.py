@@ -35,7 +35,7 @@ class ModelOptions(HasTraits):
     train_frac = Float(default_value=0.8) # the rest will be divided 50/50 val/test
     max_features = Int(default_value=200000)
     neg_to_pos_ratio = Int(default_value=6) # ideally divisible by 2 and 3
-    batch_size = Int(default_value=1024)
+    batch_size = Int(default_value=512)
     samples_per_epoch = Int(default_value=1000000)
     total_samples = Int(default_value=5000000)
     reduce_lr_flag = Bool(default_value=False)

@@ -216,15 +216,20 @@ class TrainCiteomatic(App, ModelOptions):
             if self.models_ann_dir is None:
                 print(
                 'Using embedding model that was just trained for eval. Building...')
-                paper_embedding_model = EmbeddingModel(featurizer,
-                                                       embedding_model)
+                paper_embedding_model = EmbeddingModel(
+                    featurizer,
+                    embedding_model
+                )
                 self.ann = ANN.build(paper_embedding_model, corpus)
             # if a dir is provided, then go ahead and load it
             else:
                 featurizer_for_ann, ann_models = model_from_directory(
-                    self.models_ann_dir)
-                paper_embedding_model = EmbeddingModel(featurizer_for_ann,
-                                                       ann_models['embedding'])
+                    self.models_ann_dir, on_cpu=True
+                )
+                paper_embedding_model = EmbeddingModel(
+                    featurizer_for_ann,
+                    ann_models['embedding']
+                )
                 # the ANN itself needs to be only built once
                 if self.ann is None:
                     self.ann = ANN.build(paper_embedding_model, corpus)

@@ -175,7 +175,7 @@ def train_text_model(
             paper_embedding_model = embedding_model
             embed_every_epoch = True
         else:
-            ann_featurizer, ann_models = model_from_directory(models_ann_dir)
+            ann_featurizer, ann_models = model_from_directory(models_ann_dir, on_cpu=True)
             paper_embedding_model = ann_models['embedding']
             embed_every_epoch = False
         callbacks_list.append(
