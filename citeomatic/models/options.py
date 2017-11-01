@@ -16,7 +16,7 @@ class ModelOptions(HasTraits):
     dense_dim = Int(default_value=75)
     embedding_type = Enum(values=['sum', 'cnn', 'lstm'], default_value='sum')
 
-    use_nn_negatives = Bool(default_value=False)
+    use_nn_negatives = Bool(default_value=True)
     use_dense = Bool(default_value=True)
     use_citations = Bool(default_value=True)
     use_authors = Bool(default_value=False)
