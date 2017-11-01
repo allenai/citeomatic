@@ -26,9 +26,27 @@ class TextEmbeddingSum(object):
     Text embedding models class.
     """
 
-    def __init__(self, options: ModelOptions, pretrained_embeddings=None):
-        self.n_features = options.n_features
-        self.dense_dim = options.dense_dim
+    def __init__(self, options: ModelOptions, pretrained_embeddings=None, field_type='text'):
+        """
+
+        :param options:
+        :param pretrained_embeddings:
+        :param embedding_type: Takes one of three values: text / authors / venues depending on
+        which field is being embedded
+        """
+        self.field_type = field_type
+        if self.field_type == 'text':
+            self.n_features = options.n_features
+            self.dense_dim = options.dense_dim
+        elif self.field_type == 'authors':
+            self.n_features = options.n_authors
+            self.dense_dim = options.author_dim
+        elif self.field_type == 'venues':
+            self.n_features = options.n_venues
+            self.dense_dim = options.venue_dim
+        else:
+            assert False
+
         self.l1_lambda = options.l1_lambda
         self.l2_lambda = options.l2_lambda * (pretrained_embeddings is None)
         self.dropout_p = options.dropout_p
@@ -83,9 +101,20 @@ class TextEmbeddingConv(object):
     Text embedding models class.
     """
 
-    def __init__(self, options: ModelOptions, pretrained_embeddings=None):
-        self.n_features = options.n_features
-        self.dense_dim = options.dense_dim
+    def __init__(self, options: ModelOptions, pretrained_embeddings=None, field_type='text'):
+        self.field_type = field_type
+        if self.field_type == 'text':
+            self.n_features = options.n_features
+            self.dense_dim = options.dense_dim
+        elif self.field_type == 'authors':
+            self.n_features = options.n_authors
+            self.dense_dim = options.author_dim
+        elif self.field_type == 'venues':
+            self.n_features = options.n_venues
+            self.dense_dim = options.venue_dim
+        else:
+            assert False
+
         self.nb_filter = options.n_filter
         self.max_filter_length = options.max_filter_length
         self.l1_lambda = options.l1_lambda
@@ -106,27 +135,27 @@ class TextEmbeddingConv(object):
 
         self.embed_magnitude = EmbeddingZero(
             output_dim=1,
-            input_dim=n_features,
+            input_dim=self.n_features,
             activity_regularizer=l1(self.l1_lambda),
             mask_zero=False
         )
 
         # shared convolution layers
         self.conv_layers = []
-        for i in range(1, max_filter_length + 1):
+        for i in range(1, self.max_filter_length + 1):
             self.conv_layers.append(
                 Convolution1D(
-                    n_filter, i, activation='linear', border_mode='same'
+                    self.nb_filter, i, activation='linear', border_mode='same'
                 )
             )
 
         # convolution gate layers
         # see: https://arxiv.org/abs/1612.08083
         self.conv_gate_layers = []
-        for i in range(1, max_filter_length + 1):
+        for i in range(1, self.max_filter_length + 1):
             self.conv_gate_layers.append(
                 Convolution1D(
-                    n_filter, i, activation='sigmoid', border_mode='same'
+                    self.nb_filter, i, activation='sigmoid', border_mode='same'
                 )
             )
 
@@ -177,9 +206,20 @@ class TextEmbeddingLSTM(object):
     Text embedding models class.
     """
 
-    def __init__(self, options: ModelOptions, pretrained_embeddings=None):
-        self.n_features = options.n_features
-        self.dense_dim = options.dense_dim
+    def __init__(self, options: ModelOptions, pretrained_embeddings=None, field_type='text'):
+        self.field_type = field_type
+        if self.field_type == 'text':
+            self.n_features = options.n_features
+            self.dense_dim = options.dense_dim
+        elif self.field_type == 'authors':
+            self.n_features = options.n_authors
+            self.dense_dim = options.author_dim
+        elif self.field_type == 'venues':
+            self.n_features = options.n_venues
+            self.dense_dim = options.venue_dim
+        else:
+            assert False
+
         self.lstm_dim = options.lstm_dim
         self.l2_lambda = options.l2_lambda * (pretrained_embeddings is None)
         self.dropout_p = options.dropout_p
@@ -196,7 +236,7 @@ class TextEmbeddingLSTM(object):
             self.embedding.build((None,))
             set_embedding_layer_weights(self.embedding, pretrained_embeddings)
 
-        self.bilstm = Bidirectional(LSTM(lstm_dim))
+        self.bilstm = Bidirectional(LSTM(self.lstm_dim))
 
     def create_text_embedding_model(self, prefix="", final_l2_norm=True):
         """

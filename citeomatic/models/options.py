@@ -12,23 +12,26 @@ class ModelOptions(HasTraits):
     model_name = Enum(values=[PAPER_EMBEDDING_MODEL, CITATION_RANKER_MODEL], default_value=PAPER_EMBEDDING_MODEL)
     n_features = Int()
     n_authors = Int()
+    n_venues = Int()
 
     dense_dim = Int(default_value=75)
     embedding_type = Enum(values=['sum', 'cnn', 'lstm'], default_value='sum')
 
-    use_nn_negatives = Bool(default_value=True)
+    # Architecture changing options
     use_dense = Bool(default_value=True)
     use_citations = Bool(default_value=True)
-    use_authors = Bool(default_value=False)
-    author_dim = Int(default_value=10)
     use_sparse = Bool(default_value=True)
     use_src_tgt_embeddings = Bool(default_value=False)
-    optimizer = Unicode(default_value='tfopt')
+    use_authors = Bool(default_value=False)
 
-    lr = Float(default_value=0.0001)
-    margin_multiplier = Float(default_value=1)
+    author_dim = Int(default_value=10)
+    venue_dim = Int(default_value=10)
 
     # training and feature params
+    optimizer = Unicode(default_value='tfopt')
+    lr = Float(default_value=0.0001)
+    use_nn_negatives = Bool(default_value=True)
+    margin_multiplier = Float(default_value=1)
     train_frac = Float(default_value=0.8) # the rest will be divided 50/50 val/test
     max_features = Int(default_value=200000)
     neg_to_pos_ratio = Int(default_value=6) # ideally divisible by 2 and 3
@@ -62,6 +65,8 @@ class ModelOptions(HasTraits):
 
     # minimum number of papers for an author to get an embedding.
     min_author_papers = 5
+
+    lstm_dim = Int(default_value=50)
 
     def __repr__(self):
         return json.dumps(self._trait_values, indent=2, sort_keys=True)
