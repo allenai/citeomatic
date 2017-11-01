@@ -32,6 +32,7 @@ class TrainCiteomatic(App, ModelOptions):
 
     # Training parameters
     hyperopts_results_pkl = Unicode(default_value=None, allow_none=True)
+    options_json = Unicode(default_value=None, allow_none=True)
 
     # hyperopt parameters
     max_evals_initial = Int(default_value=75)
@@ -47,7 +48,7 @@ class TrainCiteomatic(App, ModelOptions):
     version = Unicode(default_value='v0')
 
     # to be filled in later
-    models_dir = None
+    models_dir = Unicode(default_value=None, allow_none=True)
     paper_embedding_model = None
     ann = None
 
@@ -66,6 +67,10 @@ class TrainCiteomatic(App, ModelOptions):
             params = pickle.load(open(self.hyperopts_results_pkl, "rb"))
             for k, v in params[1][0]['result']['params'].items():
                 eval_params[k] = v
+        if self.options_json is not None:
+            obj = file_util.read_json(self.options_json)
+            eval_params.update(obj)
+
         if self.model_name == PAPER_EMBEDDING_MODEL:
             self.models_ann_dir = None
             self.models_dir = os.path.join(self.models_dir_base, PAPER_EMBEDDING_MODEL)

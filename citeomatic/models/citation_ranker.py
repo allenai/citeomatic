@@ -1,7 +1,7 @@
 import logging
 
 import tensorflow as tf
-from citeomatic.models.layers import Sum, ZeroMaskedEntries, custom_dot
+from citeomatic.models.layers import Sum, custom_dot, EmbeddingZero
 from citeomatic.models.options import ModelOptions
 from citeomatic.models.text_embeddings import (
     TextEmbeddingSum, TextEmbeddingConv, TextEmbeddingLSTM, _prefix
@@ -67,15 +67,13 @@ def create_model(options: ModelOptions, pretrained_embeddings=None):
             sparse_input = Input(
                 name='query-candidate-%s-intersection' % field, shape=(None,)
             )
-            sparse_embedding = Embedding(
+            elementwise_sparse = EmbeddingZero(
                 input_dim=options.n_features,
                 output_dim=1,
                 mask_zero=True,
                 name="%s-sparse-embedding" % field,
                 activity_regularizer=l1(options.l1_lambda)
-            )
-            elementwise_sparse = ZeroMaskedEntries(
-            )(sparse_embedding(sparse_input))
+            )(sparse_input)
             intermediate_outputs.append(Sum()(elementwise_sparse))
             citeomatic_inputs.append(sparse_input)
 
