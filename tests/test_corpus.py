@@ -5,6 +5,8 @@ import os
 import random
 import time
 
+import numpy as np
+
 from citeomatic import features
 from citeomatic.common import FieldNames
 from citeomatic.corpus import Corpus
@@ -19,37 +21,21 @@ def _time(op):
 
 
 WORDS = '''
-Ashikaga
-Boone's
-Charybdis's
-Decker
-Eurasia
-Gounod
-Idaho's
-Keven
-Lubavitcher
-Merck's
-Nisan
-Platonist
-Rowling's
-Soave's
-Tomas
-Wilkes
 accretion
 agreeably
 anguishing
 armor
 avenues
 bassoon
-bier's
+bier
 bobs
 brightest
-bystander's
+bystander
 carpetbags
 charbroiling
 civilian
 collaboration
-condition's
+condition
 convincingly
 crankcases
 curtsying
@@ -57,7 +43,7 @@ deeper
 designate
 disbursements
 divorce
-duckbill's
+duckbill
 elliptical
 enviously
 exiling
@@ -67,9 +53,9 @@ forces
 fulcra
 geologic
 graffiti
-gyration's
+gyration
 hearten
-homeyness's
+homeyness
 hyphenated
 inbreed
 injections
@@ -85,20 +71,20 @@ mortifies
 naturalistic
 noses
 opened
-overpopulation's
+overpopulation
 parqueted
 perform
 pillow
 politest
 preferable
 pronoun
-pyjamas's
+pyjamas
 rattles
 referees
-representation's
-rhino's
+representation
+rhino
 rumples
-scarcity's
+scarcity
 seldom
 shipments
 sizes
@@ -107,15 +93,15 @@ speakers
 stake
 stratums
 summoning
-synthetic's
-tenderness's
+synthetic
+tenderness
 tingle
 transiting
 turncoat
 uneasily
-urchin's
+urchin
 violets
-wayfaring's
+wayfaring
 wintertime
 zaniest
 '''.split('\n')
@@ -137,10 +123,10 @@ def build_test_corpus(source_file, target_file):
                 FieldNames.ABSTRACT: ' '.join(random.sample(WORDS, 1000)),
                 FieldNames.AUTHORS: [],
                 FieldNames.OUT_CITATIONS: [
-                    str(x) for x in random.sample(range(100), 10)
+                    str(x) for x in random.sample(range(100), 2)
                 ],
                 FieldNames.IN_CITATION_COUNT: len([
-                    str(x) for x in random.sample(range(100), 10)
+                    str(x) for x in random.sample(range(100), 2)
                 ]),
                 FieldNames.KEY_PHRASES: [' '.join(random.sample(WORDS, 3))],
                 FieldNames.YEAR: 2011,
@@ -152,27 +138,63 @@ def build_test_corpus(source_file, target_file):
 
     Corpus.build(target_file, source_file)
 
-
 def test_corpus_conversion():
     build_test_corpus('/tmp/foo.json', '/tmp/foo.sqlite')
 
+def test_corpus_iterator():
+    corpus = Corpus.load('/tmp/foo.sqlite')
+    iter_ids = []
+    for doc in corpus:
+        iter_ids.append(doc.id)
+    overlap_n = len(set(iter_ids).intersection(set(corpus.all_ids)))
+    assert overlap_n == corpus.n_docs
 
-def test_data_gen():
+def test_featurizer_and_data_gen():
     build_test_corpus('/tmp/foo.json', '/tmp/foo.sqlite')
     corpus = Corpus.load('/tmp/foo.sqlite')
     featurizer = features.Featurizer()
     featurizer.fit(corpus, max_df_frac=1.0)
+
     dg = features.DataGenerator(corpus, featurizer)
     gen = dg.triplet_generator(
-        paper_ids=corpus.train_ids,
-        candidate_ids=corpus.train_ids,
+        paper_ids=corpus.all_ids,
+        candidate_ids=corpus.all_ids,
         batch_size=128,
         neg_to_pos_ratio=5
     )
 
-    for i in range(100):
+    # make sure we can get features
+    for i in range(10):
         print(i)
-        next(gen)
+        X, y = next(gen)
+
+    # correct batch size
+    assert len(y) >= 128
+    # positives, hard negatives, easy negatives
+    assert len(np.unique(y)) == 3
+    # correct padding
+    assert X['query-abstract-txt'].shape[1] == featurizer.max_abstract_len
+    assert X['query-title-txt'].shape[1] == featurizer.max_title_len
+    # no new words
+    assert set(featurizer.word_indexer.word_to_index.keys()).difference(WORDS) == set()
+
+    q, ex, labels = next(dg._listwise_examples(
+        corpus.all_ids,
+        corpus.all_ids
+    ))
+
+    # query id should not be in candidates
+    assert q.id not in [i.id for i in ex]
+
+    # pos ids should be out_citations
+    pos_docs = [i.id for i,j in zip(ex, labels) if j == np.max(labels)]
+    assert set(pos_docs) == set(q.out_citations)
+
+    # neg ids should be NOT out_citations
+    neg_docs = [i.id for i, j in zip(ex, labels) if j < np.max(labels)]
+    assert np.all([i not in neg_docs for i in q.out_citations ])
+
+
 
 
 def test_data_isolation():
