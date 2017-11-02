@@ -28,4 +28,4 @@ class Ranker:
 class NoneRanker(object):
 
     def rank(self, query_id, candidate_ids):
-        return candidate_ids, [1/idx for idx, _ in enumerate(candidate_ids)]
+        return candidate_ids, [1/(idx+1) for idx, _ in enumerate(candidate_ids)]
