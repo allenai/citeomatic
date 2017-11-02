@@ -24,7 +24,6 @@ import keras.backend as K
 
 
 class TrainCiteomatic(App, ModelOptions):
-
     dataset_type = Enum(('dblp', 'pubmed', 'oc'), default_value='dblp')
 
     # Whether to train based on given options or to run a hyperopt
@@ -76,22 +75,41 @@ class TrainCiteomatic(App, ModelOptions):
 
         self.train_and_evaluate(eval_params)
 
-    def _hyperopt_space(self):
+    @staticmethod
+    def _hyperopt_space(model_name, total_samples):
 
-        # pretrained changes things
-        if self.use_pretrained:
-            l2_lambda_choice = 0
-            dense_dim_choice = self.dense_dim_pretrained
-        else:
-            l2_lambda_choice = hp.choice('l2_lambda', np.append(np.logspace(-7, -2, 6), 0))
-            dense_dim_choice = scope.int(hp.quniform('dense_dim', 25, 325, 25))
+        use_pretrained = hp.choice('use_pretrained', [True, False])
+
+        common_param_space = {
+            'total_samples':
+                total_samples,
+            'lr':
+                hp.choice('lr', [0.1, 0.01, 0.001, 0.0001, 0.00001]),
+            'l1_lambda':
+                hp.choice('l1_lambda', np.append(np.logspace(-7, -2, 6), 0)),
+            'dropout_p':
+                hp.quniform('dropout_p', 0.0, 0.75, 0.05),
+            'margin_multiplier':
+                hp.choice('margin_multiplier', [0.5, 0.75, 1.0, 1.25, 1.5])
+        }
+
+        pre_trained_params = {
+            True: {
+                'use_pretrained': True,
+                'l2_lambda': 0,
+                'dense_dim': 300,
+            },
+            False: {
+                'use_pretrained': False,
+                'l2_lambda': hp.choice('l2_lambda', np.append(np.logspace(-7, -2, 6), 0)),
+                'dense_dim': scope.int(hp.quniform('dense_dim', 25, 325, 25))
+            }
+        }
 
         # the search space
         # note that the scope.int code is a hack to get integers out of the sampler
-        if self.model_name == CITATION_RANKER_MODEL:
-            space = {
-                'total_samples':
-                    self.total_samples_initial,
+        if model_name == CITATION_RANKER_MODEL:
+            ranker_model_params = {
                 'use_authors':
                     hp.choice('use_authors', [True, False]),
                 'use_citations':
@@ -99,37 +117,30 @@ class TrainCiteomatic(App, ModelOptions):
                 'use_sparse':
                     hp.choice('sparse_option', [True, False]),
                 'use_src_tgt_embeddings':
-                    hp.choice('use_src_tgt_embeddings', [True, False]),
-                'dense_dim':
-                    dense_dim_choice,
-                'lr':
-                    hp.choice('lr', [0.1, 0.01, 0.001, 0.0001, 0.00001]),
-                'l2_lambda':
-                    l2_lambda_choice,
-                'l1_lambda':
-                    hp.choice('l1_lambda', np.append(np.logspace(-7, -2, 6), 0)),
-                'dropout_p':
-                    hp.quniform('dropout_p', 0.0, 0.75, 0.05),
-                'margin_multiplier':
-                    hp.choice('margin_multiplier', [0.5, 0.75, 1.0, 1.25, 1.5])
+                    hp.choice('use_src_tgt_embeddings', [True, False])
             }
-        elif self.model_name == PAPER_EMBEDDING_MODEL:
-            space = {
-                'total_samples':
-                    self.total_samples_initial,
-                'dense_dim':
-                    dense_dim_choice,
-                'lr':
-                    hp.choice('lr', [0.1, 0.01, 0.001, 0.0001, 0.00001]),
-                'l2_lambda':
-                    l2_lambda_choice,
-                'l1_lambda':
-                    hp.choice('l1_lambda', np.append(np.logspace(-7, -2, 6), 0)),
-                'dropout_p':
-                    hp.quniform('dropout_p', 0.0, 0.75, 0.05),
-                'margin_multiplier':
-                    hp.choice('margin_multiplier', [0.5, 0.75, 1.0, 1.25, 1.5])
-            }
+
+            space = scope.switch(
+                scope.int(use_pretrained),
+                {**pre_trained_params[False],
+                 **common_param_space,
+                 **ranker_model_params,
+                 },
+                {**pre_trained_params[True],
+                 **common_param_space,
+                 **ranker_model_params
+                 }
+            )
+        elif model_name == PAPER_EMBEDDING_MODEL:
+            space = scope.switch(
+                scope.int(use_pretrained),
+                {**pre_trained_params[False],
+                 **common_param_space
+                 },
+                {**pre_trained_params[True],
+                 **common_param_space
+                 }
+            )
         else:
             # Should not come here. Adding this to make pycharm happy.
             assert False
@@ -153,7 +164,7 @@ class TrainCiteomatic(App, ModelOptions):
         if self.model_name == PAPER_EMBEDDING_MODEL:
             self.models_ann_dir = None
 
-        space = self._hyperopt_space()
+        space = self._hyperopt_space(self.model_name, self.total_samples_initial)
 
         # stage 1: run hyperopt for max_evals_initial
         # using a max of total_samples_initial samples
@@ -215,7 +226,7 @@ class TrainCiteomatic(App, ModelOptions):
             # and have to rebuild the ANN
             if self.models_ann_dir is None:
                 print(
-                'Using embedding model that was just trained for eval. Building...')
+                    'Using embedding model that was just trained for eval. Building...')
                 paper_embedding_model = EmbeddingModel(
                     featurizer,
                     embedding_model
@@ -298,7 +309,7 @@ class TrainCiteomatic(App, ModelOptions):
             l = -f1
 
         out = {
-            'loss': l, # have to negate since we're minimizing
+            'loss': l,  # have to negate since we're minimizing
             'losses_training': results_training,
             'losses_validation': results_validation,
             'status': STATUS_FAIL if np.isnan(f1) else STATUS_OK,
