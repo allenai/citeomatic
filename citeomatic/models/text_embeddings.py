@@ -26,7 +26,8 @@ class TextEmbeddingSum(object):
     Text embedding models class.
     """
 
-    def __init__(self, options: ModelOptions, pretrained_embeddings=None, field_type='text'):
+    def __init__(self, options: ModelOptions, pretrained_embeddings=None, field_type='text',
+                 magnitudes_initializer='uniform'):
         """
 
         :param options:
@@ -68,7 +69,8 @@ class TextEmbeddingSum(object):
             input_dim=self.n_features,
             activity_regularizer=l1(self.l1_lambda),
             # will induce sparsity if large enough
-            mask_zero=False
+            mask_zero=False,
+            embeddings_initializer=magnitudes_initializer
         )
 
     def create_text_embedding_model(self, prefix="", final_l2_norm=True):
@@ -258,6 +260,7 @@ class TextEmbeddingLSTM(object):
         return Model(
             inputs=_input, outputs=outputs_list, name="%s-embedding-model"
         ), outputs_list
+
 
 def set_embedding_layer_weights(embedding_layer, pretrained_embeddings):
     dense_dim = pretrained_embeddings.shape[1]

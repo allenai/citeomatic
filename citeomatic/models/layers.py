@@ -4,6 +4,7 @@ from keras.engine.topology import Layer
 from keras.layers import Lambda, Embedding
 from keras.layers import Concatenate, Dot, Reshape, Flatten
 
+
 class EmbeddingZero(Embedding):
     def call(self, inputs):
         if K.dtype(inputs) != 'int32':
