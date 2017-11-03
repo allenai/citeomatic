@@ -195,7 +195,7 @@ def train_text_model(
     return model, embedding_model
 
 
-def end_to_end_training(model_options, dataset_type, models_dir, models_ann_dir=None, load_featurizer=False):
+def end_to_end_training(model_options, dataset_type, models_dir, models_ann_dir=None):
     # step 1: make the directory
     if not os.path.exists(models_dir):
         os.makedirs(models_dir)
@@ -212,8 +212,11 @@ def end_to_end_training(model_options, dataset_type, models_dir, models_ann_dir=
 
     # step 3: load/make the featurizer (once per hyperopt run)
     print("Making feautrizer")
-    featurizer_file = os.path.join(models_dir, dp.FEATURIZER_FILENAME)
-    if os.path.isfile(featurizer_file) and load_featurizer:
+    featurizer_file_prefix = 'pretrained_' if model_options.use_pretrained else 'corpus_fit_'
+
+    featurizer_file = os.path.join(models_dir, featurizer_file_prefix + dp.FEATURIZER_FILENAME)
+
+    if os.path.isfile(featurizer_file):
         featurizer = file_util.read_pickle(featurizer_file)
     else:
         featurizer = Featurizer(
