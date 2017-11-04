@@ -23,6 +23,7 @@ class ModelOptions(HasTraits):
     use_sparse = Bool(default_value=True)
     use_src_tgt_embeddings = Bool(default_value=False)
     use_authors = Bool(default_value=False)
+    use_venue = Bool(default_value=False)
 
     author_dim = Int(default_value=10)
     venue_dim = Int(default_value=10)
@@ -65,6 +66,9 @@ class ModelOptions(HasTraits):
 
     # minimum number of papers for an author to get an embedding.
     min_author_papers = 5
+
+    # ditto for venues
+    min_venue_papers = 5
 
     lstm_dim = Int(default_value=50)
 

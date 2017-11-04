@@ -112,6 +112,8 @@ class TrainCiteomatic(App, ModelOptions):
             ranker_model_params = {
                 'use_authors':
                     hp.choice('use_authors', [True, False]),
+                'use_venue':
+                    hp.choice('use_venue', [True, False]),
                 'use_citations':
                     hp.choice('use_citations', [True, False]),
                 'use_sparse':

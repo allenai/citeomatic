@@ -33,6 +33,13 @@ class TestModelBuild(unittest.TestCase):
         except Exception:
             assert False
 
+        options.use_venue = True
+        options.n_venues = 10
+        try:
+            models = create_model(options)
+        except Exception:
+            assert False
+
         options.use_citations = True
         try:
             models = create_model(options)

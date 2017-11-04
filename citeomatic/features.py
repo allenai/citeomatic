@@ -38,6 +38,7 @@ EASY_NEGATIVE_OFFSET = 0.0
 # ANN jaccard percentile cutoff
 ANN_JACCARD_PERCENTILE = 0.05
 
+
 def label_for_doc(d, offset):
     sigmoid = 1 / (1 + np.exp(-d.in_citation_count * CITATION_SLOPE))
     return offset + (sigmoid * MAX_CITATION_BOOST)
@@ -78,11 +79,11 @@ class Featurizer(object):
     }
 
     def __init__(
-        self,
-        max_features=200000,
-        max_title_len=32,
-        max_abstract_len=256,
-        use_pretrained=False
+            self,
+            max_features=200000,
+            max_title_len=32,
+            max_abstract_len=256,
+            use_pretrained=False
     ):
         self.max_features = max_features
         self.max_title_len = max_title_len
@@ -90,6 +91,7 @@ class Featurizer(object):
         self.use_pretrained = use_pretrained
 
         self.author_to_index = {}
+        self.venue_to_index = {}
         self.word_indexer = None
 
     @property
@@ -98,6 +100,11 @@ class Featurizer(object):
             self.author_to_index = {}
         return len(self.author_to_index) + 1
 
+    def n_venues(self):
+        if not hasattr(self, 'venue_to_index'):
+            self.venue_to_index = {}
+        return len(self.venue_to_index) + 1
+
     def fit(self, corpus, max_df_frac=0.90, min_df_frac=0.000025):
 
         logging.info(
@@ -105,21 +112,28 @@ class Featurizer(object):
             resource.getrusage(resource.RUSAGE_SELF).ru_maxrss / 1e6
         )
 
-        # Fitting authors
-        logging.info('Fitting authors')
+        # Fitting authors and venues
+        logging.info('Fitting authors and venues')
         author_counts = collections.Counter()
+        venue_counts = collections.Counter()
         for doc in tqdm.tqdm(corpus):
             if doc.id in corpus.train_ids:
                 author_counts.update(doc.authors)
+                venue_counts.update([doc.venue])
 
         for author, count in author_counts.items():
             if count >= model_options.min_author_papers:
                 self.author_to_index[author] = 1 + len(self.author_to_index)
 
+        for venue, count in venue_counts.items():
+            if count >= model_options.min_venue_papers:
+                self.venue_to_index[venue] = 1 + len(self.venue_to_index)
+
         # Step 1: filter out some words and make a vocab
         if self.use_pretrained:
             vocab_file = dp.vocab_for_corpus('shared')
-            with open(vocab_file, 'r') as f: vocab = f.read().split()
+            with open(vocab_file, 'r') as f:
+                vocab = f.read().split()
         else:
             logging.info('Cleaning text.')
             all_docs_text = [
@@ -225,16 +239,20 @@ class Featurizer(object):
         features = {
             'query-authors-txt':
                 source_features['authors'],
+            'query-venue-txt':
+                source_features['venue'],
             'query-title-txt':
                 source_features['title'],
             'query-abstract-txt':
                 source_features['abstract'],
+            'candidate-authors-txt':
+                candidate_features['authors'],
+            'candidate-venue-txt':
+                candidate_features['venue'],
             'candidate-title-txt':
                 candidate_features['title'],
             'candidate-abstract-txt':
                 candidate_features['abstract'],
-            'candidate-authors-txt':
-                candidate_features['authors'],
             'query-candidate-title-intersection':
                 query_candidate_title_intersection,
             'query-candidate-abstract-intersection':
@@ -278,7 +296,9 @@ class Featurizer(object):
                 [
                     self.author_to_index[author] for author in document.authors
                     if author in self.author_to_index
-                ]
+                ],
+            'venue':
+                [self.venue_to_index.get(document.venue, 0)]
         }
 
         return features
@@ -295,12 +315,11 @@ class Featurizer(object):
             'abstract':
                 np.asarray([doc['abstract'] for doc in docs]),
             'authors':
-                np.asarray(
-                    pad_sequences(
-                        [doc['authors']
-                         for doc in docs], MAX_AUTHORS_PER_DOCUMENT
-                    )
-                ),
+                np.asarray(pad_sequences(
+                    [doc['authors'] for doc in docs], MAX_AUTHORS_PER_DOCUMENT
+                )),
+            'venue':
+                np.asarray([doc['venue'] for doc in docs])
         }
 
 
@@ -339,7 +358,7 @@ class FeatureIndexer(object):
         for i, word in enumerate(vocab):
             self.word_to_index[word] = i + offset
 
-        if use_pretrained: # OOV hashing stuff
+        if use_pretrained:  # OOV hashing stuff
             num_words = len(vocab)
             for i in range(1, model_options.num_oov_buckets + 1):
                 word = model_options.oov_term_prefix + str(i)
@@ -370,7 +389,6 @@ class FeatureIndexer(object):
             return self.word_to_index[word]
         else:
             return None
-
 
 
 class DataGenerator(object):
@@ -430,9 +448,9 @@ class DataGenerator(object):
 
                 n_positive = len(true_citations)
                 n_per_type = {
-                    'hard_negatives':  int(np.ceil(n_positive * neg_to_pos_ratio / 3.0)),
+                    'hard_negatives': int(np.ceil(n_positive * neg_to_pos_ratio / 3.0)),
                     'easy': int(np.ceil(n_positive * neg_to_pos_ratio / 3.0)),
-                    'nn':  int(np.ceil(n_positive * neg_to_pos_ratio / 3.0))
+                    'nn': int(np.ceil(n_positive * neg_to_pos_ratio / 3.0))
                 }
 
                 if self.ann is not None:
@@ -487,7 +505,8 @@ class DataGenerator(object):
         # Sample examples from our sorted list.  The margin between each example is the difference in their label:
         # easy negatives (e.g. very bad results) should be further away from a true positive than hard negatives
         # (less embarrassing).
-        for q, ex, labels in self._listwise_examples(paper_ids, candidate_ids, neg_to_pos_ratio, margin_multiplier):
+        for q, ex, labels in self._listwise_examples(paper_ids, candidate_ids, neg_to_pos_ratio,
+                                                     margin_multiplier):
             num_true = len([l for l in labels if l >= TRUE_CITATION_OFFSET * margin_multiplier])
             # ignore cases where we didn't find enough negatives...
             if len(labels) < num_true * 2:
@@ -509,7 +528,7 @@ class DataGenerator(object):
                     del batch_labels[:]
 
     def get_negatives(
-        self, candidate_ids_set, candidate_ids_list, n_per_type, document, ann_jaccard_cutoff=1
+            self, candidate_ids_set, candidate_ids_list, n_per_type, document, ann_jaccard_cutoff=1
     ):
         '''
         :param n_per_type: dictionary with keys: 'easy', 'hard_negatives', 'nn'
@@ -572,7 +591,8 @@ class DataGenerator(object):
         if n_per_type['easy'] > 0:
             random_index = np.random.randint(len(candidate_ids_list))
             random_index_range = np.arange(random_index, random_index + n_per_type['easy'])
-            result_ids_dict['easy'] = set(np.take(candidate_ids_list, random_index_range, mode='wrap'))
+            result_ids_dict['easy'] = set(
+                np.take(candidate_ids_list, random_index_range, mode='wrap'))
             result_ids_dict['easy'].difference_update(doc_citations)
 
         # step 4: trim down the requested number of ids per type and get the actual documents

@@ -2,6 +2,8 @@
 
 DATASET=$1
 BASE_DIR=/net/nfs.corp/s2-research/citeomatic/naacl2017/
+SHA=`git log --pretty=format:'%H' -n 1`
+echo ${SHA}
 echo "python citeomatic/scripts/train.py \
   --mode hyperopt \
   --dataset_type ${DATASET} \
@@ -12,6 +14,6 @@ echo "python citeomatic/scripts/train.py \
   --total_samples_secondary 50000000 \
   --samples_per_epoch 1000000 \
   --n_eval 500 \
-  --model_name paper_embedder \
+  --model_name paper_embedder_${SHA} \
   --models_dir_base  ${BASE_DIR}/hyperopts/${DATASET} \
-  --version \"3a2ab1173686f91a1a657d4361c1874255ea6baf\"  &> /tmp/${DATASET}.hyperopt.log"
+  --version ${SHA} &> /tmp/${DATASET}.hyperopt.log"

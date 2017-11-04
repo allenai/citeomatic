@@ -61,7 +61,8 @@ def create_model(options: ModelOptions, pretrained_embeddings=None):
             )
             intermediate_outputs.append(cos_dist)
 
-    # lookup weights for the intersection of individual terms (computed by the feature generator.)
+    # lookup weights for the intersection of individual terms
+    # (computed by the feature generator.)
     if options.use_sparse:
         for field in FIELDS:
             sparse_input = Input(
@@ -83,7 +84,7 @@ def create_model(options: ModelOptions, pretrained_embeddings=None):
 
         # compute candidate-author interactions
         author_embedder, outputs = TextEmbeddingSum(
-            options=options
+            options=options, field_type='authors'
         ).create_text_embedding_model(
             prefix='candidate-authors',
             final_l2_norm=True
@@ -97,9 +98,32 @@ def create_model(options: ModelOptions, pretrained_embeddings=None):
             author_embeddings,
             normed_sums[('query', 'abstract')],
             options.dense_dim,
-            normalize=False
+            normalize=True
         )
         intermediate_outputs.append(author_abstract_interaction)
+
+    if options.n_venues:
+        assert options.n_venues > 0
+
+        # compute candidate-venue interactions
+        venue_embedder, outputs = TextEmbeddingSum(
+            options=options, field_type='venue'
+        ).create_text_embedding_model(
+            prefix='candidate-venue',
+            final_l2_norm=True
+        )
+        citeomatic_inputs.append(venue_embedder.input)
+        venue_embeddings = outputs[0]
+        if options.venue_dim != options.dense_dim:
+            venue_embeddings = Dense(options.dense_dim)(venue_embeddings)
+
+        venue_abstract_interaction = custom_dot(
+            venue_embeddings,
+            normed_sums[('query', 'abstract')],
+            options.dense_dim,
+            normalize=True
+        )
+        intermediate_outputs.append(venue_abstract_interaction)
 
     if options.use_citations:
         citation_count_input = Input(
