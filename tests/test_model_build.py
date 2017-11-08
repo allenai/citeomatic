@@ -8,7 +8,7 @@ from citeomatic.utils import import_from
 from tests.test_corpus import build_test_corpus
 
 create_model = import_from("citeomatic.models.citation_ranker", "create_model")
-
+embedder_create_model = import_from("citeomatic.models.paper_embedder", "create_model")
 
 class TestModelBuild(unittest.TestCase):
     @classmethod
@@ -28,9 +28,30 @@ class TestModelBuild(unittest.TestCase):
         cls.featurizer = featurizer
         cls.options = options
 
-    def test_build_paper_embedder(self):
-        embedder_create_model = import_from("citeomatic.models.paper_embedder", "create_model")
+    def test_build_paper_embedder_sum(self):
         try:
+            models = embedder_create_model(self.options)
+            assert 'embedding' in models
+            assert 'citeomatic' in models
+            self._test_train(models)
+            assert True
+        except Exception:
+            assert False
+
+    def test_build_paper_embedder_cnn(self):
+        try:
+            self.options.embedding_type = 'cnn'
+            models = embedder_create_model(self.options)
+            assert 'embedding' in models
+            assert 'citeomatic' in models
+            self._test_train(models)
+            assert True
+        except Exception:
+            assert False
+
+    def test_build_paper_embedder_lstm(self):
+        try:
+            self.options.embedding_type = 'lstm'
             models = embedder_create_model(self.options)
             assert 'embedding' in models
             assert 'citeomatic' in models

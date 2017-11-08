@@ -5,7 +5,7 @@ from keras.layers import Add
 
 from citeomatic.models.layers import L2Normalize, ScalarMultiply, custom_dot
 from citeomatic.models.options import ModelOptions
-from citeomatic.models.text_embeddings import TextEmbeddingSum, _prefix
+from citeomatic.models.text_embeddings import TextEmbeddingSum, _prefix, make_embedder
 
 FIELDS = ['title', 'abstract']
 SOURCE_NAMES = ['query', 'candidate']
@@ -14,10 +14,14 @@ SOURCE_NAMES = ['query', 'candidate']
 def create_model(options: ModelOptions, pretrained_embeddings=None):
     logging.info('Building model: %s' % options)
 
-    text_embeddings = TextEmbeddingSum(options, pretrained_embeddings)
     scalar_sum_models = {}
     for field in FIELDS:
         scalar_sum_models[field] = ScalarMultiply(name='scalar-mult-' + field)
+
+
+    # same embedders for query and for candidate
+    embedder_title, embedder_abstract = make_embedder(options, pretrained_embeddings)
+    embedders = {'title': embedder_title, 'abstract': embedder_abstract}
 
     # apply text embedding model and add up title, abstract, etc
     embedding_models = {}
@@ -26,7 +30,7 @@ def create_model(options: ModelOptions, pretrained_embeddings=None):
         weighted_normed_sums = []
         for field in FIELDS:
             prefix = _prefix((source, field))
-            embedding_model, _ = text_embeddings.create_text_embedding_model(
+            embedding_model, _ = embedders[field].create_text_embedding_model(
                 prefix=prefix, final_l2_norm=True
             )
             embedding_models[prefix] = embedding_model
@@ -42,7 +46,7 @@ def create_model(options: ModelOptions, pretrained_embeddings=None):
     text_output = custom_dot(
         normed_weighted_sum_of_normed_sums['query'],
         normed_weighted_sum_of_normed_sums['candidate'],
-        options.dense_dim,
+        options.dense_dim * (1 + (options.embedding_type == 'lstm')),
         normalize=False
     )
 

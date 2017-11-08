@@ -22,6 +22,23 @@ def set_embedding_layer_weights(embedding_layer, pretrained_embeddings):
 def valid_conv_kernel_size(input_kernel_size, h, r):
     return int(np.floor((input_kernel_size - h)/r + 1))
 
+def make_embedder(options, pretrained_embeddings):
+    if options.embedding_type == 'sum':
+        embedder_title = TextEmbeddingSum(options, pretrained_embeddings)
+        embedder_abstract = embedder_title
+    elif options.embedding_type == 'cnn':
+        embedder_title = TextEmbeddingConv(options, pretrained_embeddings, max_sequence_len=options.max_title_len)
+        embedder_abstract = TextEmbeddingConv(options, pretrained_embeddings, max_sequence_len=options.max_abstract_len)
+        # no reason not to share the embedding itself
+        embedder_abstract.embed_direction = embedder_title.embed_direction
+        embedder_abstract.embed_magnitude = embedder_title.embed_magnitude
+    elif options.embedding_type == 'lstm':
+        embedder_title = TextEmbeddingLSTM(options, pretrained_embeddings)
+        embedder_abstract = embedder_title
+    else:
+        assert False, 'Unknown embedding type %s' % options.embedding_type
+    return embedder_title, embedder_abstract
+
 '''
 TODO: we reuse a lot of code across the three TextEmbedding classes.
 There should be a parent class that does all the embedding initialization logic.

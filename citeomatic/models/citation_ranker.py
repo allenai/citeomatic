@@ -4,7 +4,8 @@ import tensorflow as tf
 from citeomatic.models.layers import Sum, custom_dot, EmbeddingZero
 from citeomatic.models.options import ModelOptions
 from citeomatic.models.text_embeddings import (
-    TextEmbeddingSum, TextEmbeddingConv, TextEmbeddingLSTM, _prefix
+    TextEmbeddingSum, TextEmbeddingConv, TextEmbeddingLSTM, _prefix,
+    make_embedder
 )
 from keras.engine import Model
 from keras.regularizers import l1, l2
@@ -19,36 +20,19 @@ SOURCE_NAMES = ['query', 'candidate']
 def create_model(options: ModelOptions, pretrained_embeddings=None):
     logging.info('Building model: %s' % options)
 
-    def _make_embedder():
-        if options.embedding_type == 'sum':
-            embedder_title = TextEmbeddingSum(options, pretrained_embeddings)
-            embedder_abstract = embedder_title
-        elif options.embedding_type == 'cnn':
-            embedder_title = TextEmbeddingConv(options, pretrained_embeddings, max_sequence_len=options.max_title_len)
-            embedder_abstract = TextEmbeddingConv(options, pretrained_embeddings, max_sequence_len=options.max_abstract_len)
-            # no reason not to share the embedding itself
-            embedder_abstract.embed_direction = embedder_title.embed_direction
-            embedder_abstract.embed_magnitude = embedder_title.embed_magnitude
-        elif options.embedding_type == 'lstm':
-            embedder_title = TextEmbeddingLSTM(options, pretrained_embeddings)
-            embedder_abstract = embedder_title
-        else:
-            assert False, 'Unknown embedding type %s' % options.embedding_type
-        return embedder_title, embedder_abstract
-
     embedders = {}
     if options.use_src_tgt_embeddings:
         # separate emebedders for query and for candidate
-        embedder_title, embedder_abstract = _make_embedder()
+        embedder_title, embedder_abstract = make_embedder(options, pretrained_embeddings)
         embedders[_prefix(('query', 'title'))] = embedder_title
         embedders[_prefix(('query', 'abstract'))] = embedder_abstract
 
-        embedder_title, embedder_abstract = _make_embedder()
+        embedder_title, embedder_abstract = make_embedder(options, pretrained_embeddings)
         embedders[_prefix(('candidate', 'title'))] = embedder_title
         embedders[_prefix(('candidate', 'abstract'))] = embedder_abstract
     else:
         # same embedders for query and for candidate
-        embedder_title, embedder_abstract = _make_embedder()
+        embedder_title, embedder_abstract = make_embedder(options, pretrained_embeddings)
         embedders[_prefix(('query', 'title'))] = embedder_title
         embedders[_prefix(('query', 'abstract'))] = embedder_abstract
         embedders[_prefix(('candidate', 'title'))] = embedder_title
