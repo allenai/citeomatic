@@ -12,10 +12,14 @@ class Evaluate(App):
     dataset_type = Enum(('dblp', 'pubmed', 'oc'), default_value='pubmed')
     candidate_selector_type = Enum(('bm25', 'ann'), default_value='bm25')
     ranker_type = Enum(('none', 'neural'), default_value='none')
+    n_eval = Int(default_value=None, allow_none=True)
 
     def main(self, args):
         dp = DatasetPaths()
-        corpus = Corpus.load(dp.get_db_path(self.dataset_type))
+        if self.dataset_type == 'oc':
+            corpus = Corpus.load_pkl(dp.get_pkl_path(self.dataset_type))
+        else:
+            corpus = Corpus.load(dp.get_db_path(self.dataset_type))
         index_path = dp.get_bm25_index_path(self.dataset_type)
         if self.candidate_selector_type == 'bm25':
             candidate_selector = BM25CandidateSelector(
@@ -33,7 +37,7 @@ class Evaluate(App):
             assert False
 
         results = eval_text_model(corpus, candidate_selector, citation_ranker,
-                                  papers_source='test', n_eval=None)
+                                  papers_source='test', n_eval=self.n_eval)
         print(results)
 
 

@@ -4,10 +4,12 @@ import tqdm
 
 from citeomatic.common import DatasetPaths, FieldNames, global_tokenizer
 from citeomatic.config import App
+from citeomatic.corpus import Corpus
 from citeomatic.traits import Unicode
 import os
 import json
 from citeomatic import file_util
+import pickle
 
 
 class ConvertOpenCorpusToCiteomatic(App):
@@ -18,8 +20,11 @@ class ConvertOpenCorpusToCiteomatic(App):
         logging.info("Reading Open Corpus file from: {}".format(self.input_path))
         logging.info("Writing json file to: {}".format(self.output_path))
 
+        dp = DatasetPaths()
+
         assert os.path.exists(self.input_path)
         assert not os.path.exists(self.output_path)
+        assert not os.path.exists(dp.get_pkl_path('oc'))
 
         with open(self.output_path, 'w') as f:
             for obj in tqdm.tqdm(file_util.read_json_lines(self.input_path)):
@@ -43,5 +48,7 @@ class ConvertOpenCorpusToCiteomatic(App):
                 f.write(json.dumps(translated_obj))
                 f.write("\n")
         f.close()
+        oc_corpus = Corpus.build(dp.get_db_path('oc'), dp.get_json_path('oc'))
+        pickle.dump(oc_corpus, open(dp.get_pkl_path('oc')))
 
 ConvertOpenCorpusToCiteomatic.run(__name__)

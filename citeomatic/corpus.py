@@ -2,10 +2,11 @@ import json
 import logging
 import sqlite3
 
+import pickle
 import tqdm
 
 from citeomatic import file_util
-from citeomatic.common import FieldNames, Document
+from citeomatic.common import FieldNames, Document, DatasetPaths
 from citeomatic.utils import batchify
 from citeomatic.schema_pb2 import Document as ProtoDoc
 
@@ -155,6 +156,10 @@ class Corpus(object):
     @staticmethod
     def load(data_path, train_frac=0.80):
         return load(data_path, train_frac)
+
+    @staticmethod
+    def load_pkl(corpus_pkl_location):
+        return pickle.load(open(corpus_pkl_location, "rb"))
 
     @staticmethod
     def build(db_filename, source_json):

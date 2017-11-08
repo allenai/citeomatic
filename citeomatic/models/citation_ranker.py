@@ -8,7 +8,9 @@ from citeomatic.models.text_embeddings import (
 )
 from keras.engine import Model
 from keras.regularizers import l1, l2
-from keras.layers import Dense, Embedding, Input, Reshape, Concatenate
+from keras.layers import Dense, Embedding, Input, Reshape, Concatenate, multiply, Lambda, Flatten, \
+    Dot
+import keras.backend as K
 
 FIELDS = ['title', 'abstract']
 SOURCE_NAMES = ['query', 'candidate']
@@ -82,48 +84,63 @@ def create_model(options: ModelOptions, pretrained_embeddings=None):
         assert options.n_authors > 0
         assert options.author_dim > 0
 
-        # compute candidate-author interactions
-        author_embedder, outputs = TextEmbeddingSum(
+        # candidate author
+        candidate_author_embedder, candidate_author_embeddings = TextEmbeddingSum(
             options=options, field_type='authors'
         ).create_text_embedding_model(
             prefix='candidate-authors',
             final_l2_norm=True
         )
-        citeomatic_inputs.append(author_embedder.input)
-        author_embeddings = outputs[0]
-        if options.author_dim != options.dense_dim:
-            author_embeddings = Dense(options.dense_dim)(author_embeddings)
+        citeomatic_inputs.append(candidate_author_embedder.input)
 
-        author_abstract_interaction = custom_dot(
-            author_embeddings,
-            normed_sums[('query', 'abstract')],
-            options.dense_dim,
+        # query author
+        query_author_embedder, query_author_embeddings = TextEmbeddingSum(
+            options=options, field_type='authors'
+        ).create_text_embedding_model(
+            prefix='query-authors',
+            final_l2_norm=True
+        )
+        citeomatic_inputs.append(query_author_embedder.input)
+
+        # cos-sim
+        author_similarity = custom_dot(
+            candidate_author_embeddings[0],
+            query_author_embeddings[0],
+            options.author_dim,
             normalize=True
         )
-        intermediate_outputs.append(author_abstract_interaction)
+        intermediate_outputs.append(author_similarity)
 
-    if options.n_venues:
+    if options.use_venue:
         assert options.n_venues > 0
+        assert options.venue_dim > 0
 
-        # compute candidate-venue interactions
-        venue_embedder, outputs = TextEmbeddingSum(
+        # candidate venue
+        candidate_venue_embedder, candidate_venue_embeddings = TextEmbeddingSum(
             options=options, field_type='venue'
         ).create_text_embedding_model(
             prefix='candidate-venue',
             final_l2_norm=True
         )
-        citeomatic_inputs.append(venue_embedder.input)
-        venue_embeddings = outputs[0]
-        if options.venue_dim != options.dense_dim:
-            venue_embeddings = Dense(options.dense_dim)(venue_embeddings)
+        citeomatic_inputs.append(candidate_venue_embedder.input)
 
-        venue_abstract_interaction = custom_dot(
-            venue_embeddings,
-            normed_sums[('query', 'abstract')],
-            options.dense_dim,
+        # query venue
+        query_venue_embedder, query_venue_embeddings = TextEmbeddingSum(
+            options=options, field_type='venue'
+        ).create_text_embedding_model(
+            prefix='query-venue',
+            final_l2_norm=True
+        )
+        citeomatic_inputs.append(query_venue_embedder.input)
+
+        # cos-sim
+        venue_similarity = custom_dot(
+            candidate_venue_embeddings[0],
+            query_venue_embeddings[0],
+            options.venue_dim,
             normalize=True
         )
-        intermediate_outputs.append(venue_abstract_interaction)
+        intermediate_outputs.append(venue_similarity)
 
     if options.use_citations:
         citation_count_input = Input(

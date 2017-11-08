@@ -131,15 +131,17 @@ def build_test_corpus(source_file, target_file):
                 FieldNames.KEY_PHRASES: [' '.join(random.sample(WORDS, 3))],
                 FieldNames.YEAR: 2011,
                 FieldNames.PAPER_ID: str(i),
-                FieldNames.VENUE: ''
+                FieldNames.VENUE: 'v-{}'.format(random.randint(1, 5))
             }, tf
             )
             tf.write('\n')
 
     Corpus.build(target_file, source_file)
 
+
 def test_corpus_conversion():
     build_test_corpus('/tmp/foo.json', '/tmp/foo.sqlite')
+
 
 def test_corpus_iterator():
     corpus = Corpus.load('/tmp/foo.sqlite')
@@ -148,6 +150,7 @@ def test_corpus_iterator():
         iter_ids.append(doc.id)
     overlap_n = len(set(iter_ids).intersection(set(corpus.all_ids)))
     assert overlap_n == corpus.n_docs
+
 
 def test_featurizer_and_data_gen():
     build_test_corpus('/tmp/foo.json', '/tmp/foo.sqlite')
@@ -187,14 +190,12 @@ def test_featurizer_and_data_gen():
     assert q.id not in [i.id for i in ex]
 
     # pos ids should be out_citations
-    pos_docs = [i.id for i,j in zip(ex, labels) if j == np.max(labels)]
+    pos_docs = [i.id for i, j in zip(ex, labels) if j == np.max(labels)]
     assert set(pos_docs) == set(q.out_citations)
 
     # neg ids should be NOT out_citations
     neg_docs = [i.id for i, j in zip(ex, labels) if j < np.max(labels)]
-    assert np.all([i not in neg_docs for i in q.out_citations ])
-
-
+    assert np.all([i not in neg_docs for i in q.out_citations])
 
 
 def test_data_isolation():
@@ -235,6 +236,7 @@ def test_data_isolation():
                               candidate_ids=corpus.valid_ids + corpus.train_ids + corpus.test_ids))
     examples_ids = [doc.id for doc in examples]
     assert len(set(examples_ids).intersection(set(corpus.test_ids))) != 0
+
 
 if __name__ == '__main__':
     import pytest

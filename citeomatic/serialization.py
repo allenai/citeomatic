@@ -34,16 +34,20 @@ def load_pickle(filename):
 def model_from_directory(dirname: str, on_cpu=False) -> Tuple[Featurizer, Any]:
     dp = DatasetPaths()
 
-    featurizer = file_util.read_pickle(
-        os.path.join(dirname, dp.FEATURIZER_FILENAME)
-    )  # type: Featurizer
-
     options_json = file_util.read_json(
         os.path.join(dirname, dp.OPTIONS_FILENAME),
     )
     options = ModelOptions(**json.loads(options_json))
+
+    featurizer_file_prefix = 'pretrained_' if options.use_pretrained else 'corpus_fit_'
+
+    featurizer = file_util.read_pickle(
+        os.path.join(dirname, featurizer_file_prefix + dp.FEATURIZER_FILENAME)
+    )  # type: Featurizer
+
     options.n_authors = featurizer.n_authors
     options.n_features = featurizer.n_features
+    options.n_venues = featurizer.n_venues
     create_model = import_from(
         'citeomatic.models.%s' % options.model_name, 'create_model'
     )

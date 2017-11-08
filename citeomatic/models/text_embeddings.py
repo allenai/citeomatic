@@ -118,7 +118,7 @@ class TextEmbeddingConv(object):
             assert False
 
         self.nb_filter = options.n_filter
-        self.max_filter_length = options.max_filter_length
+        self.max_filter_length = options.max_filter_len
         self.l1_lambda = options.l1_lambda
         self.l2_lambda = options.l2_lambda * (pretrained_embeddings is None)
         self.dropout_p = options.dropout_p

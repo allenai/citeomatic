@@ -9,6 +9,7 @@ from citeomatic import file_util
 from citeomatic.utils import batch_apply, flatten
 from citeomatic.schema_pb2 import Document
 from citeomatic.serialization import load_pickle
+import keras.backend as K
 
 
 class ANN(object):
@@ -73,6 +74,10 @@ class ANN(object):
             self.docid_to_idx[doc_id], top_n, search_k=-1
         )
         return [self.idx_to_docid[i] for i in idx]
+
+    def get_similarities(self, vector, doc_ids):
+        indexes = [self.docid_to_idx[doc_id] for doc_id in doc_ids]
+        return np.dot(self.embeddings[indexes], vector)
 
 
 class EmbeddingModel(object):

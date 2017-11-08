@@ -208,7 +208,11 @@ def end_to_end_training(model_options, dataset_type, models_dir, models_ann_dir=
     if not os.path.isfile(db_file):
         print("Have to build the database! This may take a while, but should only happen once.")
         Corpus.build(db_file, json_file)
-    corpus = Corpus.load(db_file, model_options.train_frac)
+
+    if dataset_type == 'oc':
+        corpus = Corpus.load_pkl(dp.get_pkl_path(dataset_type))
+    else:
+        corpus = Corpus.load(db_file, model_options.train_frac)
 
     # step 3: load/make the featurizer (once per hyperopt run)
     print("Making feautrizer")
@@ -263,6 +267,7 @@ def end_to_end_training(model_options, dataset_type, models_dir, models_ann_dir=
 
 def _gold_citations(doc_id: str, corpus: Corpus, min_citations: int, candidate_ids_pool: set):
     gold_citations_1 = set(corpus[doc_id].out_citations)
+    gold_citations_1.intersection_update(corpus._id_set)
 
     if doc_id in gold_citations_1:
         gold_citations_1.remove(doc_id)
@@ -272,6 +277,7 @@ def _gold_citations(doc_id: str, corpus: Corpus, min_citations: int, candidate_i
         citations_of_citations.extend(corpus[c].out_citations)
 
     gold_citations_2 = set(citations_of_citations).union(gold_citations_1)
+    gold_citations_2.intersection_update(corpus._id_set)
 
     if doc_id in gold_citations_2:
         gold_citations_2.remove(doc_id)
@@ -317,7 +323,7 @@ def eval_text_model(
     results_1 = []
     results_2 = []
     for doc_id in tqdm.tqdm(paper_ids_for_eval):
-        candidate_ids = candidate_selector.fetch_candidates(doc_id, candidate_ids_pool)
+        candidate_ids, similarities = candidate_selector.fetch_candidates(doc_id, candidate_ids_pool)
         predictions, scores = ranker.rank(doc_id, candidate_ids)
 
         logging.debug("Done! Found %s predictions." % len(predictions))

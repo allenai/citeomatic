@@ -73,6 +73,7 @@ class DatasetPaths(object):
     OC_CORPUS_JSON = os.path.join(BASE_DIR, 'open_corpus/corpus.json')
     OC_DB_FILE = os.path.join(BASE_DIR, 'db/oc.sqlite.db')
     OC_BM25_INDEX = os.path.join(BASE_DIR, 'bm25_index/oc/')
+    OC_PKL_FILE = os.path.join(BASE_DIR, 'open_corpus/corpus.pkl')
 
     PRETRAINED_DIR = os.path.join(BASE_DIR, 'pretrained')
     EMBEDDING_WEIGHTS_FILENAME = 'embedding.h5'
@@ -129,6 +130,14 @@ class DatasetPaths(object):
         else:
             return None
 
+    def get_pkl_path(self, corpus_name):
+        if (corpus_name.lower() == 'oc'
+            or corpus_name.lower() == 'open_corpus'
+            or corpus_name.lower() == 'opencorpus'):
+            return self.OC_PKL_FILE
+        else:
+            assert False
+
 
 class Document(object):
     _fields = [
@@ -161,7 +170,8 @@ class Document(object):
             key_phrases,
             title_raw,
             abstract_raw,
-            date=None
+            date=None,
+            candidate_selector_confidence=None
 
     ):
         self.title = title
@@ -178,6 +188,7 @@ class Document(object):
 
         self.title_raw = title_raw
         self.abstract_raw = abstract_raw
+        self.candidate_selector_confidence = candidate_selector_confidence
 
     def __iter__(self):
         for k in self._fields:

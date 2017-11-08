@@ -100,6 +100,7 @@ class Featurizer(object):
             self.author_to_index = {}
         return len(self.author_to_index) + 1
 
+    @property
     def n_venues(self):
         if not hasattr(self, 'venue_to_index'):
             self.venue_to_index = {}
@@ -116,10 +117,10 @@ class Featurizer(object):
         logging.info('Fitting authors and venues')
         author_counts = collections.Counter()
         venue_counts = collections.Counter()
-        for doc in tqdm.tqdm(corpus):
-            if doc.id in corpus.train_ids:
-                author_counts.update(doc.authors)
-                venue_counts.update([doc.venue])
+        for doc_id in tqdm.tqdm(corpus.train_ids):
+            doc = corpus[doc_id]
+            author_counts.update(doc.authors)
+            venue_counts.update([doc.venue])
 
         for author, count in author_counts.items():
             if count >= model_options.min_author_papers:
@@ -137,9 +138,8 @@ class Featurizer(object):
         else:
             logging.info('Cleaning text.')
             all_docs_text = [
-                ' '.join((_clean(doc.title), _clean(doc.abstract)))
-                for doc in tqdm.tqdm(corpus)
-                if doc.id in corpus.train_ids
+                ' '.join((_clean(corpus[doc_id].title), _clean(corpus[doc_id].abstract)))
+                for doc_id in tqdm.tqdm(corpus.train_ids)
             ]
 
             logging.info('Fitting vectorizer...')
@@ -260,6 +260,10 @@ class Featurizer(object):
             'candidate-citation-count':
                 candidate_citation_features
         }
+
+        if 'confidence' in candidate_features:
+            features['candidate-confidence'] = candidate_features['confidence']
+
         return features
 
     def transform_query_and_results(self, query, list_of_documents):
@@ -300,6 +304,8 @@ class Featurizer(object):
             'venue':
                 [self.venue_to_index.get(document.venue, 0)]
         }
+        if document.candidate_selector_confidence is not None:
+            features['confidence'] = [document.candidate_selector_confidence]
 
         return features
 
@@ -309,7 +315,7 @@ class Featurizer(object):
             docs.append(self.transform_doc(document))
 
         # pull out individual columns and convert to arrays
-        return {
+        features = {
             'title':
                 np.asarray([doc['title'] for doc in docs]),
             'abstract':
@@ -321,6 +327,11 @@ class Featurizer(object):
             'venue':
                 np.asarray([doc['venue'] for doc in docs])
         }
+
+        if 'confidence' in docs[0]:
+            features['confidence'] = np.asarray([doc['confidence'] for doc in docs])
+
+        return features
 
 
 class CachingFeaturizer(Featurizer):
