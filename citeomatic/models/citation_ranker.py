@@ -19,25 +19,41 @@ SOURCE_NAMES = ['query', 'candidate']
 def create_model(options: ModelOptions, pretrained_embeddings=None):
     logging.info('Building model: %s' % options)
 
-    embedders = {}
-
     def _make_embedder():
         if options.embedding_type == 'sum':
-            return TextEmbeddingSum(options, pretrained_embeddings)
+            embedder_title = TextEmbeddingSum(options, pretrained_embeddings)
+            embedder_abstract = embedder_title
         elif options.embedding_type == 'cnn':
-            return TextEmbeddingConv(options, pretrained_embeddings)
+            embedder_title = TextEmbeddingConv(options, pretrained_embeddings, max_sequence_len=options.max_title_len)
+            embedder_abstract = TextEmbeddingConv(options, pretrained_embeddings, max_sequence_len=options.max_abstract_len)
+            # no reason not to share the embedding itself
+            embedder_abstract.embed_direction = embedder_title.embed_direction
+            embedder_abstract.embed_magnitude = embedder_title.embed_magnitude
         elif options.embedding_type == 'lstm':
-            return TextEmbeddingLSTM(options, pretrained_embeddings)
+            embedder_title = TextEmbeddingLSTM(options, pretrained_embeddings)
+            embedder_abstract = embedder_title
         else:
             assert False, 'Unknown embedding type %s' % options.embedding_type
+        return embedder_title, embedder_abstract
 
+    embedders = {}
     if options.use_src_tgt_embeddings:
-        embedders['query'] = _make_embedder()
-        embedders['candidate'] = _make_embedder()
-    else:
-        embedders['query'] = embedders['candidate'] = _make_embedder()
+        # separate emebedders for query and for candidate
+        embedder_title, embedder_abstract = _make_embedder()
+        embedders[_prefix(('query', 'title'))] = embedder_title
+        embedders[_prefix(('query', 'abstract'))] = embedder_abstract
 
-    embedding_models = {}
+        embedder_title, embedder_abstract = _make_embedder()
+        embedders[_prefix(('candidate', 'title'))] = embedder_title
+        embedders[_prefix(('candidate', 'abstract'))] = embedder_abstract
+    else:
+        # same embedders for query and for candidate
+        embedder_title, embedder_abstract = _make_embedder()
+        embedders[_prefix(('query', 'title'))] = embedder_title
+        embedders[_prefix(('query', 'abstract'))] = embedder_abstract
+        embedders[_prefix(('candidate', 'title'))] = embedder_title
+        embedders[_prefix(('candidate', 'abstract'))] = embedder_abstract
+
     normed_sums = {}
     intermediate_outputs = []
     citeomatic_inputs = []
@@ -46,11 +62,10 @@ def create_model(options: ModelOptions, pretrained_embeddings=None):
             for field in FIELDS:
                 prefix = _prefix((source, field))
                 embedding_model, outputs = embedders[
-                    source
+                    prefix
                 ].create_text_embedding_model(prefix=prefix)
-                embedding_models[prefix] = embedding_model
                 normed_sums[(source, field)] = outputs[0]
-                citeomatic_inputs.append(embedding_models[prefix].input)
+                citeomatic_inputs.append(embedding_model.input)
 
         for field in FIELDS:
             query = normed_sums[('query', field)]
@@ -58,8 +73,8 @@ def create_model(options: ModelOptions, pretrained_embeddings=None):
             cos_dist = custom_dot(
                 query,
                 candidate,
-                options.dense_dim,
-                normalize=False
+                options.dense_dim * (1 + (options.embedding_type == 'lstm')),
+                normalize=True
             )
             intermediate_outputs.append(cos_dist)
 

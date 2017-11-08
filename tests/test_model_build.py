@@ -95,6 +95,22 @@ class TestModelBuild(unittest.TestCase):
         except Exception:
             assert False
 
+    def test_cnn(self):
+        self.options.embedding_type = 'cnn'
+        try:
+            models = create_model(self.options)
+            self._test_train(models)
+        except Exception:
+            assert False
+
+    def test_lstm(self):
+        self.options.embedding_type = 'lstm'
+        try:
+            models = create_model(self.options)
+            self._test_train(models)
+        except Exception:
+            assert False
+
     def _test_train(self, models: dict):
         model = models['citeomatic']
         model.compile(optimizer='nadam', loss=triplet_loss)

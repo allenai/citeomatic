@@ -225,6 +225,8 @@ def end_to_end_training(model_options, dataset_type, models_dir, models_ann_dir=
     else:
         featurizer = Featurizer(
             max_features=model_options.max_features,
+            max_title_len=model_options.max_title_len,
+            max_abstract_len=model_options.max_abstract_len,
             use_pretrained=model_options.use_pretrained
         )
         featurizer.fit(corpus)

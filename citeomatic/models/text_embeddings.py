@@ -3,9 +3,8 @@ import numpy as np
 
 from citeomatic.models.layers import L2Normalize, ScalarMul, Sum, EmbeddingZero
 from citeomatic.models.options import ModelOptions
-from keras.layers import Bidirectional, Embedding, Input, LSTM, Concatenate, SpatialDropout1D
-from keras.layers.convolutional import Convolution1D
-from keras.layers.pooling import GlobalAveragePooling1D
+from keras.layers import Bidirectional, Input, LSTM, Concatenate, SpatialDropout1D
+from keras.layers import Conv1D, Lambda
 from keras.models import Model
 from keras.regularizers import l1, l2
 
@@ -14,6 +13,14 @@ import keras.backend as K
 
 def _prefix(tuple):
     return '-'.join(tuple)
+
+def set_embedding_layer_weights(embedding_layer, pretrained_embeddings):
+    dense_dim = pretrained_embeddings.shape[1]
+    weights = np.vstack((np.zeros(dense_dim), pretrained_embeddings))
+    embedding_layer.set_weights([weights])
+
+def valid_conv_kernel_size(input_kernel_size, h, r):
+    return int(np.floor((input_kernel_size - h)/r + 1))
 
 '''
 TODO: we reuse a lot of code across the three TextEmbedding classes.
@@ -103,7 +110,8 @@ class TextEmbeddingConv(object):
     Text embedding models class.
     """
 
-    def __init__(self, options: ModelOptions, pretrained_embeddings=None, field_type='text'):
+    def __init__(self, options: ModelOptions, pretrained_embeddings=None, field_type='text', max_sequence_len=None,
+                 magnitudes_initializer='uniform'):
         self.field_type = field_type
         if self.field_type == 'text':
             self.n_features = options.n_features
@@ -117,17 +125,18 @@ class TextEmbeddingConv(object):
         else:
             assert False
 
-        self.nb_filter = options.n_filter
-        self.max_filter_length = options.max_filter_len
+        self.max_sequence_len = max_sequence_len
         self.l1_lambda = options.l1_lambda
         self.l2_lambda = options.l2_lambda * (pretrained_embeddings is None)
         self.dropout_p = options.dropout_p
+        self.kernel_width = options.kernel_width
+        self.stride = options.stride
 
         # shared embedding layers
         self.embed_direction = EmbeddingZero(
             output_dim=self.dense_dim,
             input_dim=self.n_features,
-            activity_regularizer=l2(self.l2_lambda) * (pretrained_embeddings is None),
+            activity_regularizer=l2(self.l2_lambda),
             mask_zero=False,
             trainable=pretrained_embeddings is None
         )
@@ -143,23 +152,26 @@ class TextEmbeddingConv(object):
         )
 
         # shared convolution layers
-        self.conv_layers = []
-        for i in range(1, self.max_filter_length + 1):
-            self.conv_layers.append(
-                Convolution1D(
-                    self.nb_filter, i, activation='linear', border_mode='same'
-                )
-            )
+        conv1_output_length = valid_conv_kernel_size(max_sequence_len, self.kernel_width, self.stride)
+        conv2_output_length = valid_conv_kernel_size(conv1_output_length, self.kernel_width, self.stride)
 
-        # convolution gate layers
-        # see: https://arxiv.org/abs/1612.08083
-        self.conv_gate_layers = []
-        for i in range(1, self.max_filter_length + 1):
-            self.conv_gate_layers.append(
-                Convolution1D(
-                    self.nb_filter, i, activation='sigmoid', border_mode='same'
-                )
-            )
+        self.conv1 = Conv1D(filters=self.dense_dim,
+                            kernel_size=self.kernel_width,
+                            strides=self.stride,
+                            padding='valid',
+                            activation='elu')
+
+        self.conv2 = Conv1D(filters=self.dense_dim,
+                            kernel_size=self.kernel_width,
+                            strides=self.stride,
+                            padding='valid',
+                            activation='elu')
+
+        self.conv3 = Conv1D(filters=self.dense_dim,
+                            kernel_size=conv2_output_length,
+                            strides=self.stride,
+                            padding='valid',
+                            activation='elu')
 
     def create_text_embedding_model(self, prefix="", final_l2_norm=True):
         """
@@ -173,30 +185,17 @@ class TextEmbeddingConv(object):
         magnitude = self.embed_magnitude(_input)
         _embedding = ScalarMul.invoke([direction, magnitude], name='%s-embed' % prefix)
         _embedding = SpatialDropout1D(self.dropout_p)(_embedding)
-        # perform convolutions of various lengths and concat them all
-        # we multiply the convolutions by their "gates"
-        list_of_gated_convs = [
-            ScalarMul.invoke([conv(_embedding), conv_gate(_embedding)])
-            for conv, conv_gate in zip(self.conv_layers, self.conv_gate_layers)
-        ]
-        if len(list_of_gated_convs) > 1:
-            # last axis should have size nb_filter * max_filter_length
-            concatted_embeddings = Concatenate(
-                axis=-1, name='%s-concatted-embeddings' % prefix
-            )(list_of_gated_convs)
-        else:
-            concatted_embeddings = list_of_gated_convs[0]
-        # global max pool
-        # pool = GlobalMaxPooling1D(name='%s-max-pool' % prefix)(concatted_embeddings)
-        pool = GlobalAveragePooling1D(name='%s-ave-pool' % prefix
-                                     )(concatted_embeddings)
+        conved1 = self.conv1(_embedding)
+        conved2 = self.conv2(conved1)
+        conved3 = self.conv3(conved2)
+        conved3 = Lambda(lambda x: K.squeeze(x, axis=1))(conved3)
         if final_l2_norm:
-            normed_pool = L2Normalize.invoke(
-                pool, name='%s-l2_normed_max_pool' % prefix
+            normed_conved3 = L2Normalize.invoke(
+                conved3, name='%s-l2_normed_conv_encoding' % prefix
             )
-            outputs_list = [normed_pool]
+            outputs_list = [normed_conved3]
         else:
-            outputs_list = [pool]
+            outputs_list = [conved3]
 
         return Model(
             inputs=_input, outputs=outputs_list, name='%s-embedding-model'
@@ -208,7 +207,8 @@ class TextEmbeddingLSTM(object):
     Text embedding models class.
     """
 
-    def __init__(self, options: ModelOptions, pretrained_embeddings=None, field_type='text'):
+    def __init__(self, options: ModelOptions, pretrained_embeddings=None, field_type='text',
+                 magnitudes_initializer='uniform'):
         self.field_type = field_type
         if self.field_type == 'text':
             self.n_features = options.n_features
@@ -222,23 +222,32 @@ class TextEmbeddingLSTM(object):
         else:
             assert False
 
-        self.lstm_dim = options.lstm_dim
         self.l2_lambda = options.l2_lambda * (pretrained_embeddings is None)
+        self.l1_lambda = options.l1_lambda
         self.dropout_p = options.dropout_p
 
-        # shared embedding layers
-        self.embedding = EmbeddingZero(
+        # shared layers
+        self.embed_direction = EmbeddingZero(
             output_dim=self.dense_dim,
             input_dim=self.n_features,
-            activity_regularizer=l2(self.l2_lambda) * (pretrained_embeddings is None),
-            mask_zero=True,
+            activity_regularizer=l2(self.l2_lambda),
+            mask_zero=False,
             trainable=pretrained_embeddings is None
         )
         if pretrained_embeddings is not None:
-            self.embedding.build((None,))
-            set_embedding_layer_weights(self.embedding, pretrained_embeddings)
+            self.embed_direction.build((None,))
+            set_embedding_layer_weights(self.embed_direction, pretrained_embeddings)
 
-        self.bilstm = Bidirectional(LSTM(self.lstm_dim))
+        self.embed_magnitude = EmbeddingZero(
+            output_dim=1,
+            input_dim=self.n_features,
+            activity_regularizer=l1(self.l1_lambda),
+            # will induce sparsity if large enough
+            mask_zero=False,
+            embeddings_initializer=magnitudes_initializer
+        )
+
+        self.bilstm = Bidirectional(LSTM(self.dense_dim))
 
     def create_text_embedding_model(self, prefix="", final_l2_norm=True):
         """
@@ -247,7 +256,10 @@ class TextEmbeddingLSTM(object):
         word embeddings that occur in the document.
         """
         _input = Input(shape=(None,), dtype='int32', name='%s-txt' % prefix)
-        _embedding = self.embedding(_input)
+        dir_embedding = self.embed_direction(_input)
+        direction = L2Normalize.invoke(dir_embedding, name='%s-dir-norm' % prefix)
+        magnitude = self.embed_magnitude(_input)
+        _embedding = ScalarMul.invoke([direction, magnitude], name='%s-embed' % prefix)
         _embedding = SpatialDropout1D(self.dropout_p)(_embedding)
         lstm_embedding = self.bilstm(_embedding)
         if final_l2_norm:
@@ -260,9 +272,3 @@ class TextEmbeddingLSTM(object):
         return Model(
             inputs=_input, outputs=outputs_list, name="%s-embedding-model"
         ), outputs_list
-
-
-def set_embedding_layer_weights(embedding_layer, pretrained_embeddings):
-    dense_dim = pretrained_embeddings.shape[1]
-    weights = np.vstack((np.zeros(dense_dim), pretrained_embeddings))
-    embedding_layer.set_weights([weights])

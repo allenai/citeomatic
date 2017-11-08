@@ -35,6 +35,8 @@ class ModelOptions(HasTraits):
     margin_multiplier = Float(default_value=1)
     train_frac = Float(default_value=0.8) # the rest will be divided 50/50 val/test
     max_features = Int(default_value=200000)
+    max_title_len = Int(default_value=32)
+    max_abstract_len = Int(default_value=256)
     neg_to_pos_ratio = Int(default_value=6) # ideally divisible by 2 and 3
     batch_size = Int(default_value=512)
     samples_per_epoch = Int(default_value=1000000)
@@ -47,8 +49,8 @@ class ModelOptions(HasTraits):
     dropout_p = Float(default_value=0)
 
     # convolutions
-    n_filter = Int()
-    max_filter_len = Int()
+    kernel_width = Int(default_value=5)
+    stride = Int(default_value=2)
 
     # dense layers
     dense_config = Unicode(default_value='20,20')
@@ -69,8 +71,6 @@ class ModelOptions(HasTraits):
 
     # ditto for venues
     min_venue_papers = 5
-
-    lstm_dim = Int(default_value=50)
 
     def __repr__(self):
         return json.dumps(self._trait_values, indent=2, sort_keys=True)
