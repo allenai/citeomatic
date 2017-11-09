@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-DATASET=dblp
+DATASET=$1
 BASE_DIR=/net/nfs.corp/s2-research/citeomatic/naacl2017/
 HYPEROPTS_DIR=${BASE_DIR}/hyperopts/${DATASET}/
 VERSION=1

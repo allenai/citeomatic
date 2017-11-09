@@ -12,12 +12,13 @@ from keras.callbacks import ReduceLROnPlateau, TensorBoard
 from keras.optimizers import TFOptimizer
 
 from citeomatic import file_util
-from citeomatic.candidate_selectors import CandidateSelector
+from citeomatic.candidate_selectors import CandidateSelector, ANNCandidateSelector
 from citeomatic.common import DatasetPaths
 from citeomatic.corpus import Corpus
 from citeomatic.features import DataGenerator
 from citeomatic.features import Featurizer
 from citeomatic.models import layers
+from citeomatic.models.options import ModelOptions
 from citeomatic.neighbors import EmbeddingModel, ANN
 from citeomatic.ranker import Ranker
 from citeomatic.serialization import model_from_directory
@@ -61,30 +62,60 @@ class MemoryUsageCallback(keras.callbacks.Callback):
 
 
 class UpdateANN(keras.callbacks.Callback):
-    def __init__(self, corpus, featurizer, embedding_model, data_generator, embed_every_epoch=True):
+    def __init__(self, corpus, featurizer, embedding_model, data_generator: DataGenerator,
+                 embed_at_epoch_end, embed_at_train_begin):
+        super().__init__()
         self.corpus = corpus
         self.featurizer = featurizer
         self.embedding_model = embedding_model
         self.data_generator = data_generator
-        self.embed_every_epoch = embed_every_epoch
-        if not self.embed_every_epoch:
-            self.on_epoch_end(epoch=-2)
+        self.embed_at_epch_end = embed_at_epoch_end
+        self.embed_at_train_begin = embed_at_train_begin
+
+    def _re_embed(self):
+        embedder = EmbeddingModel(self.featurizer, self.embedding_model)
+        ann = ANN.build(embedder, self.corpus, ann_trees=10)
+        candidate_selector = ANNCandidateSelector(
+            corpus=self.corpus,
+            ann=ann,
+            paper_embedding_model=embedder,
+            top_k=100,
+            extend_candidate_citations=False
+        )
+        self.data_generator.ann = ann
+        self.data_generator.candidate_selector = candidate_selector
+
+    def on_train_begin(self, logs=None):
+        if self.embed_at_train_begin:
+            logging.info(
+                'Beginning training. Embedding corpus.',
+            )
+            self._re_embed()
 
     def on_epoch_end(self, epoch, logs=None):
-        if self.embed_every_epoch:
+        if self.embed_at_epch_end:
             logging.info(
-                'Epoch %d ended. Retraining approximate nearest neighbors model.',
+                'Epoch %d begin. Retraining approximate nearest neighbors model.',
                 epoch + 1
             )
-            embedder = EmbeddingModel(self.featurizer, self.embedding_model)
-            ann = ANN.build(embedder, self.corpus, ann_trees=10)
-            self.data_generator.ann = ann
+            self._re_embed()
+
+
+class UpdateValidationGenerator(keras.callbacks.Callback):
+    def __init__(self, validation_generator: DataGenerator, training_generator: DataGenerator):
+        super().__init__()
+        self.validation_generator = validation_generator
+        self.training_generator = training_generator
+
+    def on_train_end(self, logs=None):
+        self.validation_generator.ann = self.training_generator.ann
+        self.validation_generator.candidate_selector = self.training_generator.candidate_selector
 
 
 def train_text_model(
-        corpus,
-        featurizer,
-        model_options,
+        corpus: Corpus,
+        featurizer: Featurizer,
+        model_options: ModelOptions,
         models_ann_dir=None,
         debug=False,
         tensorboard_dir=None
@@ -111,7 +142,8 @@ def train_text_model(
 
     logging.info(model.summary())
 
-    training_dg = DataGenerator(corpus, featurizer)
+    training_dg = DataGenerator(corpus=corpus, featurizer=featurizer)
+
     training_generator = training_dg.triplet_generator(
         paper_ids=corpus.train_ids,
         candidate_ids=corpus.train_ids,
@@ -120,7 +152,7 @@ def train_text_model(
         margin_multiplier=model_options.margin_multiplier
     )
 
-    validation_dg = DataGenerator(corpus, featurizer)
+    validation_dg = DataGenerator(corpus=corpus, featurizer=featurizer)
     validation_generator = validation_dg.triplet_generator(
         paper_ids=corpus.valid_ids,
         candidate_ids=corpus.train_ids + corpus.valid_ids,
@@ -173,14 +205,22 @@ def train_text_model(
         if models_ann_dir is None:
             ann_featurizer = featurizer
             paper_embedding_model = embedding_model
-            embed_every_epoch = True
+            embed_at_epoch_end = True
+            embed_at_train_begin = False
         else:
             ann_featurizer, ann_models = model_from_directory(models_ann_dir, on_cpu=True)
             paper_embedding_model = ann_models['embedding']
-            embed_every_epoch = False
+            embed_at_epoch_end = False
+            embed_at_train_begin = True
         callbacks_list.append(
-            UpdateANN(corpus, ann_featurizer, paper_embedding_model, training_dg, embed_every_epoch)
+            UpdateANN(corpus, ann_featurizer, paper_embedding_model, training_dg,
+                      embed_at_epoch_end, embed_at_train_begin)
         )
+
+        callbacks_list.append(
+            UpdateValidationGenerator(validation_generator, training_generator)
+        )
+
 
     # logic
     model.fit_generator(
@@ -326,7 +366,8 @@ def eval_text_model(
     results_2 = []
     for doc_id in tqdm.tqdm(paper_ids_for_eval):
         candidate_ids = candidate_selector.fetch_candidates(doc_id, candidate_ids_pool)
-        predictions, scores = ranker.rank(doc_id, candidate_ids)
+        confidence_scores = candidate_selector.confidence(doc_id, candidate_ids)
+        predictions, scores = ranker.rank(doc_id, candidate_ids, confidence_scores)
 
         logging.debug("Done! Found %s predictions." % len(predictions))
         # eval_doc_predictions.append(predictions)
