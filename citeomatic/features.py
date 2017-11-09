@@ -11,6 +11,7 @@ import tqdm
 from keras.preprocessing.sequence import pad_sequences
 from sklearn.feature_extraction.text import CountVectorizer
 
+from citeomatic.candidate_selectors import CandidateSelector
 from citeomatic.utils import flatten
 from citeomatic.common import DatasetPaths
 from citeomatic.models.options import ModelOptions
@@ -212,7 +213,7 @@ class Featurizer(object):
         abstract = _clean(document.abstract).split(' ')
         return title, abstract
 
-    def transform_query_candidate(self, query_docs, candidate_docs):
+    def transform_query_candidate(self, query_docs, candidate_docs, confidence_scores=None):
         """
         Parameters
         ----------
@@ -261,12 +262,12 @@ class Featurizer(object):
                 candidate_citation_features
         }
 
-        if 'confidence' in candidate_features:
-            features['candidate-confidence'] = candidate_features['confidence']
+        if confidence_scores is not None:
+            features['candidate-confidence'] = np.asarray(confidence_scores)
 
         return features
 
-    def transform_query_and_results(self, query, list_of_documents):
+    def transform_query_and_results(self, query, list_of_documents, similarities):
         """
         Parameters
         ----------
@@ -281,12 +282,13 @@ class Featurizer(object):
         query_docs = []
         for i in range(len(list_of_documents)):
             query_docs.append(query)
-        return self.transform_query_candidate(query_docs, list_of_documents)
+        return self.transform_query_candidate(query_docs, list_of_documents, similarities)
 
     def transform_doc(self, document):
         """
         Converts a document into its title and abstract word sequences
         :param document: Input document of type Document
+        :param confidence: Confidence score as assigned by a candidate selector
         :return: a tuple containing the title and abstract's transformed word sequences. Word
         sequences are np arrays
         """
@@ -304,8 +306,6 @@ class Featurizer(object):
             'venue':
                 [self.venue_to_index.get(document.venue, 0)]
         }
-        if document.candidate_selector_confidence is not None:
-            features['confidence'] = [document.candidate_selector_confidence]
 
         return features
 
@@ -328,9 +328,6 @@ class Featurizer(object):
                 np.asarray([doc['venue'] for doc in docs])
         }
 
-        if 'confidence' in docs[0]:
-            features['confidence'] = np.asarray([doc['confidence'] for doc in docs])
-
         return features
 
 
@@ -341,8 +338,8 @@ class CachingFeaturizer(Featurizer):
 
         self._cache = {}
 
-    def transform_doc(self, document):
-        if not document.id in self._cache:
+    def transform_doc(self, document, confidence=None):
+        if document.id not in self._cache:
             features = Featurizer.transform_doc(self, document)
             self._cache[document.id] = features
 
@@ -416,10 +413,11 @@ class DataGenerator(object):
     """
     KEYS = ['hard_negatives', 'nn', 'easy']
 
-    def __init__(self, corpus, featurizer, ann=None):
+    def __init__(self, corpus, featurizer, ann=None, candidate_selector: CandidateSelector = None):
         self.corpus = corpus
         self.featurizer = CachingFeaturizer(featurizer)
         self.ann = ann
+        self.candidate_selector = candidate_selector
 
     def _listwise_examples(
             self,
@@ -531,9 +529,17 @@ class DataGenerator(object):
                 batch_ex.extend([ex[ai], ex[bi]])
                 batch_labels.extend([labels[ai], labels[bi]])
                 if len(queries) > batch_size:
-                    yield self.featurizer.transform_query_candidate(
-                        queries, batch_ex
-                    ), np.asarray(batch_labels)
+                    if self.candidate_selector is None:
+                        yield self.featurizer.transform_query_candidate(
+                            queries, batch_ex
+                        ), np.asarray(batch_labels)
+                    else:
+                        confidence_scores = self.candidate_selector.confidence(q, [doc.id for doc in
+                                                                                   batch_ex])
+                        yield self.featurizer.transform_query_candidate(
+                            queries, batch_ex, confidence_scores
+                        ), np.asarray(batch_labels)
+
                     del queries[:]
                     del batch_ex[:]
                     del batch_labels[:]

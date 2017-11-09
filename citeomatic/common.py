@@ -1,4 +1,9 @@
+import importlib
 import os
+
+import pickle
+
+from citeomatic import file_util
 from citeomatic.schema_pb2 import Document as ProtoDoc
 import spacy
 from whoosh.fields import *
@@ -214,3 +219,17 @@ class Document(object):
             title_raw=doc.title_raw,
             abstract_raw=doc.abstract_raw,
         )
+
+
+class ModelLoader(pickle.Unpickler):
+    def find_class(self, mod_name, klass_name):
+        if mod_name[:4] == 'ai2.':
+            mod_name = mod_name[4:]
+
+        mod = importlib.import_module(mod_name)
+        return getattr(mod, klass_name)
+
+
+def load_pickle(filename):
+    with file_util.open(filename) as f:
+        return ModelLoader(f).load()

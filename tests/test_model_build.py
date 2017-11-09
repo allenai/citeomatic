@@ -1,11 +1,14 @@
 import unittest
 
+import numpy as np
+
 from citeomatic.corpus import Corpus
 from citeomatic.features import Featurizer, DataGenerator
 from citeomatic.models.layers import triplet_loss
 from citeomatic.models.options import ModelOptions
 from citeomatic.utils import import_from
 from tests.test_corpus import build_test_corpus
+import keras.backend as K
 
 create_model = import_from("citeomatic.models.citation_ranker", "create_model")
 embedder_create_model = import_from("citeomatic.models.paper_embedder", "create_model")
@@ -135,11 +138,14 @@ class TestModelBuild(unittest.TestCase):
     def _test_train(self, models: dict):
         model = models['citeomatic']
         model.compile(optimizer='nadam', loss=triplet_loss)
-        dg = DataGenerator(self.corpus, self.featurizer)
+        dg = DataGenerator(self.corpus, self.featurizer, candidate_selector=TestCandidateSelector())
 
         training_generator = dg.triplet_generator(paper_ids=self.corpus.train_ids, batch_size=2)
 
         model.fit_generator(training_generator, steps_per_epoch=1, epochs=10)
+        K.clear_session()
 
 
-
+class TestCandidateSelector(object):
+    def confidence(self, doc_id, candidate_ids):
+        return np.ones(len(candidate_ids))

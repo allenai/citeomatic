@@ -17,20 +17,6 @@ from citeomatic.features import Featurizer
 from citeomatic.models.options import ModelOptions
 
 
-class ModelLoader(pickle.Unpickler):
-    def find_class(self, mod_name, klass_name):
-        if mod_name[:4] == 'ai2.':
-            mod_name = mod_name[4:]
-
-        mod = importlib.import_module(mod_name)
-        return getattr(mod, klass_name)
-
-
-def load_pickle(filename):
-    with file_util.open(filename) as f:
-        return ModelLoader(f).load()
-
-
 def model_from_directory(dirname: str, on_cpu=False) -> Tuple[Featurizer, Any]:
     dp = DatasetPaths()
 

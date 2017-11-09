@@ -26,6 +26,16 @@ class CandidateSelector(ABC):
         """
         pass
 
+    def confidence(self, doc_id, candidate_ids) -> list:
+        """
+        For each query paper and given list of candidate docs, return an estimate of confidence
+        using the selector
+        :param doc_id:
+        :param candidate_ids:
+        :return:
+        """
+        pass
+
 
 class ANNCandidateSelector(CandidateSelector):
     def __init__(
@@ -64,8 +74,13 @@ class ANNCandidateSelector(CandidateSelector):
         if doc_id in candidate_ids:
             candidate_ids.remove(doc_id)
         candidate_ids_list = list(candidate_ids)
-        similarities_list = self.ann.get_similarities(doc_embedding, candidate_ids_list)
-        return candidate_ids_list, similarities_list
+
+        return candidate_ids_list
+
+    def confidence(self, doc_id, candidate_ids):
+        doc = self.corpus[doc_id]
+        doc_embedding = self.paper_embedding_model.embed(doc)
+        return self.ann.get_similarities(doc_embedding, candidate_ids)
 
 
 class BM25CandidateSelector(CandidateSelector):
@@ -91,7 +106,6 @@ class BM25CandidateSelector(CandidateSelector):
         self.extend_candidate_citations = extend_candidate_citations
 
     def fetch_candidates(self, doc_id, candidate_ids_pool):
-        query_text = self.corpus[doc_id].title
 
         title_key_terms = ' '.join([
             t for t,_ in self.searcher.key_terms_from_text('title', self.corpus[doc_id].title,
@@ -116,3 +130,6 @@ class BM25CandidateSelector(CandidateSelector):
         candidate_ids = [c_id for c_id in candidate_ids if c_id in candidate_ids_pool and c_id != doc_id]
 
         return candidate_ids, []
+
+    def confidence(self, doc_id, candidate_ids):
+        return []

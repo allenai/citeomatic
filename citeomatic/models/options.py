@@ -72,6 +72,8 @@ class ModelOptions(HasTraits):
     # ditto for venues
     min_venue_papers = 5
 
+    use_selector_confidence = Bool(default_value=True)
+
     def __repr__(self):
         return json.dumps(self._trait_values, indent=2, sort_keys=True)
 

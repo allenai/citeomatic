@@ -325,7 +325,7 @@ def eval_text_model(
     results_1 = []
     results_2 = []
     for doc_id in tqdm.tqdm(paper_ids_for_eval):
-        candidate_ids, similarities = candidate_selector.fetch_candidates(doc_id, candidate_ids_pool)
+        candidate_ids = candidate_selector.fetch_candidates(doc_id, candidate_ids_pool)
         predictions, scores = ranker.rank(doc_id, candidate_ids)
 
         logging.debug("Done! Found %s predictions." % len(predictions))

@@ -148,6 +148,13 @@ def create_model(options: ModelOptions, pretrained_embeddings=None):
         citeomatic_inputs.append(citation_count_input)
         intermediate_outputs.append(citation_count_input)
 
+    if options.use_selector_confidence:
+        candidate_confidence_input = Input(
+            shape=(1,), dtype='float32', name='candidate-confidence'
+        )
+        citeomatic_inputs.append(candidate_confidence_input)
+        intermediate_outputs.append(candidate_confidence_input)
+
     if len(intermediate_outputs) > 1:
         last = Concatenate()(intermediate_outputs)
     else:

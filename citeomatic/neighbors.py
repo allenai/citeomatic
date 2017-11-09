@@ -8,7 +8,7 @@ from annoy import AnnoyIndex
 from citeomatic import file_util
 from citeomatic.utils import batch_apply, flatten
 from citeomatic.schema_pb2 import Document
-from citeomatic.serialization import load_pickle
+from citeomatic.common import load_pickle
 import keras.backend as K
 
 
