@@ -32,7 +32,7 @@ class ANN(object):
     @classmethod
     def build(cls, embedding_model, corpus, ann_trees=100):
         docid_to_idx = {}
-        embedding_gen = embedding_model.embed_documents(corpus)
+        embedding_gen = embedding_model.embed_documents(corpus, batch_size=1024)
         doc_embeddings = np.zeros((len(corpus), embedding_model.output_shape))
         for i, (doc, embedding) in enumerate(
                 zip(tqdm.tqdm(corpus), embedding_gen)):
@@ -93,7 +93,7 @@ class EmbeddingModel(object):
         self.output_shape = K.int_shape(self._model.outputs[0])[-1]
 
     def embed_documents(self,
-                        generator: Iterator[Document]) -> Iterator[np.ndarray]:
+                        generator: Iterator[Document], batch_size=256) -> Iterator[np.ndarray]:
         """
         Compute embeddings of the provided documents.
         """
@@ -109,7 +109,7 @@ class EmbeddingModel(object):
             )
             return doc_embedding
 
-        return batch_apply(generator, _run_embedding)
+        return batch_apply(generator, _run_embedding, batch_size)
 
     def embed(self, doc):
         return np.asarray(list(self.embed_documents([doc])))[0]
