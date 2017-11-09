@@ -46,7 +46,7 @@ def create_model(options: ModelOptions, pretrained_embeddings=None):
     text_output = custom_dot(
         normed_weighted_sum_of_normed_sums['query'],
         normed_weighted_sum_of_normed_sums['candidate'],
-        options.dense_dim * (1 + (options.embedding_type == 'lstm')),
+        options.dense_dim,
         normalize=False
     )
 

@@ -57,7 +57,7 @@ def create_model(options: ModelOptions, pretrained_embeddings=None):
             cos_dist = custom_dot(
                 query,
                 candidate,
-                options.dense_dim * (1 + (options.embedding_type == 'lstm')),
+                options.dense_dim,
                 normalize=True
             )
             intermediate_outputs.append(cos_dist)

@@ -4,7 +4,7 @@ import numpy as np
 from citeomatic.models.layers import L2Normalize, ScalarMul, Sum, EmbeddingZero
 from citeomatic.models.options import ModelOptions
 from keras.layers import Bidirectional, Input, LSTM, Concatenate, SpatialDropout1D
-from keras.layers import Conv1D, Lambda
+from keras.layers import Conv1D, Lambda, Dense
 from keras.models import Model
 from keras.regularizers import l1, l2
 
@@ -265,6 +265,7 @@ class TextEmbeddingLSTM(object):
         )
 
         self.bilstm = Bidirectional(LSTM(self.dense_dim))
+        self.dense = Dense(self.dense_dim)
 
     def create_text_embedding_model(self, prefix="", final_l2_norm=True):
         """
@@ -278,7 +279,7 @@ class TextEmbeddingLSTM(object):
         magnitude = self.embed_magnitude(_input)
         _embedding = ScalarMul.invoke([direction, magnitude], name='%s-embed' % prefix)
         _embedding = SpatialDropout1D(self.dropout_p)(_embedding)
-        lstm_embedding = self.bilstm(_embedding)
+        lstm_embedding = self.dense(self.bilstm(_embedding))
         if final_l2_norm:
             normed_lstm_embedding = L2Normalize.invoke(
                 lstm_embedding, name='%s-l2_normed_bilstm_embedding' % prefix
