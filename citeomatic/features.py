@@ -23,6 +23,7 @@ CLEAN_TEXT_RE = re.compile('[^ a-z]')
 
 # filters for authors and docs
 MAX_AUTHORS_PER_DOCUMENT = 8
+MAX_KEYPHRASES_PER_DOCUMENT = 20
 MIN_TRUE_CITATIONS = 2
 MAX_TRUE_CITATIONS = 100
 
@@ -93,19 +94,20 @@ class Featurizer(object):
 
         self.author_to_index = {}
         self.venue_to_index = {}
+        self.keyphrase_to_index = {}
         self.word_indexer = None
 
     @property
     def n_authors(self):
-        if not hasattr(self, 'author_to_index'):
-            self.author_to_index = {}
         return len(self.author_to_index) + 1
 
     @property
     def n_venues(self):
-        if not hasattr(self, 'venue_to_index'):
-            self.venue_to_index = {}
         return len(self.venue_to_index) + 1
+
+    @property
+    def n_keyphrases(self):
+        return len(self.keyphrase_to_index) + 1
 
     def fit(self, corpus, max_df_frac=0.90, min_df_frac=0.000025):
 
@@ -118,18 +120,30 @@ class Featurizer(object):
         logging.info('Fitting authors and venues')
         author_counts = collections.Counter()
         venue_counts = collections.Counter()
+        keyphrase_counts = collections.Counter()
         for doc_id in tqdm.tqdm(corpus.train_ids):
             doc = corpus[doc_id]
             author_counts.update(doc.authors)
             venue_counts.update([doc.venue])
+            keyphrase_counts.update(doc.key_phrases)
 
+        c = 1
         for author, count in author_counts.items():
             if count >= model_options.min_author_papers:
-                self.author_to_index[author] = 1 + len(self.author_to_index)
+                self.author_to_index[author] = c
+                c += 1
 
+        c = 1
         for venue, count in venue_counts.items():
             if count >= model_options.min_venue_papers:
-                self.venue_to_index[venue] = 1 + len(self.venue_to_index)
+                self.venue_to_index[venue] = c
+                c += 1
+
+        c = 1
+        for keyphrase, count in keyphrase_counts.items():
+            if count >= model_options.min_keyphrase_papers:
+                self.keyphrase_to_index[keyphrase] = c
+                c += 1
 
         # Step 1: filter out some words and make a vocab
         if self.use_pretrained:
@@ -192,12 +206,12 @@ class Featurizer(object):
     def _citation_features(self, documents):
         return np.log([doc.in_citation_count + 1 for doc in documents])
 
-    def _intersection_features(self, source_features, candidate_features):
+    def _intersection_features(self, query_features, candidate_features):
         feats_intersection_lst = [
-            np.intersect1d(source, result)
-            for (source, result) in zip(source_features, candidate_features)
+            np.intersect1d(query, candidate)
+            for (query, candidate) in zip(query_features, candidate_features)
         ]
-        feats_intersection = np.zeros_like(source_features)
+        feats_intersection = np.zeros_like(query_features)
         for i, intersection in enumerate(feats_intersection_lst):
             feats_intersection[i, :len(intersection)] = intersection
         return feats_intersection
@@ -224,28 +238,30 @@ class Featurizer(object):
         [feats1, feats2] - feats1 and feats2 are transformed versions of the text in the dicts
         of documents.
         """
-        source_features = self.transform_list(query_docs)
+        query_features = self.transform_list(query_docs)
         candidate_features = self.transform_list(candidate_docs)
         candidate_citation_features = self._citation_features(candidate_docs)
 
         query_candidate_title_intersection = self._intersection_features(
-            source_features=source_features['title'],
+            query_features=query_features['title'],
             candidate_features=candidate_features['title']
         )
         query_candidate_abstract_intersection = self._intersection_features(
-            source_features=source_features['abstract'],
+            query_features=query_features['abstract'],
             candidate_features=candidate_features['abstract']
         )
 
         features = {
             'query-authors-txt':
-                source_features['authors'],
+                query_features['authors'],
             'query-venue-txt':
-                source_features['venue'],
+                query_features['venue'],
             'query-title-txt':
-                source_features['title'],
+                query_features['title'],
             'query-abstract-txt':
-                source_features['abstract'],
+                query_features['abstract'],
+            'query-keyphrases-txt':
+                query_features['keyphrases'],
             'candidate-authors-txt':
                 candidate_features['authors'],
             'candidate-venue-txt':
@@ -254,6 +270,8 @@ class Featurizer(object):
                 candidate_features['title'],
             'candidate-abstract-txt':
                 candidate_features['abstract'],
+            'candidate-keyphrases-txt':
+                candidate_features['keyphrases'],
             'query-candidate-title-intersection':
                 query_candidate_title_intersection,
             'query-candidate-abstract-intersection':
@@ -272,7 +290,7 @@ class Featurizer(object):
         Parameters
         ----------
         query - a single query document
-        list_of_documents - a list of possible result documents
+        list_of_documents - a list of possible candidate documents
         Returns
         -------
         [feats1, feats2] - feats1 and feats2 are transformed versions of the text in the
@@ -304,7 +322,13 @@ class Featurizer(object):
                     if author in self.author_to_index
                 ],
             'venue':
-                [self.venue_to_index.get(document.venue, 0)]
+                [self.venue_to_index.get(document.venue, 0)],
+            'keyphrases':
+                [
+                    self.keyphrase_to_index[keyphrase]
+                    for keyphrase in document.key_phrases
+                    if keyphrase in self.keyphrase_to_index
+                ]
         }
 
         return features
@@ -325,7 +349,11 @@ class Featurizer(object):
                     [doc['authors'] for doc in docs], MAX_AUTHORS_PER_DOCUMENT
                 )),
             'venue':
-                np.asarray([doc['venue'] for doc in docs])
+                np.asarray([doc['venue'] for doc in docs]),
+            'keyphrases':
+                np.asarray(pad_sequences(
+                    [doc['keyphrases'] for doc in docs], MAX_KEYPHRASES_PER_DOCUMENT
+                )),
         }
 
         return features

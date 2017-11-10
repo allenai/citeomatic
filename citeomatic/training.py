@@ -275,6 +275,7 @@ def end_to_end_training(model_options, dataset_type, models_dir, models_ann_dir=
     # update model options after featurization
     model_options.n_authors = featurizer.n_authors
     model_options.n_venues = featurizer.n_venues
+    model_options.keyphrases = featurizer.keyphrases
     model_options.n_features = featurizer.n_features
     if model_options.use_pretrained:
         model_options.dense_dim = model_options.dense_dim_pretrained

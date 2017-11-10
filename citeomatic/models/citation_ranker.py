@@ -81,21 +81,18 @@ def create_model(options: ModelOptions, pretrained_embeddings=None):
 
     if options.use_authors:
         assert options.n_authors > 0
-        assert options.author_dim > 0
+
+        embedder = TextEmbeddingSum(options=options, field_type='authors')
 
         # candidate author
-        candidate_author_embedder, candidate_author_embeddings = TextEmbeddingSum(
-            options=options, field_type='authors'
-        ).create_text_embedding_model(
+        candidate_author_embedder, candidate_author_embeddings = embedder.create_text_embedding_model(
             prefix='candidate-authors',
             final_l2_norm=True
         )
         citeomatic_inputs.append(candidate_author_embedder.input)
 
         # query author
-        query_author_embedder, query_author_embeddings = TextEmbeddingSum(
-            options=options, field_type='authors'
-        ).create_text_embedding_model(
+        query_author_embedder, query_author_embeddings = embedder.create_text_embedding_model(
             prefix='query-authors',
             final_l2_norm=True
         )
@@ -105,28 +102,25 @@ def create_model(options: ModelOptions, pretrained_embeddings=None):
         author_similarity = custom_dot(
             candidate_author_embeddings[0],
             query_author_embeddings[0],
-            options.author_dim,
+            options.metadata_dim,
             normalize=True
         )
         intermediate_outputs.append(author_similarity)
 
     if options.use_venue:
         assert options.n_venues > 0
-        assert options.venue_dim > 0
+
+        embedder = TextEmbeddingSum(options=options, field_type='venue')
 
         # candidate venue
-        candidate_venue_embedder, candidate_venue_embeddings = TextEmbeddingSum(
-            options=options, field_type='venue'
-        ).create_text_embedding_model(
+        candidate_venue_embedder, candidate_venue_embeddings = embedder.create_text_embedding_model(
             prefix='candidate-venue',
             final_l2_norm=True
         )
         citeomatic_inputs.append(candidate_venue_embedder.input)
 
         # query venue
-        query_venue_embedder, query_venue_embeddings = TextEmbeddingSum(
-            options=options, field_type='venue'
-        ).create_text_embedding_model(
+        query_venue_embedder, query_venue_embeddings = embedder.create_text_embedding_model(
             prefix='query-venue',
             final_l2_norm=True
         )
@@ -136,10 +130,41 @@ def create_model(options: ModelOptions, pretrained_embeddings=None):
         venue_similarity = custom_dot(
             candidate_venue_embeddings[0],
             query_venue_embeddings[0],
-            options.venue_dim,
+            options.metadata_dim,
             normalize=True
         )
         intermediate_outputs.append(venue_similarity)
+
+    if options.use_keyphrases:
+        assert options.n_keyphrases > 0
+
+        if options.n_keyphrases > 1:
+            # only happens if there WERE any keyphrases
+            # this prevents opencorpus from having this extra layer
+            embedding = TextEmbeddingSum(options=options, field_type='keyphrases')
+
+            # candidate keyphrases
+            candidate_keyphrases_embedder, candidate_keyphrases_embeddings = embedding.create_text_embedding_model(
+                prefix='candidate-keyphrases',
+                final_l2_norm=True
+            )
+            citeomatic_inputs.append(candidate_keyphrases_embedder.input)
+
+            # query keyphrases
+            query_keyphrases_embedder, query_keyphrases_embeddings = embedding.create_text_embedding_model(
+                prefix='query-keyphrases',
+                final_l2_norm=True
+            )
+            citeomatic_inputs.append(query_keyphrases_embedder.input)
+
+            # cos-sim
+            keyphrases_similarity = custom_dot(
+                candidate_keyphrases_embeddings[0],
+                query_keyphrases_embeddings[0],
+                options.metadata_dim,
+                normalize=True
+            )
+            intermediate_outputs.append(keyphrases_similarity)
 
     if options.use_citations:
         citation_count_input = Input(

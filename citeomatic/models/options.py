@@ -13,8 +13,10 @@ class ModelOptions(HasTraits):
     n_features = Int()
     n_authors = Int()
     n_venues = Int()
+    n_keyphrases = Int()
 
     dense_dim = Int(default_value=75)
+    metadata_dim = Int(default_value=10)
     embedding_type = Enum(values=['sum', 'cnn', 'lstm'], default_value='sum')
 
     # Architecture changing options
@@ -24,9 +26,7 @@ class ModelOptions(HasTraits):
     use_src_tgt_embeddings = Bool(default_value=False)
     use_authors = Bool(default_value=False)
     use_venue = Bool(default_value=False)
-
-    author_dim = Int(default_value=10)
-    venue_dim = Int(default_value=10)
+    use_keyphrases = Bool(default_value=False)
 
     # training and feature params
     optimizer = Unicode(default_value='tfopt')
@@ -66,11 +66,10 @@ class ModelOptions(HasTraits):
     oov_term_prefix = '#OOV_'
     subset_vocab_to_training = False
 
-    # minimum number of papers for an author to get an embedding.
+    # minimum number of papers for authors/venues/keyphrases to get an embedding.
     min_author_papers = 5
-
-    # ditto for venues
     min_venue_papers = 5
+    min_keyphrase_papers = 5
 
     use_selector_confidence = Bool(default_value=True)
 

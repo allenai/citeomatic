@@ -65,10 +65,13 @@ class TextEmbeddingSum(object):
             self.dense_dim = options.dense_dim
         elif self.field_type == 'authors':
             self.n_features = options.n_authors
-            self.dense_dim = options.author_dim
+            self.dense_dim = options.metadata_dim
         elif self.field_type == 'venue':
             self.n_features = options.n_venues
-            self.dense_dim = options.venue_dim
+            self.dense_dim = options.metadata_dim
+        elif self.field_type == 'keyphrases':
+            self.n_features = options.n_keyphrases
+            self.dense_dim  = options.metadata_dim
         else:
             assert False
 
@@ -135,10 +138,13 @@ class TextEmbeddingConv(object):
             self.dense_dim = options.dense_dim
         elif self.field_type == 'authors':
             self.n_features = options.n_authors
-            self.dense_dim = options.author_dim
+            self.dense_dim = options.metadata_dim
         elif self.field_type == 'venue':
             self.n_features = options.n_venues
-            self.dense_dim = options.venue_dim
+            self.dense_dim = options.metadata_dim
+        elif self.field_type == 'keyphrases':
+            self.n_features = options.n_keyphrases
+            self.dense_dim = options.metadata_dim
         else:
             assert False
 
@@ -232,10 +238,13 @@ class TextEmbeddingLSTM(object):
             self.dense_dim = options.dense_dim
         elif self.field_type == 'authors':
             self.n_features = options.n_authors
-            self.dense_dim = options.author_dim
+            self.dense_dim = options.metadata_dim
         elif self.field_type == 'venue':
             self.n_features = options.n_venues
-            self.dense_dim = options.venue_dim
+            self.dense_dim = options.metadata_dim
+        elif self.field_type == 'keyphrases':
+            self.n_features = options.n_keyphrases
+            self.dense_dim  = options.metadata_dim
         else:
             assert False
 

@@ -110,9 +110,13 @@ class TrainCiteomatic(App, ModelOptions):
         # note that the scope.int code is a hack to get integers out of the sampler
         if model_name == CITATION_RANKER_MODEL:
             ranker_model_params = {
+                'metadata_dim':
+                    scope.int(hp.quniform('metadata_dim', 5, 55, 5)),
                 'use_authors':
                     hp.choice('use_authors', [True, False]),
                 'use_venue':
+                    hp.choice('use_venue', [True, False]),
+                'use_keyphrases':
                     hp.choice('use_venue', [True, False]),
                 'use_citations':
                     hp.choice('use_citations', [True, False]),

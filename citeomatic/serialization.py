@@ -34,6 +34,7 @@ def model_from_directory(dirname: str, on_cpu=False) -> Tuple[Featurizer, Any]:
     options.n_authors = featurizer.n_authors
     options.n_features = featurizer.n_features
     options.n_venues = featurizer.n_venues
+    options.n_keyphrases = featurizer.keyphrases
     create_model = import_from(
         'citeomatic.models.%s' % options.model_name, 'create_model'
     )

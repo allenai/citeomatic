@@ -26,6 +26,7 @@ class TestModelBuild(unittest.TestCase):
         options.n_features = featurizer.n_features
         options.n_authors = featurizer.n_authors
         options.n_venues = featurizer.n_venues
+        options.n_keyphrases = featurizer.n_keyphrases
 
         cls.corpus = corpus
         cls.featurizer = featurizer
@@ -82,6 +83,14 @@ class TestModelBuild(unittest.TestCase):
 
     def test_use_venue(self):
         self.options.use_venue = True
+        try:
+            models = create_model(self.options)
+            self._test_train(models)
+        except Exception:
+            assert False
+
+    def test_use_keyphrases(self):
+        self.options.use_keyphrases = True
         try:
             models = create_model(self.options)
             self._test_train(models)
