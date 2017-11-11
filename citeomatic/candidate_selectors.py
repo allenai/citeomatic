@@ -16,22 +16,12 @@ class CandidateSelector(ABC):
     def __init__(self, top_k=100):
         self.top_k = top_k
 
-    def fetch_candidates(self, doc_id, candidates_id_pool) -> list:
+    def fetch_candidates(self, doc_id, candidates_id_pool) -> tuple:
         """
         For each query paper, return a list of candidates and associated scores
         :param doc_id: Document ID to get candidates for
         :param top_k: How many top candidates to fetch
         :param candidates_id_pool: Set of candidate IDs to limit candidates to
-        :return:
-        """
-        pass
-
-    def confidence(self, doc_id, candidate_ids) -> list:
-        """
-        For each query paper and given list of candidate docs, return an estimate of confidence
-        using the selector
-        :param doc_id:
-        :param candidate_ids:
         :return:
         """
         pass
@@ -75,9 +65,9 @@ class ANNCandidateSelector(CandidateSelector):
             candidate_ids.remove(doc_id)
         candidate_ids_list = list(candidate_ids)
 
-        return candidate_ids_list
+        return candidate_ids_list, self._confidence(doc_id, candidate_ids_list)
 
-    def confidence(self, doc_id, candidate_ids):
+    def _confidence(self, doc_id, candidate_ids):
         doc = self.corpus[doc_id]
         doc_embedding = self.paper_embedding_model.embed(doc)
         return self.ann.get_similarities(doc_embedding, candidate_ids)
@@ -116,20 +106,15 @@ class BM25CandidateSelector(CandidateSelector):
         )
         # Implement BM25 index builder and return
         query = self.query_parser.parse(title_key_terms + " " + abstract_key_terms)
-        results = self.searcher.search(query, limit=self.top_k + 1, optimize=True)
-
-        candidate_ids = [h['id'] for h in results][:self.top_k]
-
-        if self.extend_candidate_citations:
-            extended_candidate_ids = []
-            for candidate_id in candidate_ids:
-                extended_candidate_ids.extend(self.corpus[candidate_id].out_citations)
-            candidate_ids = candidate_ids + extended_candidate_ids
+        results = self.searcher.search(query, limit=self.top_k + 1, optimize=True, scored=True)
 
         candidate_ids_pool = set(candidate_ids_pool)
-        candidate_ids = [c_id for c_id in candidate_ids if c_id in candidate_ids_pool and c_id != doc_id]
+        candidate_ids = []
+        candidate_scores = []
+        for result in results:
+            if result['id'] in candidate_ids_pool and result['id'] != doc_id:
+                candidate_ids.append(result['id'])
+                candidate_scores.append(result.score)
 
-        return candidate_ids, []
+        return candidate_ids, candidate_scores
 
-    def confidence(self, doc_id, candidate_ids):
-        return []
