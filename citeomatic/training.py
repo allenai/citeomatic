@@ -62,13 +62,20 @@ class MemoryUsageCallback(keras.callbacks.Callback):
 
 
 class UpdateANN(keras.callbacks.Callback):
-    def __init__(self, corpus, featurizer, embedding_model, data_generator: DataGenerator,
-                 embed_at_epoch_end, embed_at_train_begin):
+    def __init__(self,
+                 corpus,
+                 featurizer,
+                 embedding_model,
+                 training_data_generator: DataGenerator,
+                 validation_data_generator: DataGenerator,
+                 embed_at_epoch_end,
+                 embed_at_train_begin):
         super().__init__()
         self.corpus = corpus
         self.featurizer = featurizer
         self.embedding_model = embedding_model
-        self.data_generator = data_generator
+        self.training_data_generator = training_data_generator
+        self.validation_data_generator = validation_data_generator
         self.embed_at_epch_end = embed_at_epoch_end
         self.embed_at_train_begin = embed_at_train_begin
 
@@ -82,8 +89,11 @@ class UpdateANN(keras.callbacks.Callback):
             top_k=100,
             extend_candidate_citations=False
         )
-        self.data_generator.ann = ann
-        self.data_generator.candidate_selector = candidate_selector
+        self.training_data_generator.ann = ann
+        self.training_data_generator.candidate_selector = candidate_selector
+
+        self.validation_data_generator.ann = self.training_data_generator.ann
+        self.validation_data_generator.candidate_selector = self.training_data_generator.candidate_selector
 
     def on_train_begin(self, logs=None):
         if self.embed_at_train_begin:
@@ -99,17 +109,6 @@ class UpdateANN(keras.callbacks.Callback):
                 epoch + 1
             )
             self._re_embed()
-
-
-class UpdateValidationGenerator(keras.callbacks.Callback):
-    def __init__(self, validation_generator: DataGenerator, training_generator: DataGenerator):
-        super().__init__()
-        self.validation_generator = validation_generator
-        self.training_generator = training_generator
-
-    def on_train_end(self, logs=None):
-        self.validation_generator.ann = self.training_generator.ann
-        self.validation_generator.candidate_selector = self.training_generator.candidate_selector
 
 
 def train_text_model(
@@ -213,12 +212,8 @@ def train_text_model(
             embed_at_epoch_end = False
             embed_at_train_begin = True
         callbacks_list.append(
-            UpdateANN(corpus, ann_featurizer, paper_embedding_model, training_dg,
+            UpdateANN(corpus, ann_featurizer, paper_embedding_model, training_dg, validation_dg,
                       embed_at_epoch_end, embed_at_train_begin)
-        )
-
-        callbacks_list.append(
-            UpdateValidationGenerator(validation_generator, training_generator)
         )
 
 
@@ -275,7 +270,7 @@ def end_to_end_training(model_options, dataset_type, models_dir, models_ann_dir=
     # update model options after featurization
     model_options.n_authors = featurizer.n_authors
     model_options.n_venues = featurizer.n_venues
-    model_options.keyphrases = featurizer.keyphrases
+    model_options.n_keyphrases = featurizer.n_keyphrases
     model_options.n_features = featurizer.n_features
     if model_options.use_pretrained:
         model_options.dense_dim = model_options.dense_dim_pretrained

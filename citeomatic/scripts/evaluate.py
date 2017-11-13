@@ -32,7 +32,7 @@ class Evaluate(App):
             ann=ann,
             paper_embedding_model=embedder,
             top_k=k,
-            extend_candidate_citations=False
+            extend_candidate_citations=True
         )
 
     def main(self, args):

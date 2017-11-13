@@ -26,6 +26,15 @@ class CandidateSelector(ABC):
         """
         pass
 
+    def confidence(self, doc_id, candidate_ids):
+        """
+
+        :param doc_id:
+        :param candidate_ids:
+        :return:
+        """
+        pass
+
 
 class ANNCandidateSelector(CandidateSelector):
     def __init__(
@@ -65,9 +74,9 @@ class ANNCandidateSelector(CandidateSelector):
             candidate_ids.remove(doc_id)
         candidate_ids_list = list(candidate_ids)
 
-        return candidate_ids_list, self._confidence(doc_id, candidate_ids_list)
+        return candidate_ids_list, self.confidence(doc_id, candidate_ids_list)
 
-    def _confidence(self, doc_id, candidate_ids):
+    def confidence(self, doc_id, candidate_ids):
         doc = self.corpus[doc_id]
         doc_embedding = self.paper_embedding_model.embed(doc)
         return self.ann.get_similarities(doc_embedding, candidate_ids)

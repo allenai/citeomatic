@@ -117,7 +117,7 @@ class TrainCiteomatic(App, ModelOptions):
                 'use_venue':
                     hp.choice('use_venue', [True, False]),
                 'use_keyphrases':
-                    hp.choice('use_venue', [True, False]),
+                    hp.choice('use_keyphrases', [True, False]),
                 'use_citations':
                     hp.choice('use_citations', [True, False]),
                 'use_sparse':

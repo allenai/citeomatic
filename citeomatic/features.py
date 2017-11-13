@@ -562,7 +562,8 @@ class DataGenerator(object):
                             queries, batch_ex
                         ), np.asarray(batch_labels)
                     else:
-                        confidence_scores = self.candidate_selector.confidence(q.id, [doc.id for doc in batch_ex])
+                        confidence_scores = self.candidate_selector.confidence(q.id, [doc.id for
+                                                                                       doc in batch_ex])
                         yield self.featurizer.transform_query_candidate(
                             queries, batch_ex, confidence_scores
                         ), np.asarray(batch_labels)
