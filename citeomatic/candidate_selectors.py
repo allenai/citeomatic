@@ -51,7 +51,7 @@ class ANNCandidateSelector(CandidateSelector):
         self.paper_embedding_model = paper_embedding_model
         self.extend_candidate_citations = extend_candidate_citations
 
-    def fetch_candidates(self, doc_id, candidate_ids_pool):
+    def fetch_candidates(self, doc_id, candidate_ids_pool: set):
         doc = self.corpus[doc_id]
         doc_embedding = self.paper_embedding_model.embed(doc)
         # 1. Fetch candidates from ANN index
@@ -68,13 +68,21 @@ class ANNCandidateSelector(CandidateSelector):
                 extended_candidate_ids.extend(self.corpus[candidate_id].out_citations)
             candidate_ids = candidate_ids + extended_candidate_ids
         logging.debug("Number of candidates found: {}".format(len(candidate_ids)))
-        candidate_ids_pool = set(candidate_ids_pool)
         candidate_ids = set(candidate_ids).intersection(candidate_ids_pool)
         if doc_id in candidate_ids:
             candidate_ids.remove(doc_id)
         candidate_ids_list = list(candidate_ids)
+        confidence_scores = self.confidence(doc_id, candidate_ids_list)
+        sorted_pairs = sorted(zip(candidate_ids_list, confidence_scores), key=lambda x: x[1],
+                              reverse=True)
 
-        return candidate_ids_list, self.confidence(doc_id, candidate_ids_list)
+        sorted_candidate_ids = []
+        sorted_scores = []
+        for pair in sorted_pairs:
+            sorted_candidate_ids.append(pair[0])
+            sorted_scores.append(pair[1])
+
+        return sorted_candidate_ids, sorted_scores
 
     def confidence(self, doc_id, candidate_ids):
         doc = self.corpus[doc_id]

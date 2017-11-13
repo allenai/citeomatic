@@ -1,3 +1,5 @@
+import json
+
 from citeomatic.candidate_selectors import BM25CandidateSelector, ANNCandidateSelector
 from citeomatic.common import DatasetPaths
 from citeomatic.config import App
@@ -5,7 +7,7 @@ from traitlets import Int, Unicode, Enum
 
 from citeomatic.corpus import Corpus
 from citeomatic.neighbors import EmbeddingModel, ANN
-from citeomatic.ranker import NoneRanker
+from citeomatic.ranker import NoneRanker, Ranker
 from citeomatic.serialization import model_from_directory
 from citeomatic.training import eval_text_model
 
@@ -22,6 +24,9 @@ class Evaluate(App):
 
     ranker_type = Enum(('none', 'neural'), default_value='none')
     n_eval = Int(default_value=None, allow_none=True)
+
+    # ranker options
+    citation_ranker_dir = Unicode(default_value=None, allow_none=True)
 
     @staticmethod
     def _make_ann_candidate_selector(corpus, featurizer, embedding_model, k):
@@ -41,8 +46,9 @@ class Evaluate(App):
             corpus = Corpus.load_pkl(dp.get_pkl_path(self.dataset_type))
         else:
             corpus = Corpus.load(dp.get_db_path(self.dataset_type))
-        index_path = dp.get_bm25_index_path(self.dataset_type)
+
         if self.candidate_selector_type == 'bm25':
+            index_path = dp.get_bm25_index_path(self.dataset_type)
             candidate_selector = BM25CandidateSelector(
                 corpus,
                 index_path,
@@ -54,17 +60,28 @@ class Evaluate(App):
             featurizer, models = model_from_directory(self.paper_embedder_dir, on_cpu=True)
             candidate_selector = Evaluate._make_ann_candidate_selector(corpus=corpus,
                                                                        featurizer=featurizer,
-                                                                       embedding_model=models[
-                                                                           'embedding'],
+                                                                       embedding_model=models['embedding'],
                                                                        k=self.num_candidates)
-
-        if self.ranker_type == 'none':
-            citation_ranker = NoneRanker()
         else:
             assert False
 
-        results = eval_text_model(corpus, candidate_selector, citation_ranker, papers_source='test', n_eval=self.n_eval)
-        print(results)
+        if self.ranker_type == 'none':
+            citation_ranker = NoneRanker()
+        elif self.ranker_type == 'neural':
+            assert self.citation_ranker_dir is not None
+            ranker_featurizer, ranker_models = model_from_directory(self.citation_ranker_dir,
+                                                                    on_cpu=True)
+            citation_ranker = Ranker(
+                corpus=corpus,
+                featurizer=ranker_featurizer,
+                citation_ranker=ranker_models['citeomatic'],
+                num_candidates_to_rank=100
+            )
+        else:
+            assert False
+
+        results = eval_text_model(corpus, candidate_selector, citation_ranker, papers_source='valid', n_eval=self.n_eval)
+        print(json.dumps(results, indent=4, sort_keys=True))
 
 
 Evaluate.run(__name__)
