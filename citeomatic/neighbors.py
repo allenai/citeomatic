@@ -34,8 +34,14 @@ class ANN(object):
         docid_to_idx = {}
         embedding_gen = embedding_model.embed_documents(corpus, batch_size=1024)
         doc_embeddings = np.zeros((len(corpus), embedding_model.output_shape))
+
+        if corpus.corpus_type == 'pubmed' or corpus.corpus_type == 'dblp':
+            docs = [corpus[doc_id] for doc_id in corpus.train_ids]
+        else:
+            docs = corpus
+
         for i, (doc, embedding) in enumerate(
-                zip(tqdm.tqdm(corpus), embedding_gen)):
+                zip(tqdm.tqdm(docs), embedding_gen)):
             docid_to_idx[doc.id] = i
             doc_embeddings[i] = embedding
 

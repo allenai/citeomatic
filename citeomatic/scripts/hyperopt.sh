@@ -14,6 +14,6 @@ echo "python citeomatic/scripts/train.py \
   --total_samples_secondary 50000000 \
   --samples_per_epoch 1000000 \
   --n_eval 500 \
-  --model_name paper_embedder_${SHA} \
+  --model_name paper_embedder \
   --models_dir_base  ${BASE_DIR}/hyperopts/${DATASET} \
-  --version ${SHA} &> /tmp/${DATASET}.hyperopt.log"
+  --version ${SHA} &> /tmp/${DATASET}.${SHA}.hyperopt.log"

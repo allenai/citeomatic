@@ -72,6 +72,10 @@ class ANNCandidateSelector(CandidateSelector):
         if doc_id in candidate_ids:
             candidate_ids.remove(doc_id)
         candidate_ids_list = list(candidate_ids)
+
+        candidate_ids_list = [candidate_doc_id for candidate_doc_id in candidate_ids_list if
+                              self.corpus[candidate_doc_id].year <= self.corpus[doc_id].year]
+
         confidence_scores = self.confidence(doc_id, candidate_ids_list)
         sorted_pairs = sorted(zip(candidate_ids_list, confidence_scores), key=lambda x: x[1],
                               reverse=True)

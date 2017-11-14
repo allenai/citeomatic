@@ -85,7 +85,7 @@ class TextEmbeddingSum(object):
             input_dim=self.n_features,
             activity_regularizer=l2(self.l2_lambda),
             mask_zero=False,
-            trainable=pretrained_embeddings is None
+            trainable=pretrained_embeddings is None or options.enable_fine_tune
         )
         if pretrained_embeddings is not None:
             self.embed_direction.build((None,))

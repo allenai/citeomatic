@@ -27,7 +27,7 @@ from citeomatic.eval_metrics import precision_recall_f1_at_ks, average_results
 
 EVAL_KEYS = [1, 5, 10, 20, 50, 100, 1000]
 EVAL_DATASET_KEYS = {'dblp': 5,
-                     'pubmed': 10,
+                     'pubmed': 20,
                      'oc': 20}
 
 
@@ -186,10 +186,10 @@ def train_text_model(
     callbacks_list = []
     if debug:
         callbacks_list.append(MemoryUsageCallback())
-    if tensorboard_dir is not None:
+    if model_options.tb_dir is not None:
         callbacks_list.append(
             TensorBoard(
-                log_dir=tensorboard_dir, histogram_freq=1, write_graph=True
+                log_dir=model_options.tb_dir, histogram_freq=1, write_graph=True
             )
         )
     if model_options.reduce_lr_flag:
@@ -216,6 +216,10 @@ def train_text_model(
                       embed_at_epoch_end, embed_at_train_begin)
         )
 
+    if model_options.tb_dir is None:
+        validation_data = validation_generator
+    else:
+        validation_data = next(validation_generator)
 
     # logic
     model.fit_generator(
@@ -224,7 +228,7 @@ def train_text_model(
         epochs=epochs,
         callbacks=callbacks_list,
         validation_data=validation_generator,
-        validation_steps=10,
+        validation_steps=10
     )
 
     return model, embedding_model
@@ -304,7 +308,7 @@ def end_to_end_training(model_options, dataset_type, models_dir, models_ann_dir=
 
 
 def _gold_citations(doc_id: str, corpus: Corpus, min_citations: int, candidate_ids_pool: set):
-    gold_citations_1 = set(corpus[doc_id].out_citations)
+    gold_citations_1 = set(corpus.get_citations(doc_id))
     gold_citations_1.intersection_update(corpus._id_set)
 
     if doc_id in gold_citations_1:
@@ -312,7 +316,7 @@ def _gold_citations(doc_id: str, corpus: Corpus, min_citations: int, candidate_i
 
     citations_of_citations = []
     for c in gold_citations_1:
-        citations_of_citations.extend(corpus[c].out_citations)
+        citations_of_citations.extend(corpus.get_citations(c))
 
     gold_citations_2 = set(citations_of_citations).union(gold_citations_1)
     gold_citations_2.intersection_update(corpus._id_set)
@@ -337,6 +341,7 @@ def eval_text_model(
         min_citations=1,
         n_eval=None
 ):
+
     if papers_source == 'valid':
         paper_ids_for_eval = corpus.valid_ids
         candidate_ids_pool = corpus.train_ids + corpus.valid_ids
@@ -347,6 +352,10 @@ def eval_text_model(
         logging.info("Using Test IDs")
         paper_ids_for_eval = corpus.test_ids
         candidate_ids_pool = corpus.train_ids + corpus.valid_ids + corpus.test_ids
+
+    if corpus.corpus_type == 'dblp' or corpus.corpus_type == 'pubmed':
+        # Hack to compare with previous work. BEWARE: do not do real experiments this way !!!
+        candidate_ids_pool = corpus.train_ids
 
     candidate_ids_pool = set(candidate_ids_pool)
 
@@ -362,6 +371,8 @@ def eval_text_model(
     results_2 = []
     for doc_id in tqdm.tqdm(paper_ids_for_eval):
         candidate_ids, confidence_scores = candidate_selector.fetch_candidates(doc_id, candidate_ids_pool)
+        if len(candidate_ids) == 0:
+            continue
         predictions, scores = ranker.rank(doc_id, candidate_ids, confidence_scores)
 
         logging.debug("Done! Found %s predictions." % len(predictions))

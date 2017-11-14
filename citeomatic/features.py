@@ -24,7 +24,11 @@ CLEAN_TEXT_RE = re.compile('[^ a-z]')
 # filters for authors and docs
 MAX_AUTHORS_PER_DOCUMENT = 8
 MAX_KEYPHRASES_PER_DOCUMENT = 20
-MIN_TRUE_CITATIONS = 2
+MIN_TRUE_CITATIONS = {
+    'pubmed': 2,
+    'dblp': 1,
+    'oc': 2
+}
 MAX_TRUE_CITATIONS = 100
 
 # Adjustments to how we boost heavily cited documents.
@@ -107,6 +111,8 @@ class Featurizer(object):
 
     @property
     def n_keyphrases(self):
+        if not hasattr(self, 'keyphrase_to_index'):
+            self.keyphrase_to_index = {}
         return len(self.keyphrase_to_index) + 1
 
     def fit(self, corpus, max_df_frac=0.90, min_df_frac=0.000025):
@@ -475,7 +481,7 @@ class DataGenerator(object):
                 labels = []
                 query = self.corpus[doc_id]
                 true_citations = candidate_ids_set.intersection(query.out_citations)
-                if len(true_citations) < MIN_TRUE_CITATIONS:
+                if len(true_citations) < MIN_TRUE_CITATIONS[self.corpus.corpus_type]:
                     continue
 
                 if len(true_citations) > MAX_TRUE_CITATIONS:

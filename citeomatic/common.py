@@ -79,6 +79,7 @@ class DatasetPaths(object):
     OC_DB_FILE = os.path.join(BASE_DIR, 'db/oc.sqlite.db')
     OC_BM25_INDEX = os.path.join(BASE_DIR, 'bm25_index/oc/')
     OC_PKL_FILE = os.path.join(BASE_DIR, 'open_corpus/corpus.pkl')
+    OC_ANN_FILE = os.path.join(BASE_DIR, 'open_corpus/ann.pkl')
 
     PRETRAINED_DIR = os.path.join(BASE_DIR, 'pretrained')
     EMBEDDING_WEIGHTS_FILENAME = 'embedding.h5'

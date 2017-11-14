@@ -195,3 +195,10 @@ class Corpus(object):
 
     def filter(self, id_set):
         return self._id_set.intersection(id_set)
+
+    def get_citations(self, doc_id):
+        out_citations = self[doc_id].out_citations
+        # Remove cited documents that appear after the year of publication of source document as
+        # they indicate incorrect data
+        return [cit_doc_id for cit_doc_id in out_citations if
+                self[cit_doc_id].year <= self[doc_id].year]

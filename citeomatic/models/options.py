@@ -67,11 +67,15 @@ class ModelOptions(HasTraits):
     subset_vocab_to_training = False
 
     # minimum number of papers for authors/venues/keyphrases to get an embedding.
-    min_author_papers = 5
-    min_venue_papers = 5
+    min_author_papers = 1
+    min_venue_papers = 1
     min_keyphrase_papers = 5
 
     use_selector_confidence = Bool(default_value=True)
+
+    tb_dir = Unicode(default_value=None, allow_none=True)
+
+    enable_fine_tune = Bool(default_value=True)
 
     def __repr__(self):
         return json.dumps(self._trait_values, indent=2, sort_keys=True)
