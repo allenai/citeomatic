@@ -53,6 +53,17 @@ class TestModelBuild(unittest.TestCase):
         except Exception:
             assert False
 
+    def test_build_paper_embedder_cnn2(self):
+        try:
+            self.options.embedding_type = 'cnn2'
+            models = embedder_create_model(self.options)
+            assert 'embedding' in models
+            assert 'citeomatic' in models
+            self._test_train(models)
+            assert True
+        except Exception:
+            assert False
+
     def test_build_paper_embedder_lstm(self):
         try:
             self.options.embedding_type = 'lstm'

@@ -17,7 +17,7 @@ class ModelOptions(HasTraits):
 
     dense_dim = Int(default_value=75)
     metadata_dim = Int(default_value=10)
-    embedding_type = Enum(values=['sum', 'cnn', 'lstm'], default_value='sum')
+    embedding_type = Enum(values=['sum', 'cnn', 'cnn2', 'lstm'], default_value='sum')
 
     # Architecture changing options
     use_dense = Bool(default_value=True)
@@ -48,9 +48,13 @@ class ModelOptions(HasTraits):
     l1_lambda = Float(default_value=0.0000001)
     dropout_p = Float(default_value=0)
 
-    # convolutions
+    # params for TextEmbeddingConv
     kernel_width = Int(default_value=5)
     stride = Int(default_value=2)
+
+    # params for TextEmbeddingConv2
+    filters = Int(default_value=100) # default in the paper
+    max_kernel_size = Int(default_value=5) # we use 2, 3, 4, 5. paper uses 3, 4, 5
 
     # dense layers
     dense_config = Unicode(default_value='20,20')

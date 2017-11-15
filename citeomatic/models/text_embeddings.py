@@ -4,7 +4,7 @@ import numpy as np
 from citeomatic.models.layers import L2Normalize, ScalarMul, Sum, EmbeddingZero
 from citeomatic.models.options import ModelOptions
 from keras.layers import Bidirectional, Input, LSTM, Concatenate, SpatialDropout1D
-from keras.layers import Conv1D, Lambda, Dense
+from keras.layers import Conv1D, Lambda, Dense, GlobalMaxPooling1D
 from keras.models import Model
 from keras.regularizers import l1, l2
 
@@ -29,6 +29,12 @@ def make_embedder(options, pretrained_embeddings):
     elif options.embedding_type == 'cnn':
         embedder_title = TextEmbeddingConv(options, pretrained_embeddings, max_sequence_len=options.max_title_len)
         embedder_abstract = TextEmbeddingConv(options, pretrained_embeddings, max_sequence_len=options.max_abstract_len)
+        # no reason not to share the embedding itself
+        embedder_abstract.embed_direction = embedder_title.embed_direction
+        embedder_abstract.embed_magnitude = embedder_title.embed_magnitude
+    elif options.embedding_type == 'cnn2':
+        embedder_title = TextEmbeddingConv2(options, pretrained_embeddings)
+        embedder_abstract = TextEmbeddingConv2(options, pretrained_embeddings)
         # no reason not to share the embedding itself
         embedder_abstract.embed_direction = embedder_title.embed_direction
         embedder_abstract.embed_magnitude = embedder_title.embed_magnitude
@@ -219,6 +225,94 @@ class TextEmbeddingConv(object):
             outputs_list = [normed_conved3]
         else:
             outputs_list = [conved3]
+
+        return Model(
+            inputs=_input, outputs=outputs_list, name='%s-embedding-model'
+        ), outputs_list
+
+
+class TextEmbeddingConv2(object):
+    """
+    Text embedding models class.
+
+    More or less:
+    https://arxiv.org/pdf/1408.5882v2.pdf
+    """
+
+    def __init__(self, options: ModelOptions, pretrained_embeddings=None, field_type='text',
+                 magnitudes_initializer='uniform'):
+        self.field_type = field_type
+        if self.field_type == 'text':
+            self.n_features = options.n_features
+            self.dense_dim = options.dense_dim
+        elif self.field_type == 'authors':
+            self.n_features = options.n_authors
+            self.dense_dim = options.metadata_dim
+        elif self.field_type == 'venue':
+            self.n_features = options.n_venues
+            self.dense_dim = options.metadata_dim
+        elif self.field_type == 'keyphrases':
+            self.n_features = options.n_keyphrases
+            self.dense_dim = options.metadata_dim
+        else:
+            assert False
+
+        self.l1_lambda = options.l1_lambda
+        self.l2_lambda = options.l2_lambda * (pretrained_embeddings is None)
+        self.dropout_p = options.dropout_p
+        self.filters = options.filters
+        self.max_kernel_size = options.max_kernel_size
+
+        # shared embedding layers
+        self.embed_direction = EmbeddingZero(
+            output_dim=self.dense_dim,
+            input_dim=self.n_features,
+            activity_regularizer=l2(self.l2_lambda),
+            mask_zero=False,
+            trainable=pretrained_embeddings is None
+        )
+        if pretrained_embeddings is not None:
+            self.embed_direction.build((None,))
+            set_embedding_layer_weights(self.embed_direction, pretrained_embeddings)
+
+        self.embed_magnitude = EmbeddingZero(
+            output_dim=1,
+            input_dim=self.n_features,
+            activity_regularizer=l1(self.l1_lambda),
+            mask_zero=False
+        )
+
+        self.conv_layers = []
+        for kernel_size in range(2, self.max_kernel_size + 1):
+            self.conv_layers.append(Conv1D(filters=self.filters,
+                                           kernel_size=kernel_size,
+                                           padding='same'))
+
+    def create_text_embedding_model(self, prefix="", final_l2_norm=True):
+        """
+        :param prefix: Preferred prefix to add to each layer in the model
+        :return: A model that takes a sequence of words as inputs and outputs the normed sum of
+        word embeddings that occur in the document.
+        """
+        _input = Input(shape=(None,), dtype='int32', name='%s-txt' % prefix)
+        dir_embedding = self.embed_direction(_input)
+        direction = L2Normalize.invoke(dir_embedding, name='%s-dir-norm' % prefix)
+        magnitude = self.embed_magnitude(_input)
+        _embedding = ScalarMul.invoke([direction, magnitude], name='%s-embed' % prefix)
+        _embedding = SpatialDropout1D(self.dropout_p)(_embedding)
+
+        list_of_convs = [GlobalMaxPooling1D()(conv(_embedding))
+                         for conv in self.conv_layers]
+        z = Concatenate()(list_of_convs) if len(list_of_convs) > 1 else list_of_convs[0]
+        encoded = Dense(self.dense_dim, activation="elu", name='%s-conv_encoding' % prefix)(z)
+
+        if final_l2_norm:
+            normed_encoded = L2Normalize.invoke(
+                encoded, name='%s-l2_normed_conv_encoding' % prefix
+            )
+            outputs_list = [normed_encoded]
+        else:
+            outputs_list = [encoded]
 
         return Model(
             inputs=_input, outputs=outputs_list, name='%s-embedding-model'

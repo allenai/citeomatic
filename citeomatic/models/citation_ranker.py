@@ -3,10 +3,7 @@ import logging
 import tensorflow as tf
 from citeomatic.models.layers import Sum, custom_dot, EmbeddingZero
 from citeomatic.models.options import ModelOptions
-from citeomatic.models.text_embeddings import (
-    TextEmbeddingSum, TextEmbeddingConv, TextEmbeddingLSTM, _prefix,
-    make_embedder
-)
+from citeomatic.models.text_embeddings import TextEmbeddingSum, _prefix, make_embedder
 from keras.engine import Model
 from keras.regularizers import l1, l2
 from keras.layers import Dense, Embedding, Input, Reshape, Concatenate, multiply, Lambda, Flatten, \
