@@ -32,13 +32,14 @@ class ANN(object):
     @classmethod
     def build(cls, embedding_model, corpus, ann_trees=100):
         docid_to_idx = {}
-        embedding_gen = embedding_model.embed_documents(corpus, batch_size=1024)
-        doc_embeddings = np.zeros((len(corpus), embedding_model.output_shape))
 
         if corpus.corpus_type == 'pubmed' or corpus.corpus_type == 'dblp':
-            docs = [corpus[doc_id] for doc_id in corpus.train_ids]
+            docs = [corpus[doc_id] for doc_id in corpus.train_ids + corpus.valid_ids]
         else:
             docs = corpus
+
+        doc_embeddings = np.zeros((len(docs), embedding_model.output_shape))
+        embedding_gen = embedding_model.embed_documents(docs, batch_size=1024)
 
         for i, (doc, embedding) in enumerate(
                 zip(tqdm.tqdm(docs), embedding_gen)):

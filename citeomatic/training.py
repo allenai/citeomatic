@@ -309,7 +309,6 @@ def end_to_end_training(model_options, dataset_type, models_dir, models_ann_dir=
 
 def _gold_citations(doc_id: str, corpus: Corpus, min_citations: int, candidate_ids_pool: set):
     gold_citations_1 = set(corpus.get_citations(doc_id))
-    gold_citations_1.intersection_update(corpus._id_set)
 
     if doc_id in gold_citations_1:
         gold_citations_1.remove(doc_id)
@@ -319,13 +318,12 @@ def _gold_citations(doc_id: str, corpus: Corpus, min_citations: int, candidate_i
         citations_of_citations.extend(corpus.get_citations(c))
 
     gold_citations_2 = set(citations_of_citations).union(gold_citations_1)
-    gold_citations_2.intersection_update(corpus._id_set)
 
     if doc_id in gold_citations_2:
         gold_citations_2.remove(doc_id)
 
-    gold_citations_1 = gold_citations_1.intersection(candidate_ids_pool)
-    gold_citations_2 = gold_citations_2.intersection(candidate_ids_pool)
+    gold_citations_1.intersection_update(candidate_ids_pool)
+    gold_citations_2.intersection_update(candidate_ids_pool)
 
     if len(gold_citations_1) < min_citations:
         return [], []
@@ -358,6 +356,8 @@ def eval_text_model(
         candidate_ids_pool = corpus.train_ids
 
     candidate_ids_pool = set(candidate_ids_pool)
+
+    logging.info("Restricting Candidates pool and gold citations to {} docs".format(len(candidate_ids_pool)))
 
     if n_eval is not None:
         if n_eval < len(paper_ids_for_eval):
