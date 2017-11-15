@@ -2,7 +2,8 @@ import json
 
 import pickle
 
-from citeomatic.candidate_selectors import BM25CandidateSelector, ANNCandidateSelector
+from citeomatic.candidate_selectors import BM25CandidateSelector, ANNCandidateSelector, \
+    OracleCandidateSelector
 from citeomatic.common import DatasetPaths
 from citeomatic.config import App
 from traitlets import Int, Unicode, Enum
@@ -17,8 +18,9 @@ import os
 
 class Evaluate(App):
     dataset_type = Enum(('dblp', 'pubmed', 'oc'), default_value='pubmed')
-    candidate_selector_type = Enum(('bm25', 'ann'), default_value='bm25')
+    candidate_selector_type = Enum(('bm25', 'ann', 'oracle'), default_value='bm25')
     metric = Enum(('precision', 'recall', 'f1'), default_value='recall')
+    split = Enum(('train', 'test', 'valid'), default_value='valid')
 
     # ann options
     paper_embedder_dir = Unicode(default_value=None, allow_none=True)
@@ -108,6 +110,8 @@ class Evaluate(App):
                                                                        featurizer=featurizer,
                                                                        embedding_model=models['embedding'],
                                                                        num_candidates=num_candidates)
+            elif self.candidate_selector_type == 'oracle':
+                candidate_selector = OracleCandidateSelector(corpus)
             else:
                 assert False
 

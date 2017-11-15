@@ -10,6 +10,7 @@ from citeomatic.common import schema, FieldNames
 from citeomatic.corpus import Corpus
 from citeomatic.neighbors import ANN
 from citeomatic.neighbors import EmbeddingModel
+import numpy as np
 
 
 class CandidateSelector(ABC):
@@ -139,3 +140,14 @@ class BM25CandidateSelector(CandidateSelector):
 
         return candidate_ids, candidate_scores
 
+
+class OracleCandidateSelector(CandidateSelector):
+    def __init__(self, corpus: Corpus):
+        super().__init__()
+        self.corpus = corpus
+
+    def fetch_candidates(self, doc_id, candidate_ids_pool):
+        candidates = set(self.corpus.get_citations(doc_id))
+        candidates.intersection_update(candidate_ids_pool)
+
+        return list(candidates), np.ones(len(candidates))
