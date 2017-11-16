@@ -141,23 +141,26 @@ def train_text_model(
 
     logging.info(model.summary())
 
-    training_dg = DataGenerator(corpus=corpus, featurizer=featurizer)
-
+    training_dg = DataGenerator(corpus=corpus,
+                                  featurizer=featurizer,
+                                  margin_multiplier=model_options.margin_multiplier,
+                                  use_variable_margin=model_options.use_variable_margin)
     training_generator = training_dg.triplet_generator(
         paper_ids=corpus.train_ids,
         candidate_ids=corpus.train_ids,
         batch_size=model_options.batch_size,
-        neg_to_pos_ratio=model_options.neg_to_pos_ratio,
-        margin_multiplier=model_options.margin_multiplier
+        neg_to_pos_ratio=model_options.neg_to_pos_ratio
     )
 
-    validation_dg = DataGenerator(corpus=corpus, featurizer=featurizer)
+    validation_dg = DataGenerator(corpus=corpus,
+                                  featurizer=featurizer,
+                                  margin_multiplier=model_options.margin_multiplier,
+                                  use_variable_margin=model_options.use_variable_margin)
     validation_generator = validation_dg.triplet_generator(
         paper_ids=corpus.valid_ids,
         candidate_ids=corpus.train_ids + corpus.valid_ids,
         batch_size=1024,
-        neg_to_pos_ratio=model_options.neg_to_pos_ratio,
-        margin_multiplier=model_options.margin_multiplier
+        neg_to_pos_ratio=model_options.neg_to_pos_ratio
     )
 
     if model_options.optimizer == 'tfopt':

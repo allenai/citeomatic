@@ -447,18 +447,35 @@ class DataGenerator(object):
     """
     KEYS = ['hard_negatives', 'nn', 'easy']
 
-    def __init__(self, corpus, featurizer, ann=None, candidate_selector: CandidateSelector = None):
+    def __init__(self,
+                 corpus,
+                 featurizer,
+                 ann=None,
+                 candidate_selector: CandidateSelector = None,
+                 margin_multiplier=1,
+                 use_variable_margin=True):
         self.corpus = corpus
         self.featurizer = CachingFeaturizer(featurizer)
         self.ann = ann
         self.candidate_selector = candidate_selector
 
+        margins_offset_dict = {
+            'true': TRUE_CITATION_OFFSET * margin_multiplier,
+            'hard': HARD_NEGATIVE_OFFSET * margin_multiplier,
+            'nn': NN_NEGATIVE_OFFSET * margin_multiplier,
+            'easy': EASY_NEGATIVE_OFFSET * margin_multiplier
+        }
+        if not use_variable_margin:
+            margins_offset_dict['hard'] = margins_offset_dict['nn']
+            margins_offset_dict['easy'] = margins_offset_dict['nn']
+
+        self.margins_offset_dict = margins_offset_dict
+
     def _listwise_examples(
             self,
             paper_ids,
             candidate_ids=None,
-            neg_to_pos_ratio=6,
-            margin_multiplier=1
+            neg_to_pos_ratio=6
     ):
         # the id pool should only have IDs that are in the corpus
         paper_ids_list = np.array(list(self.corpus.filter(paper_ids)))
@@ -511,19 +528,19 @@ class DataGenerator(object):
 
                 for c in true_citations:
                     doc = self.corpus[c]
-                    labels.append(label_for_doc(doc, TRUE_CITATION_OFFSET * margin_multiplier))
+                    labels.append(label_for_doc(doc, self.margins_offset_dict['true']))
                     examples.append(doc)
 
                 for doc in hard_negatives:
-                    labels.append(label_for_doc(doc, HARD_NEGATIVE_OFFSET * margin_multiplier))
+                    labels.append(label_for_doc(doc, self.margins_offset_dict['hard']))
                     examples.append(doc)
 
                 for doc in nn_negatives:
-                    labels.append(label_for_doc(doc, NN_NEGATIVE_OFFSET * margin_multiplier))
+                    labels.append(label_for_doc(doc, self.margins_offset_dict['nn']))
                     examples.append(doc)
 
                 for doc in easy_negatives:
-                    labels.append(label_for_doc(doc, EASY_NEGATIVE_OFFSET * margin_multiplier))
+                    labels.append(label_for_doc(doc, self.margins_offset_dict['easy']))
                     examples.append(doc)
 
                 labels = np.asarray(labels)
@@ -538,9 +555,9 @@ class DataGenerator(object):
             paper_ids,
             candidate_ids=None,
             batch_size=1024,
-            neg_to_pos_ratio=6,
-            margin_multiplier=1
+            neg_to_pos_ratio=6
     ):
+
         queries = []
         batch_ex = []
         batch_labels = []
@@ -548,9 +565,8 @@ class DataGenerator(object):
         # Sample examples from our sorted list.  The margin between each example is the difference in their label:
         # easy negatives (e.g. very bad results) should be further away from a true positive than hard negatives
         # (less embarrassing).
-        for q, ex, labels in self._listwise_examples(paper_ids, candidate_ids, neg_to_pos_ratio,
-                                                     margin_multiplier):
-            num_true = len([l for l in labels if l >= TRUE_CITATION_OFFSET * margin_multiplier])
+        for q, ex, labels in self._listwise_examples(paper_ids, candidate_ids, neg_to_pos_ratio):
+            num_true = len([l for l in labels if l >= self.margins_offset_dict['true']])
             # ignore cases where we didn't find enough negatives...
             if len(labels) < num_true * 2:
                 continue

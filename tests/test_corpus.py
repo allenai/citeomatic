@@ -197,6 +197,20 @@ def test_featurizer_and_data_gen():
     neg_docs = [i.id for i, j in zip(ex, labels) if j < np.max(labels)]
     assert np.all([i not in neg_docs for i in q.out_citations])
 
+    # test variable margin off
+    dg = features.DataGenerator(corpus, featurizer, use_variable_margin=False)
+    gen = dg.triplet_generator(
+        paper_ids=corpus.all_ids,
+        candidate_ids=corpus.all_ids,
+        batch_size=128,
+        neg_to_pos_ratio=5
+    )
+
+    X, y = next(gen)
+    print(dg.margins_offset_dict)
+    assert len(np.unique(y)) == 2
+
+
 
 def test_data_isolation():
     build_test_corpus('/tmp/foo.json', '/tmp/foo.sqlite')

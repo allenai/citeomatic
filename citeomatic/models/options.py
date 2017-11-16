@@ -34,6 +34,7 @@ class ModelOptions(HasTraits):
     lr = Float(default_value=0.0001)
     use_nn_negatives = Bool(default_value=True)
     margin_multiplier = Float(default_value=1)
+    use_variable_margin = Bool(default_value=True)
     train_frac = Float(default_value=0.8) # the rest will be divided 50/50 val/test
     max_features = Int(default_value=200000)
     max_title_len = Int(default_value=50)
