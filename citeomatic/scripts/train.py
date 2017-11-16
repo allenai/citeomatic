@@ -125,7 +125,7 @@ class TrainCiteomatic(App, ModelOptions):
                 'metadata_dim':
                     scope.int(hp.quniform('metadata_dim', 5, 55, 5)),
                 'use_metadata':
-                    hp.choice('use_authors', [True, False]),
+                    hp.choice('use_metadata', [True, False]),
                 'use_citations':
                     hp.choice('use_citations', [True, False]),
                 'use_sparse':
