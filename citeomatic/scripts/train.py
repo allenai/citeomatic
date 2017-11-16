@@ -124,12 +124,8 @@ class TrainCiteomatic(App, ModelOptions):
                     hp.choice('use_magdir', [True, False]),
                 'metadata_dim':
                     scope.int(hp.quniform('metadata_dim', 5, 55, 5)),
-                'use_authors':
+                'use_metadata':
                     hp.choice('use_authors', [True, False]),
-                'use_venue':
-                    hp.choice('use_venue', [True, False]),
-                'use_keyphrases':
-                    hp.choice('use_keyphrases', [True, False]),
                 'use_citations':
                     hp.choice('use_citations', [True, False]),
                 'use_sparse':
@@ -227,6 +223,12 @@ class TrainCiteomatic(App, ModelOptions):
         model_kw = {name: getattr(self, name) for name in ModelOptions.class_traits().keys()}
         model_kw.update(eval_params)
         model_options = ModelOptions(**model_kw)
+
+        if model_options.use_metadata:
+            model_options.use_keyphrases = True
+            model_options.use_authors = True
+            model_options.use_venue = True
+
         print("====== OPTIONS =====")
         print(model_options)
         print("======")

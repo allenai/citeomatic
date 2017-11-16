@@ -19,10 +19,11 @@ class TestModelBuild(unittest.TestCase):
         build_test_corpus('/tmp/foo.json', '/tmp/foo.sqlite')
         corpus = Corpus.load('/tmp/foo.sqlite')
 
-        featurizer = Featurizer()
+        options = ModelOptions(**{})
+
+        featurizer = Featurizer(max_title_len=options.max_title_len, max_abstract_len=options.max_abstract_len)
         featurizer.fit(corpus, max_df_frac=1.0)
 
-        options = ModelOptions(**{})
         options.n_features = featurizer.n_features
         options.n_authors = featurizer.n_authors
         options.n_venues = featurizer.n_venues

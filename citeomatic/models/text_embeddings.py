@@ -38,12 +38,6 @@ def make_embedder(options, pretrained_embeddings):
         # no reason not to share the embedding itself
         embedder_abstract.embed_direction = embedder_title.embed_direction
         embedder_abstract.embed_magnitude = embedder_title.embed_magnitude
-    elif options.embedding_type == 'cnn2':
-        embedder_title = TextEmbeddingConv2(options, pretrained_embeddings)
-        embedder_abstract = TextEmbeddingConv2(options, pretrained_embeddings)
-        # no reason not to share the embedding itself
-        embedder_abstract.embed_direction = embedder_title.embed_direction
-        embedder_abstract.embed_magnitude = embedder_title.embed_magnitude
     elif options.embedding_type == 'lstm':
         embedder_title = TextEmbeddingLSTM(options=options, pretrained_embeddings=pretrained_embeddings)
         embedder_abstract = embedder_title
@@ -199,6 +193,7 @@ class TextEmbeddingConv(TextEmbedding):
     def create_text_embedding_model(self, prefix="", final_l2_norm=True):
         """
         :param prefix: Preferred prefix to add to each layer in the model
+        :param final_l2_norm: Whether to l2 norm final output
         :return: A model that takes a sequence of words as inputs and outputs the normed sum of
         word embeddings that occur in the document.
         """

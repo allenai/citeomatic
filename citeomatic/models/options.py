@@ -24,6 +24,7 @@ class ModelOptions(HasTraits):
     use_citations = Bool(default_value=True)
     use_sparse = Bool(default_value=True)
     use_src_tgt_embeddings = Bool(default_value=False)
+    use_metadata = Bool(default_value=True)
     use_authors = Bool(default_value=False)
     use_venue = Bool(default_value=False)
     use_keyphrases = Bool(default_value=False)
@@ -35,8 +36,8 @@ class ModelOptions(HasTraits):
     margin_multiplier = Float(default_value=1)
     train_frac = Float(default_value=0.8) # the rest will be divided 50/50 val/test
     max_features = Int(default_value=200000)
-    max_title_len = Int(default_value=32)
-    max_abstract_len = Int(default_value=256)
+    max_title_len = Int(default_value=50)
+    max_abstract_len = Int(default_value=500)
     neg_to_pos_ratio = Int(default_value=6) # ideally divisible by 2 and 3
     batch_size = Int(default_value=512)
     samples_per_epoch = Int(default_value=1000000)
@@ -86,7 +87,8 @@ class ModelOptions(HasTraits):
         return json.dumps(self._trait_values, indent=2, sort_keys=True)
 
     def to_json(self):
-        return self.__repr__()
+        model_kw = {name: getattr(self, name) for name in ModelOptions.class_traits().keys()}
+        return json.dumps(model_kw)
 
     @staticmethod
     def load(filename):
