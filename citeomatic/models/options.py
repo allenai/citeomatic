@@ -47,6 +47,7 @@ class ModelOptions(HasTraits):
     l2_lambda = Float(default_value=0.00001)
     l1_lambda = Float(default_value=0.0000001)
     dropout_p = Float(default_value=0)
+    use_magdir = Bool(default_value=True)
 
     # params for TextEmbeddingConv
     kernel_width = Int(default_value=5)

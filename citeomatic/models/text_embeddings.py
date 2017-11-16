@@ -4,7 +4,7 @@ import numpy as np
 from citeomatic.models.layers import L2Normalize, ScalarMul, Sum, EmbeddingZero
 from citeomatic.models.options import ModelOptions
 from keras.layers import Bidirectional, Input, LSTM, Concatenate, SpatialDropout1D
-from keras.layers import Conv1D, Lambda, Dense, GlobalMaxPooling1D
+from keras.layers import Conv1D, Lambda, Dense, GlobalMaxPooling1D, Embedding
 from keras.models import Model
 from keras.regularizers import l1, l2
 
@@ -24,11 +24,17 @@ def valid_conv_kernel_size(input_kernel_size, h, r):
 
 def make_embedder(options, pretrained_embeddings):
     if options.embedding_type == 'sum':
-        embedder_title = TextEmbeddingSum(options, pretrained_embeddings)
+        embedder_title = TextEmbeddingSum(options=options, pretrained_embeddings=pretrained_embeddings)
         embedder_abstract = embedder_title
     elif options.embedding_type == 'cnn':
-        embedder_title = TextEmbeddingConv(options, pretrained_embeddings, max_sequence_len=options.max_title_len)
-        embedder_abstract = TextEmbeddingConv(options, pretrained_embeddings, max_sequence_len=options.max_abstract_len)
+        embedder_title = TextEmbeddingConv(options=options, pretrained_embeddings=pretrained_embeddings, max_sequence_len=options.max_title_len)
+        embedder_abstract = TextEmbeddingConv(options=options, pretrained_embeddings=pretrained_embeddings, max_sequence_len=options.max_abstract_len)
+        # no reason not to share the embedding itself
+        embedder_abstract.embed_direction = embedder_title.embed_direction
+        embedder_abstract.embed_magnitude = embedder_title.embed_magnitude
+    elif options.embedding_type == 'cnn2':
+        embedder_title = TextEmbeddingConv2(options=options, pretrained_embeddings=pretrained_embeddings)
+        embedder_abstract = TextEmbeddingConv2(options=options, pretrained_embeddings=pretrained_embeddings)
         # no reason not to share the embedding itself
         embedder_abstract.embed_direction = embedder_title.embed_direction
         embedder_abstract.embed_magnitude = embedder_title.embed_magnitude
@@ -39,27 +45,21 @@ def make_embedder(options, pretrained_embeddings):
         embedder_abstract.embed_direction = embedder_title.embed_direction
         embedder_abstract.embed_magnitude = embedder_title.embed_magnitude
     elif options.embedding_type == 'lstm':
-        embedder_title = TextEmbeddingLSTM(options, pretrained_embeddings)
+        embedder_title = TextEmbeddingLSTM(options=options, pretrained_embeddings=pretrained_embeddings)
         embedder_abstract = embedder_title
     else:
         assert False, 'Unknown embedding type %s' % options.embedding_type
     return embedder_title, embedder_abstract
 
-'''
-TODO: we reuse a lot of code across the three TextEmbedding classes.
-There should be a parent class that does all the embedding initialization logic.
-Like this: class TextEmbedding(abc)
-'''
 
-class TextEmbeddingSum(object):
-    """
-    Text embedding models class.
-    """
+class TextEmbedding(object):
 
-    def __init__(self, options: ModelOptions, pretrained_embeddings=None, field_type='text',
+    def __init__(self,
+                 options: ModelOptions,
+                 pretrained_embeddings=None,
+                 field_type='text',
                  magnitudes_initializer='uniform'):
         """
-
         :param options:
         :param pretrained_embeddings:
         :param embedding_type: Takes one of three values: text / authors / venues depending on
@@ -77,34 +77,67 @@ class TextEmbeddingSum(object):
             self.dense_dim = options.metadata_dim
         elif self.field_type == 'keyphrases':
             self.n_features = options.n_keyphrases
-            self.dense_dim  = options.metadata_dim
+            self.dense_dim = options.metadata_dim
         else:
             assert False
 
         self.l1_lambda = options.l1_lambda
         self.l2_lambda = options.l2_lambda * (pretrained_embeddings is None)
         self.dropout_p = options.dropout_p
+        self.use_magdir = options.use_magdir
+        self.magnitudes_initializer = magnitudes_initializer
+        self.enable_fine_tune = options.enable_fine_tune
+        self.pretrained_embeddings = pretrained_embeddings
+        self.mask = None
 
+    def define_embedding_layers(self):
         # shared layers
         self.embed_direction = EmbeddingZero(
             output_dim=self.dense_dim,
             input_dim=self.n_features,
             activity_regularizer=l2(self.l2_lambda),
-            mask_zero=False,
-            trainable=pretrained_embeddings is None or options.enable_fine_tune
+            mask_zero=self.mask,
+            trainable=self.pretrained_embeddings is None or self.enable_fine_tune
         )
-        if pretrained_embeddings is not None:
+        if self.pretrained_embeddings is not None:
             self.embed_direction.build((None,))
-            set_embedding_layer_weights(self.embed_direction, pretrained_embeddings)
+            set_embedding_layer_weights(self.embed_direction,
+                                        self.pretrained_embeddings)
 
         self.embed_magnitude = EmbeddingZero(
             output_dim=1,
             input_dim=self.n_features,
             activity_regularizer=l1(self.l1_lambda),
             # will induce sparsity if large enough
-            mask_zero=False,
-            embeddings_initializer=magnitudes_initializer
+            mask_zero=self.mask,
+            embeddings_initializer=self.magnitudes_initializer
         )
+
+        self.dropout = SpatialDropout1D(self.dropout_p)
+
+    def embedding_constructor(self, prefix):
+        _input = Input(shape=(None,), dtype='int32', name='%s-txt' % prefix)
+        if self.use_magdir:
+            dir_embedding = self.embed_direction(_input)
+            direction = L2Normalize.invoke(dir_embedding,
+                                           name='%s-dir-norm' % prefix)
+            magnitude = self.embed_magnitude(_input)
+            _embedding = ScalarMul.invoke([direction, magnitude],
+                                          name='%s-embed' % prefix)
+        else:
+            _embedding = self.embed_direction(_input)
+        _embedding = self.dropout(_embedding)
+        return _input, _embedding
+
+
+class TextEmbeddingSum(TextEmbedding):
+    """
+    Text embedding models class.
+    """
+    def __init__(self, **kwargs):
+        super(TextEmbeddingSum, self).__init__(**kwargs)
+        self.mask = True
+        self.define_embedding_layers()
 
     def create_text_embedding_model(self, prefix="", final_l2_norm=True):
         """
@@ -112,12 +145,7 @@ class TextEmbeddingSum(object):
         :return: A model that takes a sequence of words as inputs and outputs the normed sum of
         word embeddings that occur in the document.
         """
-        _input = Input(shape=(None,), dtype='int32', name='%s-txt' % prefix)
-        dir_embedding = self.embed_direction(_input)
-        direction = L2Normalize.invoke(dir_embedding, name='%s-dir-norm' % prefix)
-        magnitude = self.embed_magnitude(_input)
-        _embedding = ScalarMul.invoke([direction, magnitude], name='%s-embed' % prefix)
-        _embedding = SpatialDropout1D(self.dropout_p)(_embedding)
+        _input, _embedding = self.embedding_constructor(prefix)
         summed = Sum.invoke(_embedding, name='%s-sum-title' % prefix)
         if final_l2_norm:
             normed_sum = L2Normalize.invoke(
@@ -131,54 +159,20 @@ class TextEmbeddingSum(object):
         ), outputs_list
 
 
-class TextEmbeddingConv(object):
+class TextEmbeddingConv(TextEmbedding):
     """
     Text embedding models class.
     """
 
-    def __init__(self, options: ModelOptions, pretrained_embeddings=None, field_type='text', max_sequence_len=None,
-                 magnitudes_initializer='uniform'):
-        self.field_type = field_type
-        if self.field_type == 'text':
-            self.n_features = options.n_features
-            self.dense_dim = options.dense_dim
-        elif self.field_type == 'authors':
-            self.n_features = options.n_authors
-            self.dense_dim = options.metadata_dim
-        elif self.field_type == 'venue':
-            self.n_features = options.n_venues
-            self.dense_dim = options.metadata_dim
-        elif self.field_type == 'keyphrases':
-            self.n_features = options.n_keyphrases
-            self.dense_dim = options.metadata_dim
-        else:
-            assert False
+    def __init__(self, max_sequence_len=None, **kwargs):
+        super(TextEmbeddingConv, self).__init__(**kwargs)
 
         self.max_sequence_len = max_sequence_len
-        self.l1_lambda = options.l1_lambda
-        self.l2_lambda = options.l2_lambda * (pretrained_embeddings is None)
-        self.dropout_p = options.dropout_p
-        self.kernel_width = options.kernel_width
-        self.stride = options.stride
+        self.kernel_width = kwargs['options'].kernel_width
+        self.stride = kwargs['options'].stride
+        self.mask = False
 
-        # shared embedding layers
-        self.embed_direction = EmbeddingZero(
-            output_dim=self.dense_dim,
-            input_dim=self.n_features,
-            activity_regularizer=l2(self.l2_lambda),
-            mask_zero=False,
-            trainable=pretrained_embeddings is None
-        )
-        if pretrained_embeddings is not None:
-            self.embed_direction.build((None,))
-            set_embedding_layer_weights(self.embed_direction, pretrained_embeddings)
-
-        self.embed_magnitude = EmbeddingZero(
-            output_dim=1,
-            input_dim=self.n_features,
-            activity_regularizer=l1(self.l1_lambda),
-            mask_zero=False
-        )
+        self.define_embedding_layers()
 
         # shared convolution layers
         conv1_output_length = valid_conv_kernel_size(max_sequence_len, self.kernel_width, self.stride)
@@ -208,12 +202,7 @@ class TextEmbeddingConv(object):
         :return: A model that takes a sequence of words as inputs and outputs the normed sum of
         word embeddings that occur in the document.
         """
-        _input = Input(shape=(None,), dtype='int32', name='%s-txt' % prefix)
-        dir_embedding = self.embed_direction(_input)
-        direction = L2Normalize.invoke(dir_embedding, name='%s-dir-norm' % prefix)
-        magnitude = self.embed_magnitude(_input)
-        _embedding = ScalarMul.invoke([direction, magnitude], name='%s-embed' % prefix)
-        _embedding = SpatialDropout1D(self.dropout_p)(_embedding)
+        _input, _embedding = self.embedding_constructor(prefix)
         conved1 = self.conv1(_embedding)
         conved2 = self.conv2(conved1)
         conved3 = self.conv3(conved2)
@@ -231,7 +220,7 @@ class TextEmbeddingConv(object):
         ), outputs_list
 
 
-class TextEmbeddingConv2(object):
+class TextEmbeddingConv2(TextEmbedding):
     """
     Text embedding models class.
 
@@ -239,54 +228,23 @@ class TextEmbeddingConv2(object):
     https://arxiv.org/pdf/1408.5882v2.pdf
     """
 
-    def __init__(self, options: ModelOptions, pretrained_embeddings=None, field_type='text',
-                 magnitudes_initializer='uniform'):
-        self.field_type = field_type
-        if self.field_type == 'text':
-            self.n_features = options.n_features
-            self.dense_dim = options.dense_dim
-        elif self.field_type == 'authors':
-            self.n_features = options.n_authors
-            self.dense_dim = options.metadata_dim
-        elif self.field_type == 'venue':
-            self.n_features = options.n_venues
-            self.dense_dim = options.metadata_dim
-        elif self.field_type == 'keyphrases':
-            self.n_features = options.n_keyphrases
-            self.dense_dim = options.metadata_dim
-        else:
-            assert False
+    def __init__(self, **kwargs):
+        super(TextEmbeddingConv2, self).__init__(**kwargs)
 
-        self.l1_lambda = options.l1_lambda
-        self.l2_lambda = options.l2_lambda * (pretrained_embeddings is None)
-        self.dropout_p = options.dropout_p
-        self.filters = options.filters
-        self.max_kernel_size = options.max_kernel_size
+        self.filters = kwargs['options'].filters
+        self.max_kernel_size = kwargs['options'].max_kernel_size
+        self.mask = False
 
-        # shared embedding layers
-        self.embed_direction = EmbeddingZero(
-            output_dim=self.dense_dim,
-            input_dim=self.n_features,
-            activity_regularizer=l2(self.l2_lambda),
-            mask_zero=False,
-            trainable=pretrained_embeddings is None
-        )
-        if pretrained_embeddings is not None:
-            self.embed_direction.build((None,))
-            set_embedding_layer_weights(self.embed_direction, pretrained_embeddings)
+        self.define_embedding_layers()
 
-        self.embed_magnitude = EmbeddingZero(
-            output_dim=1,
-            input_dim=self.n_features,
-            activity_regularizer=l1(self.l1_lambda),
-            mask_zero=False
-        )
-
+        # shared conv layers
         self.conv_layers = []
         for kernel_size in range(2, self.max_kernel_size + 1):
             self.conv_layers.append(Conv1D(filters=self.filters,
                                            kernel_size=kernel_size,
                                            padding='same'))
+
+        self.dense = Dense(self.dense_dim, activation='elu')
 
     def create_text_embedding_model(self, prefix="", final_l2_norm=True):
         """
@@ -294,17 +252,11 @@ class TextEmbeddingConv2(object):
         :return: A model that takes a sequence of words as inputs and outputs the normed sum of
         word embeddings that occur in the document.
         """
-        _input = Input(shape=(None,), dtype='int32', name='%s-txt' % prefix)
-        dir_embedding = self.embed_direction(_input)
-        direction = L2Normalize.invoke(dir_embedding, name='%s-dir-norm' % prefix)
-        magnitude = self.embed_magnitude(_input)
-        _embedding = ScalarMul.invoke([direction, magnitude], name='%s-embed' % prefix)
-        _embedding = SpatialDropout1D(self.dropout_p)(_embedding)
-
+        _input, _embedding = self.embedding_constructor(prefix)
         list_of_convs = [GlobalMaxPooling1D()(conv(_embedding))
                          for conv in self.conv_layers]
         z = Concatenate()(list_of_convs) if len(list_of_convs) > 1 else list_of_convs[0]
-        encoded = Dense(self.dense_dim, activation="elu", name='%s-conv_encoding' % prefix)(z)
+        encoded = self.dense(z)
 
         if final_l2_norm:
             normed_encoded = L2Normalize.invoke(
@@ -319,56 +271,17 @@ class TextEmbeddingConv2(object):
         ), outputs_list
 
 
-class TextEmbeddingLSTM(object):
+class TextEmbeddingLSTM(TextEmbedding):
     """
     Text embedding models class.
     """
 
-    def __init__(self, options: ModelOptions, pretrained_embeddings=None, field_type='text',
-                 magnitudes_initializer='uniform'):
-        self.field_type = field_type
-        if self.field_type == 'text':
-            self.n_features = options.n_features
-            self.dense_dim = options.dense_dim
-        elif self.field_type == 'authors':
-            self.n_features = options.n_authors
-            self.dense_dim = options.metadata_dim
-        elif self.field_type == 'venue':
-            self.n_features = options.n_venues
-            self.dense_dim = options.metadata_dim
-        elif self.field_type == 'keyphrases':
-            self.n_features = options.n_keyphrases
-            self.dense_dim  = options.metadata_dim
-        else:
-            assert False
-
-        self.l2_lambda = options.l2_lambda * (pretrained_embeddings is None)
-        self.l1_lambda = options.l1_lambda
-        self.dropout_p = options.dropout_p
-
-        # shared layers
-        self.embed_direction = EmbeddingZero(
-            output_dim=self.dense_dim,
-            input_dim=self.n_features,
-            activity_regularizer=l2(self.l2_lambda),
-            mask_zero=False,
-            trainable=pretrained_embeddings is None
-        )
-        if pretrained_embeddings is not None:
-            self.embed_direction.build((None,))
-            set_embedding_layer_weights(self.embed_direction, pretrained_embeddings)
-
-        self.embed_magnitude = EmbeddingZero(
-            output_dim=1,
-            input_dim=self.n_features,
-            activity_regularizer=l1(self.l1_lambda),
-            # will induce sparsity if large enough
-            mask_zero=False,
-            embeddings_initializer=magnitudes_initializer
-        )
-
+    def __init__(self, **kwargs):
+        super(TextEmbeddingLSTM, self).__init__(**kwargs)
+        self.mask = True
+        self.define_embedding_layers()
         self.bilstm = Bidirectional(LSTM(self.dense_dim))
-        self.dense = Dense(self.dense_dim)
+        self.dense = Dense(self.dense_dim, activation='elu')
 
     def create_text_embedding_model(self, prefix="", final_l2_norm=True):
         """
@@ -376,12 +289,7 @@ class TextEmbeddingLSTM(object):
         :return: A model that takes a sequence of words as inputs and outputs the normed sum of
         word embeddings that occur in the document.
         """
-        _input = Input(shape=(None,), dtype='int32', name='%s-txt' % prefix)
-        dir_embedding = self.embed_direction(_input)
-        direction = L2Normalize.invoke(dir_embedding, name='%s-dir-norm' % prefix)
-        magnitude = self.embed_magnitude(_input)
-        _embedding = ScalarMul.invoke([direction, magnitude], name='%s-embed' % prefix)
-        _embedding = SpatialDropout1D(self.dropout_p)(_embedding)
+        _input, _embedding = self.embedding_constructor(prefix)
         lstm_embedding = self.dense(self.bilstm(_embedding))
         if final_l2_norm:
             normed_lstm_embedding = L2Normalize.invoke(

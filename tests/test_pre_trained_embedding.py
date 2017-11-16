@@ -28,8 +28,8 @@ class TestPreTrainedEmbedding(unittest.TestCase):
         options.use_pretrained = True
         options.dense_dim = 300
         options.n_features = 200
-        t_embedding_sum = TextEmbeddingSum(options,
-                                           pretrained_embeddings,
+        t_embedding_sum = TextEmbeddingSum(options=options,
+                                           pretrained_embeddings=pretrained_embeddings,
                                            magnitudes_initializer='ones'
                                            )
 

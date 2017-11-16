@@ -42,6 +42,17 @@ class TestModelBuild(unittest.TestCase):
         except Exception:
             assert False
 
+    def test_build_magdir(self):
+        try:
+            models = embedder_create_model(self.options)
+            self.options.use_magdir = False
+            assert 'embedding' in models
+            assert 'citeomatic' in models
+            self._test_train(models)
+            assert True
+        except Exception:
+            assert False
+
     def test_build_paper_embedder_cnn(self):
         try:
             self.options.embedding_type = 'cnn'
@@ -61,6 +72,22 @@ class TestModelBuild(unittest.TestCase):
             assert 'citeomatic' in models
             self._test_train(models)
             assert True
+        except Exception:
+            assert False
+
+    def test_cnn(self):
+        self.options.embedding_type = 'cnn'
+        try:
+            models = create_model(self.options)
+            self._test_train(models)
+        except Exception:
+            assert False
+
+    def test_lstm(self):
+        self.options.embedding_type = 'lstm'
+        try:
+            models = create_model(self.options)
+            self._test_train(models)
         except Exception:
             assert False
 
@@ -133,22 +160,6 @@ class TestModelBuild(unittest.TestCase):
 
     def test_siamese(self):
         self.options.use_src_tgt_embeddings = True
-        try:
-            models = create_model(self.options)
-            self._test_train(models)
-        except Exception:
-            assert False
-
-    def test_cnn(self):
-        self.options.embedding_type = 'cnn'
-        try:
-            models = create_model(self.options)
-            self._test_train(models)
-        except Exception:
-            assert False
-
-    def test_lstm(self):
-        self.options.embedding_type = 'lstm'
         try:
             models = create_model(self.options)
             self._test_train(models)

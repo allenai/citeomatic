@@ -5,7 +5,7 @@ from keras.layers import Add
 
 from citeomatic.models.layers import L2Normalize, ScalarMultiply, custom_dot
 from citeomatic.models.options import ModelOptions
-from citeomatic.models.text_embeddings import TextEmbeddingSum, _prefix, make_embedder
+from citeomatic.models.text_embeddings import _prefix, make_embedder
 
 FIELDS = ['title', 'abstract']
 SOURCE_NAMES = ['query', 'candidate']

@@ -34,11 +34,11 @@ class TrainCiteomatic(App, ModelOptions):
     options_json = Unicode(default_value=None, allow_none=True)
 
     # hyperopt parameters
-    max_evals_initial = Int(default_value=75)
-    max_evals_secondary = Int(default_value=10)
+    max_evals_initial = None
+    max_evals_secondary = None
     total_samples_initial = Int(default_value=5000000)
-    total_samples_secondary = Int(default_value=20000000)
-    n_eval = Int(default_value=1000, allow_none=True)
+    total_samples_secondary = Int(default_value=50000000)
+    n_eval = Int(default_value=500, allow_none=True)
     models_ann_dir = Unicode(default_value=None, allow_none=True)
     models_dir_base = Unicode(
         default_value='/net/nfs.corp/s2-research/citeomatic/'
@@ -53,6 +53,12 @@ class TrainCiteomatic(App, ModelOptions):
     def main(self, args):
 
         if self.mode == 'hyperopt':
+            if self.model_name == PAPER_EMBEDDING_MODEL:
+                self.max_evals_initial = 25
+                self.max_evals_secondary = 5
+            else:
+                self.max_evals_initial = 75
+                self.max_evals_secondary = 10
             self.run_hyperopt()
         elif self.mode == 'train':
             self.run_train()
@@ -98,11 +104,13 @@ class TrainCiteomatic(App, ModelOptions):
                 'use_pretrained': True,
                 'l2_lambda': 0,
                 'dense_dim': 300,
+                'enable_fine_tune': hp.choice('enable_fine_tune', [True, False])
             },
             False: {
                 'use_pretrained': False,
                 'l2_lambda': hp.choice('l2_lambda', np.append(np.logspace(-7, -2, 6), 0)),
-                'dense_dim': scope.int(hp.quniform('dense_dim', 25, 325, 25))
+                'dense_dim': scope.int(hp.quniform('dense_dim', 25, 325, 25)),
+                'enable_fine_tune': True # doesn't matter what goes here
             }
         }
 
@@ -110,6 +118,10 @@ class TrainCiteomatic(App, ModelOptions):
         # note that the scope.int code is a hack to get integers out of the sampler
         if model_name == CITATION_RANKER_MODEL:
             ranker_model_params = {
+                'embedding_type':
+                    hp.choice('embedding_type', ['sum', 'cnn2']),
+                'use_magdir':
+                    hp.choice('use_magdir', [True, False]),
                 'metadata_dim':
                     scope.int(hp.quniform('metadata_dim', 5, 55, 5)),
                 'use_authors':
@@ -311,11 +323,10 @@ class TrainCiteomatic(App, ModelOptions):
         f1 = results_validation['f1_1'][EVAL_DATASET_KEYS[self.dataset_type]]
 
         if self.model_name == PAPER_EMBEDDING_MODEL:
-            if self.dataset_type == 'dblp':
-                l = -p
-            else:
-                l = -r
+            # optimizing for recall
+            l = -r
         else:
+            # optimizing for F1
             l = -f1
 
         out = {
