@@ -32,7 +32,7 @@
   "samples_per_epoch": 2500000,
   "stride": 2,
   "tb_dir": null,
-  "total_samples": 50000000,
+  "total_samples": 100000000,
   "train_frac": 0.8,
   "use_authors": true,
   "use_citations": true,

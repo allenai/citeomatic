@@ -79,9 +79,13 @@ class UpdateANN(keras.callbacks.Callback):
         self.embed_at_epch_end = embed_at_epoch_end
         self.embed_at_train_begin = embed_at_train_begin
 
-    def _re_embed(self):
+    def _re_embed(self, load_pkl=False):
         embedder = EmbeddingModel(self.featurizer, self.embedding_model)
-        ann = ANN.build(embedder, self.corpus, ann_trees=10)
+        if load_pkl and self.corpus.corpus_type == 'oc' and os.path.exists(
+                        DatasetPaths.OC_ANN_FILE + ".pickle"):
+            ann = ANN.load(DatasetPaths.OC_ANN_FILE)
+        else:
+            ann = ANN.build(embedder, self.corpus, ann_trees=10)
         candidate_selector = ANNCandidateSelector(
             corpus=self.corpus,
             ann=ann,
@@ -100,7 +104,7 @@ class UpdateANN(keras.callbacks.Callback):
             logging.info(
                 'Beginning training. Embedding corpus.',
             )
-            self._re_embed()
+            self._re_embed(load_pkl=True)
 
     def on_epoch_end(self, epoch, logs=None):
         if self.embed_at_epch_end:
@@ -142,9 +146,9 @@ def train_text_model(
     logging.info(model.summary())
 
     training_dg = DataGenerator(corpus=corpus,
-                                  featurizer=featurizer,
-                                  margin_multiplier=model_options.margin_multiplier,
-                                  use_variable_margin=model_options.use_variable_margin)
+                                featurizer=featurizer,
+                                margin_multiplier=model_options.margin_multiplier,
+                                use_variable_margin=model_options.use_variable_margin)
     training_generator = training_dg.triplet_generator(
         paper_ids=corpus.train_ids,
         candidate_ids=corpus.train_ids,
@@ -212,6 +216,7 @@ def train_text_model(
         else:
             ann_featurizer, ann_models = model_from_directory(models_ann_dir, on_cpu=True)
             paper_embedding_model = ann_models['embedding']
+            paper_embedding_model._make_predict_function()
             embed_at_epoch_end = False
             embed_at_train_begin = True
         callbacks_list.append(
@@ -342,7 +347,6 @@ def eval_text_model(
         min_citations=1,
         n_eval=None
 ):
-
     if papers_source == 'valid':
         paper_ids_for_eval = corpus.valid_ids
         candidate_ids_pool = corpus.train_ids + corpus.valid_ids
@@ -360,7 +364,8 @@ def eval_text_model(
 
     candidate_ids_pool = set(candidate_ids_pool)
 
-    logging.info("Restricting Candidates pool and gold citations to {} docs".format(len(candidate_ids_pool)))
+    logging.info(
+        "Restricting Candidates pool and gold citations to {} docs".format(len(candidate_ids_pool)))
 
     if n_eval is not None:
         if n_eval < len(paper_ids_for_eval):
@@ -373,14 +378,16 @@ def eval_text_model(
     results_1 = []
     results_2 = []
     for doc_id in tqdm.tqdm(paper_ids_for_eval):
-        candidate_ids, confidence_scores = candidate_selector.fetch_candidates(doc_id, candidate_ids_pool)
+        candidate_ids, confidence_scores = candidate_selector.fetch_candidates(doc_id,
+                                                                               candidate_ids_pool)
         if len(candidate_ids) == 0:
             continue
         predictions, scores = ranker.rank(doc_id, candidate_ids, confidence_scores)
 
         logging.debug("Done! Found %s predictions." % len(predictions))
         # eval_doc_predictions.append(predictions)
-        gold_citations_1, gold_citations_2 = _gold_citations(doc_id, corpus, min_citations, candidate_ids_pool)
+        gold_citations_1, gold_citations_2 = _gold_citations(doc_id, corpus, min_citations,
+                                                             candidate_ids_pool)
         if len(gold_citations_1) == 0:
             logging.debug("Skipping doc id : {}".format(doc_id))
             continue

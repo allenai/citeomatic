@@ -263,7 +263,10 @@ class TrainCiteomatic(App, ModelOptions):
                 )
                 # the ANN itself needs to be only built once
                 if self.ann is None:
-                    self.ann = ANN.build(paper_embedding_model, corpus)
+                    if corpus.corpus_type == 'oc' and os.path.exists(DatasetPaths.OC_ANN_FILE + ".pickle"):
+                        self.ann = ANN.load(DatasetPaths.OC_ANN_FILE)
+                    else:
+                        self.ann = ANN.build(paper_embedding_model, corpus)
 
             candidate_selector = ANNCandidateSelector(
                 corpus=corpus,

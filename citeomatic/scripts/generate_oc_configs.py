@@ -39,6 +39,8 @@ class GenerateOcConfigs(App):
              "oc.citation_ranker.canonical-pretrained_no_finetune.options.json"),
             ({'use_pretrained': True, 'enable_fine_tune': True},
              "oc.citation_ranker.canonical-pretrained_with_finetime.options.json"),
+            ({'use_sparse': False},
+             "oc.citation_ranker.canonical-sparse.options.json"),
         ]
 
         for change, filename in changes_file_list:
