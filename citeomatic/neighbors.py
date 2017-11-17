@@ -61,13 +61,18 @@ class ANN(object):
 
         file_util.write_pickle('%s.pickle' % target, self)
 
+    def __getstate__(self):
+        return self.docid_to_idx, self.idx_to_docid, self.embeddings, self.annoy_dims, None
+
+    def __setstate__(self, state):
+        self.docid_to_idx, self.idx_to_docid, self.embeddings, self.annoy_dims, self.annoy = state
+
     @staticmethod
     def load(source):
         import annoy
-        ann = load_pickle('%s.pickle' % source)
-        if ann.annoy is not None:
-            ann.annoy = annoy.AnnoyIndex(ann.annoy_dims)
-            ann.annoy.load('%s.annoy' % source)
+        ann = file_util.read_pickle('%s.pickle' % source)
+        ann.annoy = annoy.AnnoyIndex(ann.annoy_dims)
+        ann.annoy.load('%s.annoy' % source)
         return ann
 
     def get_nns_by_vector(self, vector, top_n, **kw):

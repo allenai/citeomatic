@@ -200,5 +200,5 @@ class Corpus(object):
         out_citations = self[doc_id].out_citations
         # Remove cited documents that appear after the year of publication of source document as
         # they indicate incorrect data
-        return [cit_doc_id for cit_doc_id in out_citations if
+        return [cit_doc_id for cit_doc_id in out_citations if cit_doc_id in self._id_set and
                 self[cit_doc_id].year <= self[doc_id].year]

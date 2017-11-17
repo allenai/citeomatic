@@ -43,7 +43,7 @@ class Evaluate(App):
         return self._embedder
 
     def ann(self, embedder, corpus) -> ANN:
-        if corpus.corpus_type == 'oc' and os.path.exists(DatasetPaths.OC_ANN_FILE):
+        if corpus.corpus_type == 'oc' and os.path.exists(DatasetPaths.OC_ANN_FILE + ".pickle"):
             self._ann = ANN.load(DatasetPaths.OC_ANN_FILE)
             return self._ann
         if self._ann is None:
