@@ -74,9 +74,9 @@ class ModelOptions(HasTraits):
     subset_vocab_to_training = False
 
     # minimum number of papers for authors/venues/keyphrases to get an embedding.
-    min_author_papers = 1
-    min_venue_papers = 1
-    min_keyphrase_papers = 5
+    min_author_papers = Int(default_value=1)
+    min_venue_papers = Int(default_value=1)
+    min_keyphrase_papers = Int(default_value=5)
 
     use_selector_confidence = Bool(default_value=True)
 

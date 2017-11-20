@@ -2,19 +2,17 @@
 """
 Helpers for pickle compatibility across module renames.
 """
+import json
+import os
 from typing import Tuple, Any
 
-import os
-import json
-import importlib
-import pickle
 import tensorflow as tf
 
 from citeomatic import file_util
-from citeomatic.utils import import_from
 from citeomatic.common import DatasetPaths
 from citeomatic.features import Featurizer
 from citeomatic.models.options import ModelOptions
+from citeomatic.utils import import_from
 
 
 def model_from_directory(dirname: str, on_cpu=False) -> Tuple[Featurizer, Any]:

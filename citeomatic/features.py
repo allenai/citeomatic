@@ -16,7 +16,6 @@ from citeomatic.utils import flatten
 from citeomatic.common import DatasetPaths
 from citeomatic.models.options import ModelOptions
 
-model_options = ModelOptions()
 dp = DatasetPaths()
 
 CLEAN_TEXT_RE = re.compile('[^ a-z]')
@@ -89,12 +88,18 @@ class Featurizer(object):
             max_features=200000,
             max_title_len=32,
             max_abstract_len=256,
-            use_pretrained=False
+            use_pretrained=False,
+            min_author_papers=1,
+            min_venue_papers=1,
+            min_keyphrase_papers=5
     ):
         self.max_features = max_features
         self.max_title_len = max_title_len
         self.max_abstract_len = max_abstract_len
         self.use_pretrained = use_pretrained
+        self.min_author_papers = min_author_papers
+        self.min_venue_papers = min_venue_papers
+        self.min_keyphrase_papers = min_keyphrase_papers
 
         self.author_to_index = {}
         self.venue_to_index = {}
@@ -135,19 +140,19 @@ class Featurizer(object):
 
         c = 1
         for author, count in author_counts.items():
-            if count >= model_options.min_author_papers:
+            if count >= self.min_author_papers:
                 self.author_to_index[author] = c
                 c += 1
 
         c = 1
         for venue, count in venue_counts.items():
-            if count >= model_options.min_venue_papers:
+            if count >= self.min_venue_papers:
                 self.venue_to_index[venue] = c
                 c += 1
 
         c = 1
         for keyphrase, count in keyphrase_counts.items():
-            if count >= model_options.min_keyphrase_papers:
+            if count >= self.min_keyphrase_papers:
                 self.keyphrase_to_index[keyphrase] = c
                 c += 1
 
@@ -200,6 +205,9 @@ class Featurizer(object):
             resource.getrusage(resource.RUSAGE_SELF).ru_maxrss / 1e6
         )
         logging.info('Total words %d ' % len(self.word_indexer.word_to_index))
+        logging.info('Total authors %d ' % self.n_authors)
+        logging.info('Total venues %d ' % self.n_venues)
+        logging.info('Total keyphrases %d ' % self.n_keyphrases)
 
     def __setstate__(self, state):
         for k, v in state.items():
@@ -400,11 +408,12 @@ class FeatureIndexer(object):
         for i, word in enumerate(vocab):
             self.word_to_index[word] = i + offset
 
-        if use_pretrained:  # OOV hashing stuff
-            num_words = len(vocab)
-            for i in range(1, model_options.num_oov_buckets + 1):
-                word = model_options.oov_term_prefix + str(i)
-                self.word_to_index[word] = num_words + i
+        # if not use_pretrained:  # OOV hashing stuff only when not using pretrained. Pretrained
+        #     # vocab file already has
+        #     num_words = len(vocab)
+        #     for i in range(1, ModelOptions.num_oov_buckets + 1):
+        #         word = ModelOptions.oov_term_prefix + str(i)
+        #         self.word_to_index[word] = num_words + i
 
     def transform(self, raw_X):
         """
@@ -426,8 +435,8 @@ class FeatureIndexer(object):
         if word in self.word_to_index:
             return self.word_to_index[word]
         elif self.use_pretrained:
-            hash_id = (mmh3.hash(word) % model_options.num_oov_buckets) + 1
-            word = model_options.oov_term_prefix + str(hash_id)
+            hash_id = (mmh3.hash(word) % ModelOptions.num_oov_buckets) + 1
+            word = ModelOptions.oov_term_prefix + str(hash_id)
             return self.word_to_index[word]
         else:
             return None

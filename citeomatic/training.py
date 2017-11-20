@@ -242,7 +242,7 @@ def train_text_model(
     return model, embedding_model
 
 
-def end_to_end_training(model_options, dataset_type, models_dir, models_ann_dir=None):
+def end_to_end_training(model_options: ModelOptions, dataset_type, models_dir, models_ann_dir=None):
     # step 1: make the directory
     if not os.path.exists(models_dir):
         os.makedirs(models_dir)
@@ -274,7 +274,10 @@ def end_to_end_training(model_options, dataset_type, models_dir, models_ann_dir=
             max_features=model_options.max_features,
             max_title_len=model_options.max_title_len,
             max_abstract_len=model_options.max_abstract_len,
-            use_pretrained=model_options.use_pretrained
+            use_pretrained=model_options.use_pretrained,
+            min_author_papers=model_options.min_author_papers,
+            min_venue_papers=model_options.min_venue_papers,
+            min_keyphrase_papers=model_options.min_keyphrase_papers
         )
         featurizer.fit(corpus)
         file_util.write_pickle(featurizer_file, featurizer)

@@ -34,11 +34,11 @@ class GenerateOcConfigs(App):
                  'use_keyphrases': False,
                  'use_venue': False,
              }, "oc.citation_ranker.canonical-metadata.options.json"),
-            ({'use_src_tgt_embeddings': False}, "oc.citation_ranker.canonical-non_siamese.options.json"),
+            ({'use_src_tgt_embeddings': True}, "oc.citation_ranker.canonical-siamese.options.json"),
             ({'use_pretrained': True, 'enable_fine_tune': False},
              "oc.citation_ranker.canonical-pretrained_no_finetune.options.json"),
             ({'use_pretrained': True, 'enable_fine_tune': True},
-             "oc.citation_ranker.canonical-pretrained_with_finetime.options.json"),
+             "oc.citation_ranker.canonical-pretrained_with_finetune.options.json"),
             ({'use_sparse': False},
              "oc.citation_ranker.canonical-sparse.options.json"),
         ]
