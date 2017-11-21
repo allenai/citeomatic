@@ -30,6 +30,12 @@ EVAL_DATASET_KEYS = {'dblp': 5,
                      'pubmed': 20,
                      'oc': 20}
 
+EVAL_DOC_MIN_CITATION = {
+    'dblp': 10,
+    'pubmed': 10,
+    'oc': 1
+}
+
 
 class ValidationCallback(keras.callbacks.Callback):
     def __init__(self, corpus, candidate_selector, ranker, n_valid):
@@ -391,7 +397,7 @@ def eval_text_model(
         # eval_doc_predictions.append(predictions)
         gold_citations_1, gold_citations_2 = _gold_citations(doc_id, corpus, min_citations,
                                                              candidate_ids_pool)
-        if len(gold_citations_1) == 0:
+        if len(gold_citations_1) < EVAL_DOC_MIN_CITATION[corpus.corpus_type]:
             logging.debug("Skipping doc id : {}".format(doc_id))
             continue
 
@@ -411,6 +417,9 @@ def eval_text_model(
 
         results_1.append(r_1)
         results_2.append(r_2)
+
+    logging.info("Found {} papers in the test set after filtering docs with fewer than {} "
+                 "citations".format(len(results_1), EVAL_DOC_MIN_CITATION[corpus.corpus_type]))
 
     averaged_results_1 = average_results(results_1)
     averaged_results_2 = average_results(results_2)
