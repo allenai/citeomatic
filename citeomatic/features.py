@@ -218,7 +218,7 @@ class Featurizer(object):
                 continue
 
     def _citation_features(self, documents):
-        return np.log([doc.in_citation_count + 1 for doc in documents])
+        return np.log([max(doc.in_citation_count - 1, 0) + 1 for doc in documents])
 
     def _intersection_features(self, query_features, candidate_features):
         feats_intersection_lst = [

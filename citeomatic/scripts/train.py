@@ -57,7 +57,7 @@ class TrainCiteomatic(App, ModelOptions):
                 self.max_evals_initial = 25
                 self.max_evals_secondary = 5
             else:
-                self.max_evals_initial = 75
+                self.max_evals_initial = 25
                 self.max_evals_secondary = 10
             self.run_hyperopt()
         elif self.mode == 'train':
