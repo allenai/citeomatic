@@ -26,7 +26,7 @@ from citeomatic.utils import import_from
 from citeomatic.eval_metrics import precision_recall_f1_at_ks, average_results
 
 EVAL_KEYS = [1, 5, 10, 20, 50, 100, 1000]
-EVAL_DATASET_KEYS = {'dblp': 5,
+EVAL_DATASET_KEYS = {'dblp': 10,
                      'pubmed': 20,
                      'oc': 20}
 
@@ -387,6 +387,13 @@ def eval_text_model(
     results_1 = []
     results_2 = []
     for doc_id in tqdm.tqdm(paper_ids_for_eval):
+
+        gold_citations_1, gold_citations_2 = _gold_citations(doc_id, corpus, min_citations,
+                                                             candidate_ids_pool)
+        if len(gold_citations_1) < EVAL_DOC_MIN_CITATION[corpus.corpus_type]:
+            logging.debug("Skipping doc id : {}".format(doc_id))
+            continue
+
         candidate_ids, confidence_scores = candidate_selector.fetch_candidates(doc_id,
                                                                                candidate_ids_pool)
         if len(candidate_ids) == 0:
@@ -395,11 +402,6 @@ def eval_text_model(
 
         logging.debug("Done! Found %s predictions." % len(predictions))
         # eval_doc_predictions.append(predictions)
-        gold_citations_1, gold_citations_2 = _gold_citations(doc_id, corpus, min_citations,
-                                                             candidate_ids_pool)
-        if len(gold_citations_1) < EVAL_DOC_MIN_CITATION[corpus.corpus_type]:
-            logging.debug("Skipping doc id : {}".format(doc_id))
-            continue
 
         r_1 = precision_recall_f1_at_ks(
             gold_y=gold_citations_1,
