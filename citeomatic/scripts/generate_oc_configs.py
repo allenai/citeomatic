@@ -25,7 +25,8 @@ class GenerateOcConfigs(App):
             base_config = json.load(open(self.input_config_file))
 
         changes_file_list = [
-            ({'use_citations': False}, "oc.citation_ranker.canonical-citation.options.json"),
+            ({'use_citations': False, 'use_selector_confidence': False},
+             "oc.citation_ranker.canonical-extra_features.options.json"),
             ({'use_magdir': False}, "oc.citation_ranker.canonical-magdir.options.json"),
             ({'use_variable_margin': False}, "oc.citation_ranker.canonical-var_margin.options.json"),
             ({
@@ -41,6 +42,10 @@ class GenerateOcConfigs(App):
              "oc.citation_ranker.canonical-pretrained_with_finetune.options.json"),
             ({'use_sparse': False},
              "oc.citation_ranker.canonical-sparse.options.json"),
+            ({'batch_size': 512},
+             "oc.citation_ranker.canonical-large_batch.options.json"),
+            ({'use_nn_negatives': False},
+             "oc.citation_ranker.canonical-nn_negatives.options.json")
         ]
 
         for change, filename in changes_file_list:

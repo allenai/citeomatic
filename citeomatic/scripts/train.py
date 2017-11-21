@@ -120,18 +120,8 @@ class TrainCiteomatic(App, ModelOptions):
             ranker_model_params = {
                 'embedding_type':
                     hp.choice('embedding_type', ['sum', 'cnn2']),
-                'use_magdir':
-                    hp.choice('use_magdir', [True, False]),
                 'metadata_dim':
                     scope.int(hp.quniform('metadata_dim', 5, 55, 5)),
-                'use_metadata':
-                    hp.choice('use_metadata', [True, False]),
-                'use_citations':
-                    hp.choice('use_citations', [True, False]),
-                'use_sparse':
-                    hp.choice('sparse_option', [True, False]),
-                'use_src_tgt_embeddings':
-                    hp.choice('use_src_tgt_embeddings', [True, False])
             }
 
             space = scope.switch(
