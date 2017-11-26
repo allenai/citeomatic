@@ -223,6 +223,9 @@ class TrainCiteomatic(App, ModelOptions):
         print(model_options)
         print("======")
 
+        if model_options.train_for_test_set:
+            logging.info("\n\n============== TRAINING FOR TEST SET =============\n\n")
+
         training_outputs = end_to_end_training(
             model_options,
             self.dataset_type,

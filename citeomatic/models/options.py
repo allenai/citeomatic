@@ -84,6 +84,8 @@ class ModelOptions(HasTraits):
 
     enable_fine_tune = Bool(default_value=True)
 
+    train_for_test_set = Bool(default_value=False)
+
     def __repr__(self):
         return json.dumps(self._trait_values, indent=2, sort_keys=True)
 

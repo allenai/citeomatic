@@ -120,19 +120,24 @@ class Featurizer(object):
             self.keyphrase_to_index = {}
         return len(self.keyphrase_to_index) + 1
 
-    def fit(self, corpus, max_df_frac=0.90, min_df_frac=0.000025):
+    def fit(self, corpus, max_df_frac=0.90, min_df_frac=0.000025, is_featurizer_for_test=False):
 
         logging.info(
             'Usage at beginning of featurizer fit: %s',
             resource.getrusage(resource.RUSAGE_SELF).ru_maxrss / 1e6
         )
 
+        if is_featurizer_for_test:
+            paper_ids_for_training = corpus.train_ids + corpus.valid_ids
+        else:
+            paper_ids_for_training = corpus.train_ids
+
         # Fitting authors and venues
         logging.info('Fitting authors and venues')
         author_counts = collections.Counter()
         venue_counts = collections.Counter()
         keyphrase_counts = collections.Counter()
-        for doc_id in tqdm.tqdm(corpus.train_ids):
+        for doc_id in tqdm.tqdm(paper_ids_for_training):
             doc = corpus[doc_id]
             author_counts.update(doc.authors)
             venue_counts.update([doc.venue])
@@ -165,7 +170,7 @@ class Featurizer(object):
             logging.info('Cleaning text.')
             all_docs_text = [
                 ' '.join((_clean(corpus[doc_id].title), _clean(corpus[doc_id].abstract)))
-                for doc_id in tqdm.tqdm(corpus.train_ids)
+                for doc_id in tqdm.tqdm(paper_ids_for_training)
             ]
 
             logging.info('Fitting vectorizer...')

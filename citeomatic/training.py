@@ -127,7 +127,7 @@ def train_text_model(
         model_options: ModelOptions,
         models_ann_dir=None,
         debug=False,
-        tensorboard_dir=None
+        tensorboard_dir=None,
 ):
     """
     Utility function for training citeomatic models.
@@ -151,13 +151,20 @@ def train_text_model(
 
     logging.info(model.summary())
 
+    if model_options.train_for_test_set:
+        paper_ids_for_training = corpus.train_ids + corpus.valid_ids
+        candidates_for_training = corpus.train_ids + corpus.valid_ids + corpus.test_ids
+    else:
+        paper_ids_for_training = corpus.train_ids
+        candidates_for_training = corpus.train_ids + corpus.valid_ids
+
     training_dg = DataGenerator(corpus=corpus,
                                 featurizer=featurizer,
                                 margin_multiplier=model_options.margin_multiplier,
                                 use_variable_margin=model_options.use_variable_margin)
     training_generator = training_dg.triplet_generator(
-        paper_ids=corpus.train_ids,
-        candidate_ids=corpus.train_ids,
+        paper_ids=paper_ids_for_training,
+        candidate_ids=candidates_for_training,
         batch_size=model_options.batch_size,
         neg_to_pos_ratio=model_options.neg_to_pos_ratio
     )
@@ -285,7 +292,7 @@ def end_to_end_training(model_options: ModelOptions, dataset_type, models_dir, m
             min_venue_papers=model_options.min_venue_papers,
             min_keyphrase_papers=model_options.min_keyphrase_papers
         )
-        featurizer.fit(corpus)
+        featurizer.fit(corpus, is_featurizer_for_test=model_options.train_for_test_set)
         file_util.write_pickle(featurizer_file, featurizer)
 
     # update model options after featurization
