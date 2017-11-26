@@ -47,6 +47,6 @@
   "use_pretrained": false,
   "use_selector_confidence": true,
   "use_sparse": true,
-  "use_src_tgt_embeddings": false,
+  "use_src_tgt_embeddings": true,
   "use_venue": true
 }
