@@ -1,0 +1,12 @@
+{"dense_dim": 175,
+  "dropout_p": 0.35000000000000003,
+  "embedding_type": "sum",
+  "enable_fine_tune": true,
+  "l1_lambda": 0.0001,
+  "l2_lambda": 0.001,
+  "lr": 0.01,
+  "margin_multiplier": 0.5,
+  "metadata_dim": 45,
+  "total_samples": 50000000,
+  "use_pretrained": false
+}

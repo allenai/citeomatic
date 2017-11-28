@@ -57,8 +57,8 @@ class TrainCiteomatic(App, ModelOptions):
                 self.max_evals_initial = 25
                 self.max_evals_secondary = 5
             else:
-                self.max_evals_initial = 50
-                self.max_evals_secondary = 10
+                self.max_evals_initial = 25
+                self.max_evals_secondary = 5
             self.run_hyperopt()
         elif self.mode == 'train':
             self.run_train()
@@ -119,7 +119,7 @@ class TrainCiteomatic(App, ModelOptions):
         if model_name == CITATION_RANKER_MODEL:
             ranker_model_params = {
                 'embedding_type':
-                    hp.choice('embedding_type', ['sum', 'cnn2']),
+                    hp.choice('embedding_type', ['sum']),
                 'metadata_dim':
                     scope.int(hp.quniform('metadata_dim', 5, 55, 5)),
             }
