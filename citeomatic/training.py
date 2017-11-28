@@ -220,22 +220,21 @@ def train_text_model(
                 )
             )
 
-    if model_options.use_nn_negatives:
-        if models_ann_dir is None:
-            ann_featurizer = featurizer
-            paper_embedding_model = embedding_model
-            embed_at_epoch_end = True
-            embed_at_train_begin = False
-        else:
-            ann_featurizer, ann_models = model_from_directory(models_ann_dir, on_cpu=True)
-            paper_embedding_model = ann_models['embedding']
-            paper_embedding_model._make_predict_function()
-            embed_at_epoch_end = False
-            embed_at_train_begin = True
-        callbacks_list.append(
-            UpdateANN(corpus, ann_featurizer, paper_embedding_model, training_dg, validation_dg,
-                      embed_at_epoch_end, embed_at_train_begin)
-        )
+    if models_ann_dir is None:
+        ann_featurizer = featurizer
+        paper_embedding_model = embedding_model
+        embed_at_epoch_end = True
+        embed_at_train_begin = False
+    else:
+        ann_featurizer, ann_models = model_from_directory(models_ann_dir, on_cpu=True)
+        paper_embedding_model = ann_models['embedding']
+        paper_embedding_model._make_predict_function()
+        embed_at_epoch_end = False
+        embed_at_train_begin = True
+    callbacks_list.append(
+        UpdateANN(corpus, ann_featurizer, paper_embedding_model, training_dg, validation_dg,
+                  embed_at_epoch_end, embed_at_train_begin)
+    )
 
     if model_options.tb_dir is None:
         validation_data = validation_generator
@@ -386,6 +385,7 @@ def eval_text_model(
     if n_eval is not None:
         if n_eval < len(paper_ids_for_eval):
             logging.info("Selecting a random sample of {} papers for evaluation.".format(n_eval))
+            np.random.seed(110886)
             paper_ids_for_eval = np.random.choice(paper_ids_for_eval, n_eval, replace=False)
         else:
             logging.info("Using all {} papers for evaluation.".format(len(paper_ids_for_eval)))
