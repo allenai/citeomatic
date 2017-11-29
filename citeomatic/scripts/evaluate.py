@@ -116,7 +116,7 @@ class Evaluate(App):
                 assert False
 
             results = eval_text_model(corpus, candidate_selector, citation_ranker,
-                                      papers_source='valid', n_eval=self.n_eval)
+                                      papers_source=self.split, n_eval=self.n_eval)
             candidate_results_map[num_candidates] = results
 
         best_k = -1
