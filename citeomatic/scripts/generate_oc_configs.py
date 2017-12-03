@@ -41,6 +41,8 @@ class GenerateOcConfigs(App):
              }, "{}.citation_ranker.canonical-metadata.options.json".format(self.dataset_type)),
             ({'use_src_tgt_embeddings': True},
              "{}.citation_ranker.canonical-siamese.options.json".format(self.dataset_type)),
+            ({'use_src_tgt_embeddings': False},
+             "{}.citation_ranker.canonical-non_siamese.options.json".format(self.dataset_type)),
             ({'use_pretrained': True, 'enable_fine_tune': False},
              "{}.citation_ranker.canonical-pretrained_no_finetune.options.json".format(self.dataset_type)),
             ({'use_pretrained': True, 'enable_fine_tune': True},
