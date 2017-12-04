@@ -199,7 +199,7 @@ def train_text_model(
             'keras.optimizers', model_options.optimizer
         )(lr=model_options.lr)
 
-    if options.use_triplet:
+    if model_options.use_triplet:
         model.compile(optimizer=optimizer, loss=layers.triplet_loss)
     else:
         model.compile(optimizer=optimizer, loss='binary_crossentropy')
