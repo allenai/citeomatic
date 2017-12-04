@@ -30,6 +30,7 @@ class ModelOptions(HasTraits):
     use_keyphrases = Bool(default_value=False)
 
     # training and feature params
+    use_triplet = Bool(default_value=True)
     optimizer = Unicode(default_value='tfopt')
     lr = Float(default_value=0.0001)
     use_nn_negatives = Bool(default_value=True)

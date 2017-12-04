@@ -167,6 +167,25 @@ class TestModelBuild(unittest.TestCase):
         except Exception:
             assert False
 
+    def test_binary(self):
+        self.options.use_triplet = False
+        try:
+            models = create_model(self.options)
+            model = models['citeomatic']
+            model.compile(optimizer='nadam', loss='binary_crossentropy')
+            dg = DataGenerator(self.corpus, self.featurizer,
+                               candidate_selector=TestCandidateSelector(),
+                               use_triplet=False)
+
+            training_generator = dg.pairwise_generator(
+                paper_ids=self.corpus.train_ids, batch_size=2)
+
+            model.fit_generator(training_generator, steps_per_epoch=1,
+                                epochs=10)
+            K.clear_session()
+        except Exception:
+            assert False
+
     def _test_train(self, models: dict):
         model = models['citeomatic']
         model.compile(optimizer='nadam', loss=triplet_loss)

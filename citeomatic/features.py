@@ -467,21 +467,32 @@ class DataGenerator(object):
                  ann=None,
                  candidate_selector: CandidateSelector = None,
                  margin_multiplier=1,
-                 use_variable_margin=True):
+                 use_variable_margin=True,
+                 use_triplet=True):
         self.corpus = corpus
         self.featurizer = CachingFeaturizer(featurizer)
         self.ann = ann
         self.candidate_selector = candidate_selector
 
-        margins_offset_dict = {
-            'true': TRUE_CITATION_OFFSET * margin_multiplier,
-            'hard': HARD_NEGATIVE_OFFSET * margin_multiplier,
-            'nn': NN_NEGATIVE_OFFSET * margin_multiplier,
-            'easy': EASY_NEGATIVE_OFFSET * margin_multiplier
-        }
-        if not use_variable_margin:
-            margins_offset_dict['hard'] = margins_offset_dict['nn']
-            margins_offset_dict['easy'] = margins_offset_dict['nn']
+        if use_triplet:
+            margins_offset_dict = {
+                'true': TRUE_CITATION_OFFSET * margin_multiplier,
+                'hard': HARD_NEGATIVE_OFFSET * margin_multiplier,
+                'nn': NN_NEGATIVE_OFFSET * margin_multiplier,
+                'easy': EASY_NEGATIVE_OFFSET * margin_multiplier
+            }
+            if not use_variable_margin:
+                margins_offset_dict['hard'] = margins_offset_dict['nn']
+                margins_offset_dict['easy'] = margins_offset_dict['nn']
+            self.label_for_doc = label_for_doc
+        else: # binary loss
+            margins_offset_dict = {
+                'true': 1,
+                'hard': 0,
+                'nn': 0,
+                'easy': 0
+            }
+            self.label_for_doc = lambda doc, offset: offset # no boost
 
         self.margins_offset_dict = margins_offset_dict
 
@@ -542,19 +553,19 @@ class DataGenerator(object):
 
                 for c in true_citations:
                     doc = self.corpus[c]
-                    labels.append(label_for_doc(doc, self.margins_offset_dict['true']))
+                    labels.append(self.label_for_doc(doc, self.margins_offset_dict['true']))
                     examples.append(doc)
 
                 for doc in hard_negatives:
-                    labels.append(label_for_doc(doc, self.margins_offset_dict['hard']))
+                    labels.append(self.label_for_doc(doc, self.margins_offset_dict['hard']))
                     examples.append(doc)
 
                 for doc in nn_negatives:
-                    labels.append(label_for_doc(doc, self.margins_offset_dict['nn']))
+                    labels.append(self.label_for_doc(doc, self.margins_offset_dict['nn']))
                     examples.append(doc)
 
                 for doc in easy_negatives:
-                    labels.append(label_for_doc(doc, self.margins_offset_dict['easy']))
+                    labels.append(self.label_for_doc(doc, self.margins_offset_dict['easy']))
                     examples.append(doc)
 
                 labels = np.asarray(labels)
@@ -592,6 +603,44 @@ class DataGenerator(object):
                 queries.extend([q, q])
                 batch_ex.extend([ex[ai], ex[bi]])
                 batch_labels.extend([labels[ai], labels[bi]])
+                if len(queries) > batch_size:
+                    if self.candidate_selector is None:
+                        yield self.featurizer.transform_query_candidate(
+                            queries, batch_ex
+                        ), np.asarray(batch_labels)
+                    else:
+                        confidence_scores = self.candidate_selector.confidence(q.id, [doc.id for
+                                                                                       doc in batch_ex])
+                        yield self.featurizer.transform_query_candidate(
+                            queries, batch_ex, confidence_scores
+                        ), np.asarray(batch_labels)
+
+                    del queries[:]
+                    del batch_ex[:]
+                    del batch_labels[:]
+
+    def pairwise_generator(
+            self,
+            paper_ids,
+            candidate_ids=None,
+            batch_size=1024,
+            neg_to_pos_ratio=6
+    ):
+
+        queries = []
+        batch_ex = []
+        batch_labels = []
+
+        # Sample examples from our sorted list.
+        for q, ex, labels in self._listwise_examples(paper_ids, candidate_ids, neg_to_pos_ratio):
+            num_true = len([l for l in labels if l >= self.margins_offset_dict['true']])
+            # ignore cases where we didn't find enough negatives... to match triplet filtering
+            if len(labels) < num_true * 2:
+                continue
+            for ex_i, label_i in zip(ex, labels):
+                queries.append(q)
+                batch_ex.append(ex_i)
+                batch_labels.append(label_i)
                 if len(queries) > batch_size:
                     if self.candidate_selector is None:
                         yield self.featurizer.transform_query_candidate(

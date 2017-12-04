@@ -161,8 +161,13 @@ def train_text_model(
     training_dg = DataGenerator(corpus=corpus,
                                 featurizer=featurizer,
                                 margin_multiplier=model_options.margin_multiplier,
-                                use_variable_margin=model_options.use_variable_margin)
-    training_generator = training_dg.triplet_generator(
+                                use_variable_margin=model_options.use_variable_margin,
+                                use_triplet=model_options.use_triplet)
+    if model_options.use_triplet:
+        tr_dg = training_dg.triplet_generator
+    else:
+        tr_dg = training_dg.pairwise_generator
+    training_generator = tr_dg(
         paper_ids=paper_ids_for_training,
         candidate_ids=candidates_for_training,
         batch_size=model_options.batch_size,
@@ -172,8 +177,13 @@ def train_text_model(
     validation_dg = DataGenerator(corpus=corpus,
                                   featurizer=featurizer,
                                   margin_multiplier=model_options.margin_multiplier,
-                                  use_variable_margin=model_options.use_variable_margin)
-    validation_generator = validation_dg.triplet_generator(
+                                  use_variable_margin=model_options.use_variable_margin,
+                                  use_triplet=model_options.use_triplet)
+    if model_options.use_triplet:
+        vl_dg = validation_dg.triplet_generator
+    else:
+        vl_dg = validation_dg.pairwise_generator
+    validation_generator = vl_dg(
         paper_ids=corpus.valid_ids,
         candidate_ids=corpus.train_ids + corpus.valid_ids,
         batch_size=1024,
@@ -189,7 +199,10 @@ def train_text_model(
             'keras.optimizers', model_options.optimizer
         )(lr=model_options.lr)
 
-    model.compile(optimizer=optimizer, loss=layers.triplet_loss)
+    if options.use_triplet:
+        model.compile(optimizer=optimizer, loss=layers.triplet_loss)
+    else:
+        model.compile(optimizer=optimizer, loss='binary_crossentropy')
 
     # training calculation
     model_options.samples_per_epoch = int(np.minimum(
