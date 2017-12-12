@@ -54,7 +54,9 @@ class GenerateOcConfigs(App):
             ({'batch_size': 512},
              "{}.citation_ranker.canonical-large_batch.options.json".format(self.dataset_type)),
             ({'use_nn_negatives': False},
-             "{}.citation_ranker.canonical-nn_negatives.options.json".format(self.dataset_type))
+             "{}.citation_ranker.canonical-nn_negatives.options.json".format(self.dataset_type)),
+            ({'embedding_type': 'cnn2'},
+             "{}.citation_ranker.canonical+cnn.options.json".format(self.dataset_type))
         ]
 
         for change, filename in changes_file_list:
