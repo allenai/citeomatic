@@ -40,4 +40,4 @@ fi
 
 python -m spacy download en
 python setup.py develop
-python citeomatic/scripts/generate_oc_configs.py --input_config_file config/oc.citation_ranker.canonical.options.json
+python citeomatic/scripts/generate_oc_configs.py --input_config_file config/pubmed.citation_ranker.canonical.options.json

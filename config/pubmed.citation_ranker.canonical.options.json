@@ -8,5 +8,6 @@
   "margin_multiplier": 1.5,
   "metadata_dim": 40,
   "total_samples": 50000000,
-  "use_pretrained": false
+  "use_pretrained": false,
+  "samples_per_epoch": 1000000
 }
