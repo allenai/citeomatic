@@ -38,6 +38,11 @@ Verify that you now have the `ai2-citeomatic` conda environment installed and ac
 
 ## Download data
 
+Execute the data download script
+```
+./get-data.sh
+
+```
 
 ## Running the model
 
