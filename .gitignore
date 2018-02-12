@@ -1,5 +1,6 @@
 *.pyc
 .cache
+data/
 
 # IntelliJ
 .idea
