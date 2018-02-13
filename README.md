@@ -46,10 +46,17 @@ Execute the data download script
 
 ## Running the model
 
+#### Pubmed
 ```
 python citeomatic/scripts/evaluate.py --dataset_type pubmed --candidate_selector_type ann --split valid --paper_embedder_dir data/comparison/pubmed/models/paper_embedder/ --num_candidates 10 --ranker_type neural --citation_ranker_dir data/comparison/pubmed/models/citation_ranker/ --n_eval 1000
 
 ```
+
+#### DBLP
+```
+python citeomatic/scripts/evaluate.py --dataset_type dblp --candidate_selector_type ann --split test --paper_embedder_dir data/comparison/dblp/models/paper_embedder/ --num_candidates 10 --ranker_type neural --citation_ranker_dir data/comparison/dblp/models/citation_ranker/
+```
+
 
 ## Training the model
 
