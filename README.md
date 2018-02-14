@@ -48,10 +48,10 @@ The script will internally add a symlink from a local `data` directory to the pr
 
 If you have access to the AI2 Corp network, you can set `location` to  `/net/nfs.corp/s2-research/citeomatic/public/`  
 
-## Replicating Experiments
+# Citeomatic Evaluation
 
 This section details how to run the end-to-end system using pre-trained models for each dataset 
-and replicate experiments from the NAACL paper.
+and evaluate performance of Citeomatic from the NAACL paper. The `--num_candidates` option below   
   
 #### Pubmed
 ```
@@ -66,28 +66,31 @@ python citeomatic/scripts/evaluate.py --dataset_type dblp --candidate_selector_t
 
 #### Open Corpus
 ```
-python citeomatic/scripts/evaluate.py --dataset_type oc --candidate_selector_type ann --split test --paper_embedder_dir data/open_corpus/models/paper_embedder/ --num_candidates 5 --ranker_type neural --n_eval 20000 
---citation_ranker_dir data/open_corpus/models/citation_ranker/
+python citeomatic/scripts/evaluate.py --dataset_type oc --candidate_selector_type ann --split test --paper_embedder_dir data/open_corpus/models/paper_embedder/ --num_candidates 5 --ranker_type neural --citation_ranker_dir data/open_corpus/models/citation_ranker/ --n_eval 20000
 ```
 
-## Training the model
 
+# BM25 Baseline
 
-## Evaluation
+## Create Index
+The steps described above download pre-built BM25 indexes, neural models etc. and allow you to execute the evaluation method.
 
-
-
-# Starting from scratch
-
-The steps described above download pre-built BM25 indexes, neural models etc. and allow you to execute the evaluation method. If you intend to modify any of these components, please follow the instructions below:
-
-1. Build BM25 indexes for a given corpus
+Build BM25 indexes for a given corpus
 
 ```
-python citeomatic/scripts/create_bm25_index.py --dataset_name <dataset name>
+python citeomatic/scripts/evaluate.py --dataset_name <dataset name> --candidate_selector_type bm25 --split test --ranker_type none --num_candidates 10 
 ```
+
+Modify `CreateBM25Index` to change the way the BM25 index is built. We use the [whoosh](https://pypi.python.org/pypi/Whoosh/) package to build the BM25 index.
+To change the way the index is queried, change the `fetch_candidates` implementation in `BM25CandidateSelector`
 
 This script will create an index at this location: `data/bm25_index/<dataset name>/`
+
+## Evaluate
+
+```
+python citeomatic/scripts/evaluate.py --dataset_type <dataset>   --candidate_selector_type bm25 --split test --ranker_type none --num_candidates 10
+```
 
 2. Re-Create SQLite DB for dataset
 
@@ -103,13 +106,15 @@ This following scripts will create an index at this location: `data/db/<dataset 
 	python citeomatic/scripts/convert_open_corpus_to_citeomatic.py
 	```
 
+The SQLite DB is used to speed-up retrieving documents for a particular document id. 
+
 3. The main script to train and tune hyperparameters for various models is `train.py`. Usage:
 
 	```
 	python train.py [options]
 	```
 
-  * Genral Parameters:
+  * General Parameters:
 	  * `--mode` (Required): The mode to run the `train.py` script in. Possible values: `train` or 
 	  `hyperopt`. The `train` mode will train a single model and save to a given location. The 
 	  `hyperopt` mode will run hyperparamter-optimization and return the best found model.
