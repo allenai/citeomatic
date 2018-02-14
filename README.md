@@ -48,8 +48,11 @@ The script will internally add a symlink from a local `data` directory to the pr
 
 If you have access to the AI2 Corp network, you can set `location` to  `/net/nfs.corp/s2-research/citeomatic/public/`  
 
-## Replicating Experimental Results from our paper
+## Replicating Experiments
 
+This section details how to run the end-to-end system using pre-trained models for each dataset 
+and replicate experiments from the NAACL paper.
+  
 #### Pubmed
 ```
 python citeomatic/scripts/evaluate.py --dataset_type pubmed --candidate_selector_type ann --split test --paper_embedder_dir data/comparison/pubmed/models/paper_embedder/ --num_candidates 10 --ranker_type neural --citation_ranker_dir data/comparison/pubmed/models/citation_ranker/
@@ -74,7 +77,7 @@ python citeomatic/scripts/evaluate.py --dataset_type oc --candidate_selector_typ
 
 
 
-# Starting with scratch
+# Starting from scratch
 
 The steps described above download pre-built BM25 indexes, neural models etc. and allow you to execute the evaluation method. If you intend to modify any of these components, please follow the instructions below:
 
