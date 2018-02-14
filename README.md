@@ -1,30 +1,29 @@
 # Citeomatic
 
-This is the source distribution for the [Citeomatic](citeomatic.semanticscholar.org) service and 
-for the paper **Content-based Citation Recommendation**.
+This is the source distribution for the [Citeomatic](citeomatic.semanticscholar.org) service and for the paper **Content-based Citation Recommendation**.
 
 ## Clone the repo
 ```
 git clone git@github.com:allenai/citeomatic.git
 ```
 
-## Setup direnv (Optional)
-Citeomatic uses direnv to activate the `ai2-citeomatic` conda environment whenever you `cd` into the root directory. Alternatively, you can activate the conda environment yourself. 
+## Install direnv (Optional)
+Citeomatic uses [direnv](https://github.com/direnv/direnv) to activate the `ai2-citeomatic` conda environment whenever you `cd` into the root directory. Alternatively, you can skip this step and activate the conda environment manually yourself.
+ 
 1. To install `direnv` on:
-##### Ubuntu: 
-```
-sudo apt-get install direnv
-```
-##### Mac OSX:
-```
-brew install direnv
-```
-
-Then:
-
-`cd citeomatic/`
-
-`direnv allow .`
+	* For Ubuntu: 
+		```
+		sudo apt-get install direnv
+		```
+	* For MAC OSX:
+		```
+		brew install direnv
+		```
+	Then:
+		```
+		cd citeomatic/ ;
+		direnv allow .
+		```
 
 
 ## Setup
@@ -48,7 +47,7 @@ The script will internally add a symlink from a local `data` directory to the pr
 
 If you have access to the AI2 Corp network, you can set `location` to  `/net/nfs.corp/s2-research/citeomatic/public/`  
 
-# Citeomatic Evaluation
+## Citeomatic Evaluation
 
 This section details how to run the end-to-end system using pre-trained models for each dataset 
 and evaluate performance of Citeomatic from the NAACL paper. The `--num_candidates` option below   
@@ -70,15 +69,15 @@ python citeomatic/scripts/evaluate.py --dataset_type oc --candidate_selector_typ
 ```
 
 
-# BM25 Baseline
+## BM25 Baseline
 
-## Create Index
+### Create Index
 The steps described above download pre-built BM25 indexes, neural models etc. and allow you to execute the evaluation method.
 
 Build BM25 indexes for a given corpus
 
 ```
-python citeomatic/scripts/evaluate.py --dataset_type <dataset name> --candidate_selector_type bm25 --split test --ranker_type none --num_candidates 10 
+python citeomatic/scripts/create_bm25_index.py --dataset_name <dataset name> 
 ```
 
 Modify `CreateBM25Index` to change the way the BM25 index is built. We use the [whoosh](https://pypi.python.org/pypi/Whoosh/) package to build the BM25 index.
@@ -86,7 +85,7 @@ To change the way the index is queried, change the `fetch_candidates` implementa
 
 This script will create an index at this location: `data/bm25_index/<dataset name>/`
 
-## Evaluate
+### Evaluate
 
 ```
 python citeomatic/scripts/evaluate.py --dataset_type <dataset>   --candidate_selector_type bm25 --split test --ranker_type none --num_candidates 10
