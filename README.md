@@ -1,6 +1,7 @@
 # Citeomatic
 
-This is the source distribution for the [Citeomatic](citeomatic.semanticscholar.org) service.
+This is the source distribution for the [Citeomatic](citeomatic.semanticscholar.org) service and 
+for the paper **Content-based Citation Recommendation**.
 
 ## Clone the repo
 ```
@@ -47,11 +48,11 @@ The script will internally add a symlink from a local `data` directory to the pr
 
 If you have access to the AI2 Corp network, you can set `location` to  `/net/nfs.corp/s2-research/citeomatic/public/`  
 
-## Running the model
+## Replicating Experimental Results from our paper
 
 #### Pubmed
 ```
-python citeomatic/scripts/evaluate.py --dataset_type pubmed --candidate_selector_type ann --split valid --paper_embedder_dir data/comparison/pubmed/models/paper_embedder/ --num_candidates 10 --ranker_type neural --citation_ranker_dir data/comparison/pubmed/models/citation_ranker/ --n_eval 1000
+python citeomatic/scripts/evaluate.py --dataset_type pubmed --candidate_selector_type ann --split test --paper_embedder_dir data/comparison/pubmed/models/paper_embedder/ --num_candidates 10 --ranker_type neural --citation_ranker_dir data/comparison/pubmed/models/citation_ranker/
 
 ```
 
