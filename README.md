@@ -90,20 +90,24 @@ python citeomatic/scripts/create_bm25_index.py --dataset_name <dataset name>
 This script will create an index at this location: `data/bm25_index/<dataset name>/`
 
 2. Re-Create SQLite DB for dataset
-```
-python citeomatic/scripts/convert_kdd_to_citeomatic.py --dataset_name <dataset name>
-```
-This script will create an index at this location: `data/db/<dataset name>.sqlite.db`
 
-For the open corpus dataset:
-```
-python citeomatic/scripts/convert_open_corpus_to_citeomatic.py
-```
+This following scripts will create an index at this location: `data/db/<dataset name>.sqlite.db`
+
+  * For the DBLP and Pubmed datasets:
+	```
+	python citeomatic/scripts/convert_kdd_to_citeomatic.py --dataset_name <dataset name>
+	```
+
+  * For the open corpus dataset:
+	```
+	python citeomatic/scripts/convert_open_corpus_to_citeomatic.py
+	```
 
 3. The main script to train and tune hyperparameters for various models is `train.py`. Usage:
-```
-python train.py [options]
-```
+
+	```
+	python train.py [options]
+	```
 
   * Genral Parameters:
 	  * `--mode` (Required): The mode to run the `train.py` script in. Possible values: `train` or 
