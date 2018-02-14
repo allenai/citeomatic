@@ -78,7 +78,7 @@ The steps described above download pre-built BM25 indexes, neural models etc. an
 Build BM25 indexes for a given corpus
 
 ```
-python citeomatic/scripts/evaluate.py --dataset_name <dataset name> --candidate_selector_type bm25 --split test --ranker_type none --num_candidates 10 
+python citeomatic/scripts/evaluate.py --dataset_type <dataset name> --candidate_selector_type bm25 --split test --ranker_type none --num_candidates 10 
 ```
 
 Modify `CreateBM25Index` to change the way the BM25 index is built. We use the [whoosh](https://pypi.python.org/pypi/Whoosh/) package to build the BM25 index.
