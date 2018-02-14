@@ -1,6 +1,6 @@
 # Citeomatic
 
-This is the source distribution for the [Citeomatic](citeomatic.semanticscholar.org) service and for the paper **Content-based Citation Recommendation**.
+This is the source distribution for the [Citeomatic](http://labs.semanticscholar.org/citeomatic/) service and for the paper **Content-based Citation Recommendation**.
 
 ## Clone the repo
 ```
@@ -10,12 +10,12 @@ git clone git@github.com:allenai/citeomatic.git
 ## Install direnv (Optional)
 Citeomatic uses [direnv](https://github.com/direnv/direnv) to activate the `ai2-citeomatic` conda environment whenever you `cd` into the root directory. Alternatively, you can skip this step and activate the conda environment manually yourself.
  
-1. To install `direnv` on:
-	* For Ubuntu: 
+* Install `direnv`:
+	* Ubuntu: 
 		```
 		sudo apt-get install direnv
 		```
-	* For MAC OSX:
+	* OSX:
 		```
 		brew install direnv
 		```
@@ -28,13 +28,13 @@ Citeomatic uses [direnv](https://github.com/direnv/direnv) to activate the `ai2-
 
 ## Setup
 
-Use the provided `env.sh` script to setup the package and install dependencies:
+Use the provided `env.sh` script to setup a conda environment (`ai2-citeomatic`), the package and its dependencies:
 
 ```
 ./env.sh
 ```
 
-Verify that you now have the `ai2-citeomatic` conda environment installed and activated
+Verify that you now have the `ai2-citeomatic` conda environment installed and activated.
 
 ## Download data
 
@@ -43,14 +43,16 @@ Execute the data download script
 ./get-data.sh <location>
 
 ```
-The script will internally add a symlink from a local `data` directory to the provided `<location>`. Alternatively, you can provide `data/` as the location to save all required data.
+The script download all the required data and trained models to the provided location and add a symlink from a local `data` directory to the provided `<location>`. Alternatively, you can provide `data/` as the location to avoid the symlink.
+
+**IMPORTANT**: 
 
 If you have access to the AI2 Corp network, you can set `location` to  `/net/nfs.corp/s2-research/citeomatic/public/`  
 
 ## Citeomatic Evaluation
 
 This section details how to run the end-to-end system using pre-trained models for each dataset 
-and evaluate performance of Citeomatic from the NAACL paper. The `--num_candidates` option below   
+and evaluate performance of Citeomatic on these datasets. Trained models are downloaded by the `get-data.sh` script.
   
 #### Pubmed
 ```
@@ -72,9 +74,7 @@ python citeomatic/scripts/evaluate.py --dataset_type oc --candidate_selector_typ
 ## BM25 Baseline
 
 ### Create Index
-The steps described above download pre-built BM25 indexes, neural models etc. and allow you to execute the evaluation method.
-
-Build BM25 indexes for a given corpus
+The `get-data.sh` script also downloaded a pre-built BM25 indexe for each dataset (pubmed, dblp and oc). But, a new index can be built as below:
 
 ```
 python citeomatic/scripts/create_bm25_index.py --dataset_name <dataset name> 
@@ -91,23 +91,8 @@ This script will create an index at this location: `data/bm25_index/<dataset nam
 python citeomatic/scripts/evaluate.py --dataset_type <dataset>   --candidate_selector_type bm25 --split test --ranker_type none --num_candidates 10
 ```
 
-2. Re-Create SQLite DB for dataset
-
-This following scripts will create an index at this location: `data/db/<dataset name>.sqlite.db`
-
-  * For the DBLP and Pubmed datasets:
-	```
-	python citeomatic/scripts/convert_kdd_to_citeomatic.py --dataset_name <dataset name>
-	```
-
-  * For the open corpus dataset:
-	```
-	python citeomatic/scripts/convert_open_corpus_to_citeomatic.py
-	```
-
-The SQLite DB is used to speed-up retrieving documents for a particular document id. 
-
-3. The main script to train and tune hyperparameters for various models is `train.py`. Usage:
+## Train.py
+The main script to train and tune hyperparameters for various models is `train.py`. Usage:
 
 	```
 	python train.py [options]
@@ -139,6 +124,39 @@ The SQLite DB is used to speed-up retrieving documents for a particular document
       * `options_json`: Optional json file containing all options required to train a model
       
     Refer to the `ModelOptions` class for more options.
+
+### Hyper-parameter optimization
+
+We use the [hyperopt](https://github.com/hyperopt/hyperopt) package to tune hyperparameters. 
+Use the following command to run the hyperopt on a particular dataset
+
+  * Paper Embedder Model 
+
+```
+python citeomatic/scripts/train.py   --mode hyperopt   --dataset_type <dataset> --n_eval 500 --model_name paper_embedder   --models_dir_base  data/hyperopts/<dataset>/ --version <version> &> data/hyperopts/dblp/dblp.paper_embedder.hyperopt.log
+```
+
+  * Citation Ranker Model
+  
+
+## Miscellaneous
+  1. Re-Create SQLite DB for dataset
+  
+  This following scripts will create an index at this location: `data/db/<dataset name>.sqlite.db`
+
+  * For the DBLP and Pubmed datasets:
+	```
+	python citeomatic/scripts/convert_kdd_to_citeomatic.py --dataset_name <dataset name>
+	```
+
+  * For the open corpus dataset:
+	```
+	python citeomatic/scripts/convert_open_corpus_to_citeomatic.py
+	```
+
+The SQLite DB is used to speed-up retrieving documents for a particular document id. 
+
+
 
 3. We use the [hyperopt](https://github.com/hyperopt/hyperopt) package to tune hyperparameters. 
 Use the following command to run the hyperopt on a particular dataset
