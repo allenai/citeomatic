@@ -27,68 +27,60 @@ Citeomatic uses [direnv](https://github.com/direnv/direnv) to activate the `ai2-
 
 
 ## Setup
-
-Use the provided `env.sh` script to setup a conda environment (`ai2-citeomatic`), the package and its dependencies:
-
 ```
 ./env.sh
 ```
+The script will setup a conda environment (`ai2-citeomatic`), the citeomatic package and its dependencies. 
 
-Verify that you now have the `ai2-citeomatic` conda environment installed and activated.
+Verify that you now have the `ai2-citeomatic` conda environment installed and activated. If not, `source activate ai2-citeomatic`.
 
 ## Download data
-
-Execute the data download script
 ```
 ./get-data.sh <location>
 
 ```
-The script download all the required data and trained models to the provided location and add a symlink from a local `data` directory to the provided `<location>`. Alternatively, you can provide `data/` as the location to avoid the symlink.
+The script downloads all the required data and trained models to the provided location and adds a symlink from a local `data` directory to the provided `<location>`. Alternatively, you can provide `data/` as the location to avoid the symlink.
 
 **IMPORTANT**: 
 
-If you have access to the AI2 Corp network, you can set `location` to  `/net/nfs.corp/s2-research/citeomatic/public/`  
+If you have access to the AI2 Corp network, you can set `location` to  `/net/nfs.corp/s2-research/citeomatic/public/` to avoid duplicating data.
 
 ## Citeomatic Evaluation
 
-This section details how to run the end-to-end system using pre-trained models for each dataset 
-and evaluate performance of Citeomatic on these datasets. Trained models are downloaded by the `get-data.sh` script.
-  
-#### Pubmed
+This section details how to run the end-to-end system using pre-trained models
+and evaluate performance of Citeomatic for each dataset. If you successfully executed the previous steps, trained models should already be available.
+
+ * Open Corpus
+```
+python citeomatic/scripts/evaluate.py --dataset_type oc --candidate_selector_type ann --split test --paper_embedder_dir data/open_corpus/models/paper_embedder/ --num_candidates 5 --ranker_type neural --citation_ranker_dir data/open_corpus/models/citation_ranker/ --n_eval 20000
+```  
+
+ * Pubmed
 ```
 python citeomatic/scripts/evaluate.py --dataset_type pubmed --candidate_selector_type ann --split test --paper_embedder_dir data/comparison/pubmed/models/paper_embedder/ --num_candidates 10 --ranker_type neural --citation_ranker_dir data/comparison/pubmed/models/citation_ranker/
 
 ```
 
-#### DBLP
+ * DBLP
 ```
 python citeomatic/scripts/evaluate.py --dataset_type dblp --candidate_selector_type ann --split test --paper_embedder_dir data/comparison/dblp/models/paper_embedder/ --num_candidates 10 --ranker_type neural --citation_ranker_dir data/comparison/dblp/models/citation_ranker/
 ```
 
-#### Open Corpus
-```
-python citeomatic/scripts/evaluate.py --dataset_type oc --candidate_selector_type ann --split test --paper_embedder_dir data/open_corpus/models/paper_embedder/ --num_candidates 5 --ranker_type neural --citation_ranker_dir data/open_corpus/models/citation_ranker/ --n_eval 20000
-```
-
-
 ## BM25 Baseline
 
-### Create Index
-The `get-data.sh` script also downloaded a pre-built BM25 indexe for each dataset (pubmed, dblp and oc). But, a new index can be built as below:
-
+ * Open Corpus
 ```
-python citeomatic/scripts/create_bm25_index.py --dataset_name <dataset name> 
+python citeomatic/scripts/evaluate.py --dataset_type oc   --candidate_selector_type bm25 --split test --ranker_type none --num_candidates 5
+```  
+
+ * Pubmed
+```
+python citeomatic/scripts/evaluate.py --dataset_type pubmed   --candidate_selector_type bm25 --split test --ranker_type none --num_candidates 10
 ```
 
-Modify `CreateBM25Index` to change the way the BM25 index is built. We use the [whoosh](https://pypi.python.org/pypi/Whoosh/) package to build the BM25 index.
-To change the way the index is queried, change the `fetch_candidates` implementation in `BM25CandidateSelector`
-
-This script will create an index at this location: `data/bm25_index/<dataset name>/`
-
-### Evaluate
-
+ * DBLP
 ```
-python citeomatic/scripts/evaluate.py --dataset_type <dataset>   --candidate_selector_type bm25 --split test --ranker_type none --num_candidates 10
+python citeomatic/scripts/evaluate.py --dataset_type dblp   --candidate_selector_type bm25 --split test --ranker_type none --num_candidates 10
 ```
 
 ## Train.py
@@ -140,7 +132,21 @@ python citeomatic/scripts/train.py   --mode hyperopt   --dataset_type <dataset> 
   
 
 ## Miscellaneous
-  1. Re-Create SQLite DB for dataset
+
+  1. **Create a new BM25 Index**
+  
+  The `get-data.sh` script also downloaded a pre-built BM25 indexe for each dataset (pubmed, dblp and oc). But, a new index can be built as:
+  
+```
+python citeomatic/scripts/create_bm25_index.py --dataset_name <dataset name> 
+```
+	
+  Modify `CreateBM25Index` to change the way the BM25 index is built. We use the [whoosh](https://pypi.python.org/pypi/Whoosh/) package to build the BM25 index. To change the way the index is queried, change the `fetch_candidates` implementation in `BM25CandidateSelector`
+
+  This script will create an index at this location: `data/bm25_index/<dataset name>/`
+
+
+  2. **Re-Create SQLite DB for dataset**
   
   This following scripts will create an index at this location: `data/db/<dataset name>.sqlite.db`
 
