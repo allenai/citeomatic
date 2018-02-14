@@ -62,7 +62,8 @@ python citeomatic/scripts/evaluate.py --dataset_type dblp --candidate_selector_t
 
 #### Open Corpus
 ```
-python citeomatic/scripts/evaluate.py --dataset_type oc --candidate_selector_type ann --split test --paper_embedder_dir /net/nfs.corp/s2-research/citeomatic/naacl2017/open_corpus/models/paper_embedder/ --num_candidates 5 --ranker_type neural --n_eval 20000 --citation_ranker_dir /net/nfs.corp/s2-research/citeomatic/naacl2017/open_corpus/models/stddev/citation_ranker_canonical_9f6f4b2aefae04f4f58e4de0f9522f6083fd981e_1/
+python citeomatic/scripts/evaluate.py --dataset_type oc --candidate_selector_type ann --split test --paper_embedder_dir data/open_corpus/models/paper_embedder/ --num_candidates 5 --ranker_type neural --n_eval 20000 
+--citation_ranker_dir data/open_corpus/models/citation_ranker/
 ```
 
 ## Training the model
