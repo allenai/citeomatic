@@ -54,11 +54,15 @@ class TrainCiteomatic(App, ModelOptions):
 
         if self.mode == 'hyperopt':
             if self.model_name == PAPER_EMBEDDING_MODEL:
-                self.max_evals_initial = 25
-                self.max_evals_secondary = 5
+                if self.max_evals_initial is None:
+                    self.max_evals_initial = 25
+                if self.max_evals_secondary is None:
+                    self.max_evals_secondary = 5
             else:
-                self.max_evals_initial = 25
-                self.max_evals_secondary = 5
+                if self.max_evals_initial is None:
+                    self.max_evals_initial = 25
+                if self.max_evals_secondary is None:
+                    self.max_evals_secondary = 5
             self.run_hyperopt()
         elif self.mode == 'train':
             self.run_train()
