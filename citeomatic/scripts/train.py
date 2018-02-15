@@ -34,8 +34,8 @@ class TrainCiteomatic(App, ModelOptions):
     options_json = Unicode(default_value=None, allow_none=True)
 
     # hyperopt parameters
-    max_evals_initial = None
-    max_evals_secondary = None
+    max_evals_initial = Int(default_value=25)
+    max_evals_secondary = Int(default_value=5)
     total_samples_initial = Int(default_value=5000000)
     total_samples_secondary = Int(default_value=50000000)
     n_eval = Int(default_value=500, allow_none=True)
@@ -53,16 +53,6 @@ class TrainCiteomatic(App, ModelOptions):
     def main(self, args):
 
         if self.mode == 'hyperopt':
-            if self.model_name == PAPER_EMBEDDING_MODEL:
-                if self.max_evals_initial is None:
-                    self.max_evals_initial = 25
-                if self.max_evals_secondary is None:
-                    self.max_evals_secondary = 5
-            else:
-                if self.max_evals_initial is None:
-                    self.max_evals_initial = 25
-                if self.max_evals_secondary is None:
-                    self.max_evals_secondary = 5
             self.run_hyperopt()
         elif self.mode == 'train':
             self.run_train()
