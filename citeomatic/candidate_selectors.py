@@ -109,9 +109,6 @@ class BM25CandidateSelector(CandidateSelector):
         storage = FileStorage(self.index_path, readonly=True)
         self._bm25_index = FileIndex(copy_to_ram(storage), schema=schema)
         self.searcher = self._bm25_index.searcher(weighting=scoring.BM25F)
-        # TODO (chandra): Think about how to tune this query so the baseline is stronger. Currently
-        # we just search for words in the title of the query document in the title and abstract
-        # fields of candidate documents.
         self.query_parser = MultifieldParser([FieldNames.TITLE, FieldNames.ABSTRACT],
                                              self._bm25_index.schema, group=qparser.OrGroup)
         self.corpus = corpus

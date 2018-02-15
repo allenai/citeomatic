@@ -62,7 +62,7 @@ class FieldNames(object):
 
 
 class DatasetPaths(object):
-    BASE_DIR = '/net/nfs.corp/s2-research/citeomatic/naacl2017/'
+    BASE_DIR = os.path.abspath("./data")
 
     DBLP_GOLD_DIR = os.path.join(BASE_DIR, 'comparison/dblp/gold')
     DBLP_CORPUS_JSON = os.path.join(BASE_DIR, 'comparison/dblp/corpus.json')

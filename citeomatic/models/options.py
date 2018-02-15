@@ -6,17 +6,36 @@ from traitlets import Bool, HasTraits, Int, Unicode, Enum, Float
 
 class ModelOptions(HasTraits):
 
+    # The type of candidate selector to use. Okapi BM25 (https://en.wikipedia.org/wiki/Okapi_BM25)
+    # ranking model or an Approximate Nearest Neighbor index built on embeddings of documents
+    # obtained from the paper_embedding model
     candidate_selector_type = Enum(('ann', 'bm25'), default_value='ann')
+
+    # Whether to use the citation_ranker model to re-rank selected candidates or not
     citation_ranker_type = Enum(('neural', 'none'), default_value='neural')
 
+    # Model name to train: citation_ranker or paper_embedder
     model_name = Enum(values=[PAPER_EMBEDDING_MODEL, CITATION_RANKER_MODEL], default_value=PAPER_EMBEDDING_MODEL)
+
+    # No. of features (words) to retain from the corpus for training
     n_features = Int()
+
+    # No. of authors to retain from the corpus for training
     n_authors = Int()
+
+    # No. of venues to retain from the corpus for training
     n_venues = Int()
+
+    # No. of key phrases to retain from the corpus for training
     n_keyphrases = Int()
 
+    # Dimension of word embedding
     dense_dim = Int(default_value=75)
+
+    # Dimension of embeddings for author, venue or keyphrase
     metadata_dim = Int(default_value=10)
+
+    # Embedding type to use for text fields
     embedding_type = Enum(values=['sum', 'cnn', 'cnn2', 'lstm'], default_value='sum')
 
     # Architecture changing options
@@ -80,10 +99,13 @@ class ModelOptions(HasTraits):
 
     use_selector_confidence = Bool(default_value=True)
 
+    # Tensoboard logging directory
     tb_dir = Unicode(default_value=None, allow_none=True)
 
+    # Option to fine-tune pre-trained embeddings
     enable_fine_tune = Bool(default_value=True)
 
+    # Use both training and validation data for final training of model
     train_for_test_set = Bool(default_value=False)
 
     def __repr__(self):
