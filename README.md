@@ -27,17 +27,34 @@ Citeomatic uses [direnv](https://github.com/direnv/direnv) to activate the `ai2-
 
 
 ## Setup
-```
+
+Citeomatic uses the tensorflow framework to run its neural network models. It was tested on NVIDIA 
+GPUs (GeForce GTX 1080 and Tesla V100-SXM2). Please install the required GPU drivers for your GPU
+. 
+
+Once the required drivers are installed: 
+
+```bash
 ./env.sh
 ```
 The script will setup a conda environment (`ai2-citeomatic`), the citeomatic package and its dependencies. 
 
 Verify that you now have the `ai2-citeomatic` conda environment installed and activated. If not activated, `source activate ai2-citeomatic`.
 
+### Common Issues
+  1. If you see this error when running any of our scripts:
+```
+ImportError: libcusolver.so.8.0: cannot open shared object file: No such file or directory
+```
+please set the environment variable: `export LD_LIBRARY_PATH=/usr/local/cuda/lib64/`
+
+  2. If you have multiple GPUs, please set the environment variable `export 
+  CUDA_VISIBLE_DEVICES=<gpu number>`. Citeomatic does not use more than 1 GPU but tensorflow will
+   spawn a process on all available GPUs. 
+
 ## Download data
 ```
-./get-data.sh <location>
-
+./get-data.sh <location> 
 ```
 The script downloads all the required data and trained models to the provided location and adds a symlink from a local `data` directory to the provided `<location>`. Alternatively, you can provide `data/` as the location to avoid the symlink.
 
@@ -51,42 +68,42 @@ This section details how to run the end-to-end system using pre-trained models
 and evaluate performance of Citeomatic for each dataset. If you successfully executed the previous steps, trained models should already be available.
 
  * Open Corpus
-```
+```bash
 python citeomatic/scripts/evaluate.py --dataset_type oc --candidate_selector_type ann --split test --paper_embedder_dir data/open_corpus/models/paper_embedder/ --num_candidates 5 --ranker_type neural --citation_ranker_dir data/open_corpus/models/citation_ranker/ --n_eval 20000
 ```  
 
  * Pubmed
-```
+```bash
 python citeomatic/scripts/evaluate.py --dataset_type pubmed --candidate_selector_type ann --split test --paper_embedder_dir data/comparison/pubmed/models/paper_embedder/ --num_candidates 10 --ranker_type neural --citation_ranker_dir data/comparison/pubmed/models/citation_ranker/
 
 ```
 
  * DBLP
-```
+```bash
 python citeomatic/scripts/evaluate.py --dataset_type dblp --candidate_selector_type ann --split test --paper_embedder_dir data/comparison/dblp/models/paper_embedder/ --num_candidates 10 --ranker_type neural --citation_ranker_dir data/comparison/dblp/models/citation_ranker/
 ```
 
 ## BM25 Baseline
 
  * Open Corpus
-```
+```bash
 python citeomatic/scripts/evaluate.py --dataset_type oc   --candidate_selector_type bm25 --split test --ranker_type none --num_candidates 5
 ```  
 
  * Pubmed
-```
+```bash
 python citeomatic/scripts/evaluate.py --dataset_type pubmed   --candidate_selector_type bm25 --split test --ranker_type none --num_candidates 10
 ```
 
  * DBLP
-```
+```bash
 python citeomatic/scripts/evaluate.py --dataset_type dblp   --candidate_selector_type bm25 --split test --ranker_type none --num_candidates 10
 ```
 
 ## Train.py
 The main script to train and tune hyperparameters for various models is `train.py`. Usage:
 
-```
+```bash
 python train.py [options]
 ```
 
@@ -124,7 +141,7 @@ Use the following command to run the hyperopt on a particular dataset
 
   * Paper Embedder Model 
 
-```
+```bash
 python citeomatic/scripts/train.py   --mode hyperopt   --dataset_type <dataset> --n_eval 500 --model_name paper_embedder   --models_dir_base  data/hyperopts/<dataset>/ --version <version> &> data/hyperopts/dblp/dblp.paper_embedder.hyperopt.log
 ```
 
@@ -161,3 +178,9 @@ python citeomatic/scripts/create_bm25_index.py --dataset_name <dataset name>
 	```
 
 The SQLite DB is used to speed-up retrieving documents for a particular document id. 
+
+## Team
+
+Citeomatic is an open-source project backed by the [Allen Institute for Artificial Intelligence (AI2)](http://www.allenai.org).
+AI2 is a non-profit institute with the mission to contribute to humanity through high-impact AI research and engineering.
+To learn more about who specifically contributed to this codebase, see [our contributors](https://github.com/allenai/citeomatic/graphs/contributors) page.
