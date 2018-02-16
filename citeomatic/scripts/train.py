@@ -41,7 +41,7 @@ class TrainCiteomatic(App, ModelOptions):
     n_eval = Int(default_value=500, allow_none=True)
     models_ann_dir = Unicode(default_value=None, allow_none=True)
     models_dir_base = Unicode(
-        default_value='/net/nfs.corp/s2-research/citeomatic/'
+        default_value='data/models/'
     )
     run_identifier = Unicode(default_value=None, allow_none=True)
     version = Unicode(default_value='v0')

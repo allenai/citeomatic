@@ -1,1 +1,1 @@
-api: GPU_FRACTION=0.22 CORPUS_PATH=s3://ai2-s2-research/citeomatic/data/corpus-medium/corpus.msgpack NODE_PROXY= ANN_MODEL_PATH=s3://ai2-s2-research/citeomatic/data/golden-2017-02-17 MODEL_PATH=s3://ai2-s2-research/citeomatic/data/golden-2017-02-22/  PYTHONUNBUFFERED=1 PYTHONPATH=../../ gunicorn -b 0.0.0.0:5000 --log-level=INFO -w 1 -t 900 -k sync citeomatic.gunicorn:app
+api: GPU_FRACTION=0.22 CORPUS_PATH=<> NODE_PROXY= ANN_MODEL_PATH=<> MODEL_PATH=<> PYTHONUNBUFFERED=1 PYTHONPATH=../../ gunicorn -b 0.0.0.0:5000 --log-level=INFO -w 1 -t 900 -k sync citeomatic.gunicorn:app

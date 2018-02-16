@@ -1,8 +1,22 @@
 <p align="center"><img width="30%" src="citeomatic_logo.png" /></p>
 
-A citation recommendation ssytem that allows users to find relevant citations for their paper drafts. The tool is backed by [Semantic Scholar](https://www.semanticscholar.org/)'s [OpenCorpus](http://labs.semanticscholar.org/corpus/) dataset (released on `2017-02-21`).
+[![Build Status](http://build.allennlp.org/app/rest/builds/buildType:(id:AllenNLP_AllenNLPCommits)/statusIcon)](http://s2build.dev.ai2/viewType.html?buildTypeId=ScholarResearch_CiteomaticCiTests)
 
-This is the source distribution for the [Citeomatic](http://labs.semanticscholar.org/citeomatic/) service and for the paper **Content-based Citation Recommendation** to be published at NAACL 2018.
+A citation recommendation ssytem that allows users to find relevant citations for their paper drafts. The tool is backed by [Semantic Scholar](https://www.semanticscholar.org/)'s [OpenCorpus](http://labs.semanticscholar.org/corpus/corpus/archive#) dataset (released on `2017-02-21`).
+
+## Demo
+http://labs.semanticscholar.org/citeomatic/
+
+## Paper
+[**Content-based Citation Recommendation**](https://arxiv.org/abs/) (NAACL 2018)
+
+  * Main Results
+  ![alt text](citeomatic_results.png "Citeomatic Comparison")
+
+## Data
+You can download the associated OpenCorpus dataset [here](http://labs.semanticscholar.org/corpus/corpus/archive#).
+
+For models and data associated with experiments from the paper, please refer [below](#download).
 
 ## Clone the repo
 ```
@@ -46,13 +60,14 @@ please set the environment variable: `export LD_LIBRARY_PATH=/usr/local/cuda/lib
   CUDA_VISIBLE_DEVICES=<gpu number>`. Citeomatic does not use more than 1 GPU but tensorflow will
    spawn a process on all available GPUs. 
 
-## Download data
+## <a name="download"></a>Download data
 ```
 ./get-data.sh <location> 
 ```
 The script downloads all the required data and trained models to the provided location and adds a symlink from a local `data` directory to the provided `<location>`. Alternatively, you can provide `data/` as the location to avoid the symlink.
 
 **ATTENTION**: If you have access to the AI2 Corp network, you can set `location` to  `/net/nfs.corp/s2-research/citeomatic/public/` to avoid duplicating data.
+
 
 ## Citeomatic Evaluation
 
@@ -112,8 +127,8 @@ python train.py [options]
   * Parameters specific to Hyperparameter Optimization
 	  * `--max_evals_initial`: No. of models to train in the first phase. Our hyperparameter 
 	  optimization method runs in two steps. In the first step, a large number of models are run 
-	  for a few epochs and the best performing 10 models are run for more number of epochs in the
-	   second phase.
+	  for a few epochs and the best performing `max_evals_secondary` models are run for more 
+	  number of epochs in the second phase.
 	  * `--max_evals_secondary`: No. of models to train in the second phase. Best 
 	  `max_evals_secondary` models from Phase 1 are trained for a longer time
 	  * `--total_samples_initial`: No. of samples to train first phase models on
@@ -140,15 +155,31 @@ We use the [hyperopt](https://github.com/hyperopt/hyperopt) package to tune hype
 	```bash
 	python citeomatic/scripts/train.py --mode hyperopt --dataset_type dblp --n_eval 500 --model_name paper_embedder --models_dir_base data/hyperopts/dblp/ --version 1 &> data/hyperopts/dblp/dblp.paper_embedder.hyperopt.log
 	```
+	
+	Execution Time: `~19 hours` (For 25 "initial" and 5 "secondary" trial models)
+	
   * **Paper Embedder** Model for DBLP
+  
+	  Create an empty directory:
 	  ```bash
-	python citeomatic/scripts.train.py --mode train --dataset_type dblp --n_eval 500 --model_name paper_embedder --hyperopts_results_pkl data/hyperopts/dblp/citeomatic_hyperopt_paper_embedder_dblp_2018-XX-XX_1/hyperopt_results.pickle --models_dir data/comparison/dblp/models/paper_embedder_trained_2018-XX-XX/ &> data/dblp/dblp.paper_embedder.trained.log
+	mkdir data/comparison/dblp/models/trained/
 	```
-  	This should produce a trained paper_embedder model in the `data/comparison/dblp/models/paper_embedder_trained_2018-XX-XX/` directory.
+
+	  ```bash
+	python citeomatic/scripts/train.py --mode train --dataset_type dblp --n_eval 500 --model_name paper_embedder --hyperopts_results_pkl data/hyperopts/dblp/citeomatic_hyperopt_paper_embedder_dblp_2018-XX-XX_1/hyperopt_results.pickle --models_dir_base data/comparison/dblp/models/trained/ &> data/comparison/dblp/models/dblp.paper_embedder.trained.log
+	```
+  	This should produce a trained paper_embedder model in the `--models_dir_base data/comparison/dblp/models/trained/paper_embedder/` directory.
+  	
+  	Execution time: `~5 hours` 
+  	
+	  * Evaluating the Paper Embedder for DBLP
+		  ```bash
+		python citeomatic/script/evaluate.py --dataset_type dblp --candidate_selector_type ann --split test --paper_embedder_dir data/comparison/dblp/models/trained/paper_embedder/ --num_candidates 10 --ranker_type none
+		```
   
   * Hyperopt for **Citation Ranker** Model
 	  ```bash
-	python citeomatic/scripts/train.py --mode hyperopt --dataset_type dblp --models_ann_dir data/comparison/dblp/models/paper_embedder_trained_2018-XX-XX/ --n_eval 500 --model_name citation_ranker --models_dir_base --models_dir_base data/hyperopts/dblp/ --version 1 &> data/hyperopts/dblp/dblp.citation_ranker.hyperopt.log
+	python citeomatic/scripts/train.py --mode hyperopt --dataset_type dblp --models_ann_dir data/comparison/dblp/models/trained/paper_embedder/ --n_eval 500 --model_name citation_ranker --models_dir_base data/hyperopts/dblp/ --version 1 &> data/hyperopts/dblp/dblp.citation_ranker.hyperopt.log
 	```
 	
   * **Citation Ranker** Model for DBLP
@@ -187,7 +218,18 @@ python citeomatic/scripts/create_bm25_index.py --dataset_name <dataset name>
 	python citeomatic/scripts/convert_open_corpus_to_citeomatic.py
 	```
 
-The SQLite DB is used to speed-up retrieving documents for a particular document id. 
+The SQLite DB is used to speed-up retrieving documents for a particular document id.
+
+## Issues
+Please file issues [here](https://github.com/allenai/citeomatic/issues).
+
+## Contact
+
+  1. [chandrab@allenai.org](mailto:chandrab@allenai.org): For enquiries about running experiments
+   and replicating results from the paper.
+  2. [feedback@semanticscholar.org](mailto:feedback@semanticscholar.org): For other questions and
+   feedback about Citeomatic. 
+ 
 
 ## Team
 
