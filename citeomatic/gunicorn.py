@@ -35,8 +35,8 @@ featurizer, models = model_from_directory(os.environ['MODEL_PATH'])
 if 'ANN_MODEL_PATH' in os.environ:
     featurizer, ann_models = model_from_directory(os.environ['ANN_MODEL_PATH'])
     ann_model = EmbeddingModel(featurizer, ann_models['embedding'])
-    ann = ANN.load(os.environ['ANN_MODEL_PATH'] + '/citeomatic_ann')
     corpus = Corpus.load(os.environ['CORPUS_PATH'])
+    ann = ANN.build(ann_model, corpus)
 else:
     ann = None
     ann_model = None
