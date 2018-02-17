@@ -48,9 +48,10 @@ def model_from_directory(dirname: str, on_cpu=False) -> Tuple[Featurizer, Any]:
         models['citeomatic'].load_weights(
             file_util.cache_file(os.path.join(dirname, dp.CITEOMATIC_WEIGHTS_FILENAME))
         )
-        models['embedding'].load_weights(
-            file_util.cache_file(os.path.join(dirname, dp.EMBEDDING_WEIGHTS_FILENAME))
-        )
+        if models['embedding'] is not None:
+            models['embedding'].load_weights(
+                file_util.cache_file(os.path.join(dirname, dp.EMBEDDING_WEIGHTS_FILENAME))
+            )
     else:
         models['citeomatic'].load_weights(os.path.join(dirname, dp.CITEOMATIC_WEIGHTS_FILENAME))
         if models['embedding'] is not None:
