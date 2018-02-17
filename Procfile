@@ -1,2 +1,1 @@
-api: GPU_FRACTION=0.22 CORPUS_PATH=data/comparison/dblp/corpus.json NODE_PROXY=
-ANN_MODEL_PATH=data/comparison/dblp/models/paper_embedder/ MODEL_PATH=data/comparison/dblp/models/citation_ranker/ PYTHONUNBUFFERED=1 PYTHONPATH=../../ gunicorn -b 0.0.0.0:5000 --log-level=INFO -w 1 -t 900 -k sync citeomatic.gunicorn:app
+api: GPU_FRACTION=0.22 CORPUS_PATH=data/comparison/dblp/corpus.json NODE_PROXY= ANN_MODEL_PATH=data/comparison/dblp/models/paper_embedder/ MODEL_PATH=data/comparison/dblp/models/citation_ranker/ PYTHONUNBUFFERED=1 PYTHONPATH=../../ gunicorn -b 0.0.0.0:5000 --log-level=INFO -w 1 -t 900 -k sync citeomatic.gunicorn:app
