@@ -13,6 +13,7 @@ from os.path import abspath, dirname, join
 from gzip import GzipFile
 
 import arrow
+import boto3
 
 ROOT = abspath(dirname(dirname(dirname(__file__))))
 
@@ -53,6 +54,17 @@ def last_modified(filename):
             return arrow.get(os.path.getmtime(filename))
         else:
             return None
+
+
+def _s3_key(filename):
+    s3 = boto3.resource('s3')
+    bucket_name, key_name = filename[5:].split('/', 1)
+    key = s3.Object(bucket_name, key_name)
+    try:
+        key.last_modified
+    except:
+        return None
+    return key
 
 
 class StreamingS3File(object):
