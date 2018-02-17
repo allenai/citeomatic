@@ -4,8 +4,8 @@ import os
 import keras.backend as K
 import tensorflow as tf
 from citeomatic import service
+from citeomatic.corpus import Corpus
 from citeomatic.serialization import model_from_directory
-from citeomatic.features import Corpus
 from citeomatic.grobid_parser import GrobidParser
 from citeomatic.neighbors import ANN, EmbeddingModel
 from citeomatic.config import setup_default_logging
