@@ -66,7 +66,7 @@ class APIModel(object):
         # Extend the candidate set with their citations
         citations_of_candidates = []
         for id in candidate_ids:
-            citations_of_candidates.extend(self.corpus[id].OUT_CITATIONS)
+            citations_of_candidates.extend(self.corpus[id].out_citations)
         candidate_ids = list(set(citations_of_candidates + candidate_ids))
 
         logging.info('Fetching %d documents ' % len(candidate_ids))
