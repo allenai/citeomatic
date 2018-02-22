@@ -23,7 +23,7 @@ from citeomatic.neighbors import EmbeddingModel, ANN
 from citeomatic.ranker import Ranker
 from citeomatic.serialization import model_from_directory
 from citeomatic.utils import import_from
-from citeomatic.eval_metrics import precision_recall_f1_at_ks, average_results
+from citeomatic.eval_metrics import precision_recall_f1_at_ks, average_results, f1
 
 EVAL_KEYS = [1, 5, 10, 20, 50, 100, 1000]
 EVAL_DATASET_KEYS = {'dblp': 10,
@@ -436,10 +436,8 @@ def eval_text_model(
     return {
         'precision_1': {k: v for k, v in zip(EVAL_KEYS, averaged_results_1['precision'])},
         'recall_1': {k: v for k, v in zip(EVAL_KEYS, averaged_results_1['recall'])},
-        'f1_1': {k: v for k, v in zip(EVAL_KEYS, averaged_results_1['f1'])},
-        'precision_2': {k: v for k, v in zip(EVAL_KEYS, averaged_results_2['precision'])},
-        'recall_2': {k: v for k, v in zip(EVAL_KEYS, averaged_results_2['recall'])},
-        'f1_2': {k: v for k, v in zip(EVAL_KEYS, averaged_results_2['f1'])},
+        'f1_1_per_paper': {k: v for k, v in zip(EVAL_KEYS, averaged_results_1['f1'])},
         'mrr_1': averaged_results_1['mrr'],
-        'mrr_2': averaged_results_2['mrr'],
+        'f1_1': {k: f1(p, r) for k, p, r in zip(EVAL_KEYS, averaged_results_1['precision'],
+                                                averaged_results_1['recall'])}
     }

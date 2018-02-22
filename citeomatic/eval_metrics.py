@@ -64,3 +64,10 @@ def average_results(results: list):
         'f1': list(np.mean(f_matrix, axis=0)),
         'mrr': np.mean(mrr_list),
     }
+
+
+def f1(p, r):
+    if p + r == 0.0:
+        return 0.0
+    else:
+        return 2 * p * r / (p + r)

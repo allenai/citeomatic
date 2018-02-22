@@ -1,7 +1,5 @@
 <p align="center"><img width="30%" src="citeomatic_logo.png" /></p>
 
-[![Build Status](http://build.allennlp.org/app/rest/builds/buildType:(id:AllenNLP_AllenNLPCommits)/statusIcon)](http://s2build.dev.ai2/viewType.html?buildTypeId=ScholarResearch_CiteomaticCiTests)
-
 A citation recommendation ssytem that allows users to find relevant citations for their paper drafts. The tool is backed by [Semantic Scholar](https://www.semanticscholar.org/)'s [OpenCorpus](http://labs.semanticscholar.org/corpus/corpus/archive#) dataset (released on `2017-02-21`).
 
 ## Demo
@@ -102,12 +100,12 @@ python citeomatic/scripts/evaluate.py --dataset_type oc   --candidate_selector_t
 
  * Pubmed
 ```bash
-python citeomatic/scripts/evaluate.py --dataset_type pubmed   --candidate_selector_type bm25 --split test --ranker_type none --num_candidates 10
+python citeomatic/scripts/evaluate.py --dataset_type pubmed   --candidate_selector_type bm25 --split test --ranker_type none --num_candidates 100
 ```
 
  * DBLP
 ```bash
-python citeomatic/scripts/evaluate.py --dataset_type dblp   --candidate_selector_type bm25 --split test --ranker_type none --num_candidates 10
+python citeomatic/scripts/evaluate.py --dataset_type dblp   --candidate_selector_type bm25 --split test --ranker_type none --num_candidates 50
 ```
 
 ## Train.py
@@ -184,7 +182,7 @@ We use the [hyperopt](https://github.com/hyperopt/hyperopt) package to tune hype
 	
   * **Citation Ranker** Model for DBLP
 	  ```bash
-	python citeomatic/scripts/train.py --mode train --dataset_type dblp --hyperopts_results_pkl data/hyperopts/dblp/citeomatic_hyperopt_citation_ranker_dblp_2018-XX-XX_1/hyperopt_results.pickle --n_eval 500 --model_name citation_ranker --models_ann_dir data/comparison/dblp/models/paper_embedder_trained_2018-XX-XX/ --models_dir data/comparison/dblp/models/citation_ranker_trained_2018-XX-XX/ --version 1 &> data/hyperopts/dblp/dblp.citation_ranker.trained.log
+	python citeomatic/scripts/train.py --mode train --dataset_type dblp --hyperopts_results_pkl data/hyperopts/dblp/citeomatic_hyperopt_citation_ranker_dblp_2018-XX-XX_1/hyperopt_results.pickle --n_eval 500 --model_name citation_ranker --models_ann_dir data/comparison/dblp/models/trained/paper_embedder/ --models_dir data/comparison/dblp/models/trained/citation_ranker/ --version 1 &> data/comparison/dblp/models/trained/dblp.citation_ranker.trained.log
 	```  
 
 Change the `--dataset_type` parameter to train for the other datasets. Hyperopt on the OC dataset takes a long time. We suggest setting the parameters manually or by using values described in our paper and training the two models as in steps 2 and 4 above.
