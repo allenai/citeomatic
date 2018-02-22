@@ -1,0 +1,400 @@
+@font-face {
+  font-family: 'Oxygen';
+  src:  url('./fonts/Oxygen-Regular.ttf') format('truetype');
+}
+
+@font-face {
+  font-family: 'Oxygen';
+  src: url("./fonts/Oxygen-Bold.ttf") format('truetype');
+  font-weight: bold;
+}
+
+@font-face {
+  font-family: 'Oxygen';
+  src: url("fonts/Oxygen-Light.ttf") format('truetype');
+  font-weight: lighter;
+}
+
+img.quote-logo {
+  height: 30px;
+  width: 30px;
+  margin-right: 8px;
+  margin-bottom: 4px;
+}
+
+/*
+Blue #2172a4
+Light Blue ##2f8eb0
+Orange #fcb431
+Black (for text) #525252
+Dark Blue #144664
+*/
+.react-tabs [role=tab][aria-selected=true] {
+  border-bottom: 4px solid #2172a4;
+}
+
+.react-tabs [role=tab] {
+  border: 0px;
+  padding: 8px 0px;
+  margin-right: 16px;
+  color: #2f8eb0;
+}
+
+.react-tabs [role=tablist] {
+  border-bottom: 1px solid #dcdcdc;
+}
+
+.tab-panel {
+  padding: 0px;
+  margin-top: 24px;
+}
+
+p.placeholder {
+  color: #b7b7b7;
+  font-size: 12px;
+}
+
+.form-error {
+  color: #dd4b39;
+  background-color: #f7f7f7;
+  padding: 8px 16px;
+  margin-bottom: 8px;
+}
+
+input[type="submit"] {
+  border: 0;
+  background: none;
+  box-shadow:none;
+  border-radius: 18px;
+  -moz-border-radius: 5px;
+  -webkit-border-radius: 5px;
+  background-color: #2172a4;
+  font-weight: bold;
+  color: white;
+  padding: 4px 12px;
+  margin-top: 8px;
+}
+
+label {
+  margin-bottom: 8px;
+}
+
+.App {
+}
+
+.App-header {
+  /* height: 250px;*/
+  padding: 20px;
+}
+
+.App-intro {
+  font-size: large;
+}
+
+h3.intro {
+  font-size: 24px;
+  font-weight: bold;
+  color: #144664;
+  text-align: center;
+  margin: 40px;
+}
+
+td.abstract {
+  vertical-align: top;
+}
+
+p.tagline {
+  font-size: 18px;
+  text-align: center;
+  color: #144664;
+  font-weight: bold;
+}
+
+div.privacy {
+  width: 600px;
+}
+
+div.privacy-container {
+  width: 100%;
+}
+
+h3.tech-info {
+  margin-top: 30px;
+  margin-bottom: 20px;
+  font-weight: bold;
+}
+p.privacy-text {
+  margin-top: 20px;
+}
+
+p.disclaimer {
+  margin: auto;
+  width: 500px;
+  text-align: center;
+}
+
+p.intro {
+  margin-left: auto;
+  margin-right: auto;
+  width: 500px;
+  text-align: center;
+}
+
+div.notes {
+  margin-left: auto;
+  margin-right: auto;
+  width: 500px;
+}
+
+div.notes ul {
+  margin-top: 6px;
+  font-size: 11px;
+  width: 400px;
+}
+
+div.upload {
+  height: 400px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+div.url-upload {
+  margin-bottom: 12px;
+  border-bottom: 2px black solid;
+  padding-bottom: 12px;
+}
+
+div.loading-icon {
+  margin-top: 12px;
+}
+
+div.file-upload {
+  margin-top: 12px;
+}
+
+img.img-logo {
+  margin-top: 5px;
+  height: 30px;
+}
+
+img.upload-img {
+  height: 100px;
+  width: 100px;
+  margin-bottom: 8px;
+}
+
+div.inner-upload {
+  text-align: center;
+}
+
+p.link-home {
+  font-weight: bold;
+  font-size: 14px;
+  color: #144664;
+}
+
+div.upload-box {
+  height: 200px;
+  width: 200px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 1px 3px rgba(0,0,0,.15)
+}
+
+div.upload-or {
+  height: 200px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #8c9296;
+}
+
+div.upload-or > p {
+  font-size: 24px;
+  font-weight: 300;
+}
+
+div.justify-left {
+  float: left;
+}
+
+div.justify-right {
+  float: right;
+}
+
+div.nav {
+  padding: 12px;
+  color: #2e6da4;
+}
+
+div.centered {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+p.your-paper {
+  margin-top: 40px;
+}
+
+div.dropzone {
+  border-width: 3px;
+  border-color: #8c9296;
+  border-style: dashed;
+  border-radius: 3px;
+  padding: 16px;
+  border-color: #c2cace;
+}
+
+div.modal-header {
+  min-height: 12px;
+  padding: 16px 16px 0 16px;
+  border-bottom: 0px;
+}
+
+h4 {
+  font-weight: bold;
+  font-size: 18px;
+  color: #144664;
+}
+
+div.column {
+  flex-direction: column
+}
+
+div.your-paper {
+  background: rgb(247, 248, 249);
+  padding: 12px 12px 12px 12px;
+}
+
+p.your-label {
+  margin-right: 10px;
+  font-weight: bold;
+}
+
+a.export-citations {
+  margin-left: 12px;
+}
+
+div.actions {
+  padding: 12px;
+}
+
+img.download-actions {
+  margin-right: 4px;
+}
+
+.btn {
+  padding: 6px 10px;
+}
+
+a.download-all {
+  /*background: rgb(91, 164, 219, 1);*/
+}
+
+h3.result-header {
+  margin-top: 6px;
+  color: #2f8eb0;
+  float: left;
+}
+
+p.disclaimer {
+  margin-top: 50px;
+  font-size: 11px;
+}
+
+p.your-header {
+  font-weight: bold;
+}
+
+div.back-nav {
+  align-items: center
+}
+
+a.advanced {
+  color: rgb(202, 207, 213);
+}
+
+div.downloads {
+  margin-bottom: 14px;
+}
+
+p.browse-pdf-text {
+  margin-top: 10px;
+}
+
+td.author-column {
+  max-width: 500px;
+  word-wrap: break-word;
+}
+
+a {
+  color: #2f8eb0;
+}
+
+p {
+  font-weight: 400;
+  line-height: 1.4;
+  font-size: 14px;
+}
+
+textarea.textBox {
+  width: 100%;
+  height: 100%
+}
+
+.input-tabs {
+  margin-top: 12px;
+  width: 500px;
+}
+
+.modal-dialog: {
+  width: 80%;
+}
+
+.ReactModal__Overlay {
+  -webkit-perspective: 600;
+  perspective: 600;
+  opacity: 0;
+  overflow-x: hidden;
+  overflow-y: auto;
+  background-color: rgba(0, 0, 0, 0.7);
+}
+
+.ReactModal__Overlay--after-open {
+  opacity: 1;
+  transition: opacity 150ms ease-out;
+}
+
+.ReactModal__Content {
+  -webkit-transform: scale(0.5) rotateX(-30deg);
+  transform: scale(0.5) rotateX(-30deg);
+}
+
+.ReactModal__Content--after-open {
+  -webkit-transform: scale(1) rotateX(0deg);
+  transform: scale(1) rotateX(0deg);
+  transition: all 150ms ease-in;
+}
+
+.ReactModal__Overlay--before-close {
+  opacity: 0;
+}
+
+.ReactModal__Content--before-close {
+  -webkit-transform: scale(0.5) rotateX(30deg);
+  transform: scale(0.5) rotateX(30deg);
+  transition: all 150ms ease-in;
+}
+
+.ReactModal__Content.modal-dialog {
+  border: none;
+  background-color: transparent;
+}
+
+.progress {
+  border: 1px solid rgba(0, 0, 0, 1);
+}
+
