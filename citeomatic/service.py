@@ -66,7 +66,7 @@ class APIModel(object):
         # Extend the candidate set with their citations
         citations_of_candidates = []
         for id in candidate_ids:
-            citations_of_candidates.extend(self.corpus[id].citations)
+            citations_of_candidates.extend(self.corpus[id].OUT_CITATIONS)
         candidate_ids = list(set(citations_of_candidates + candidate_ids))
 
         logging.info('Fetching %d documents ' % len(candidate_ids))
@@ -107,7 +107,9 @@ def document_from_dict(doc):
         FieldNames.VENUE: '',
         FieldNames.IN_CITATION_COUNT: 0,
         FieldNames.OUT_CITATION_COUNT: 0,
-        FieldNames.KEY_PHRASES: []
+        FieldNames.KEY_PHRASES: [],
+        FieldNames.TITLE_RAW: '',
+        FieldNames.ABSTRACT_RAW: ''
     }
     defaults.update(doc)
 
