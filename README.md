@@ -1,10 +1,13 @@
 <p align="center"><img width="30%" src="citeomatic_logo.png" /></p>
 
-A citation recommendation ssytem that allows users to find relevant citations for their paper drafts. The tool is backed by [Semantic Scholar](https://www.semanticscholar.org/)'s [OpenCorpus](http://labs.semanticscholar.org/corpus/corpus/archive#) dataset (released on `2017-02-21`).
+A citation recommendation system that allows users to find relevant citations for their paper drafts. The tool is backed by [Semantic Scholar](https://www.semanticscholar.org/)'s [OpenCorpus](http://labs.semanticscholar.org/corpus/corpus/archive#) dataset (released on `2017-02-21`). 
+
+This repository contains code to train and evaluate citation recommendation models. We also include our trained models and steps to replicate our results in the NAACL paper.
 
 ## Demo
 http://labs.semanticscholar.org/citeomatic/
 
+**Note**: The code for the demo is not currently part of this repo.  
 ## Paper
 [**Content-based Citation Recommendation**](https://arxiv.org/abs/) (NAACL 2018)
 
@@ -22,8 +25,10 @@ git clone git@github.com:allenai/citeomatic.git
 ```
 
 ## Installation
-
-  1. [**Optional**] Install direnv 
+  1. [Download and install Conda](https://conda.io/docs/download.html)
+		
+  2. [**Optional**] Install direnv 
+  
      Citeomatic uses [direnv](https://github.com/direnv/direnv) to activate the `ai2-citeomatic` conda environment whenever you `cd` into the repo's root directory. Alternatively, you can skip this step and activate the conda environment manually yourself.
       
      * Install `direnv`:
@@ -40,12 +45,22 @@ git clone git@github.com:allenai/citeomatic.git
      		cd citeomatic/ ;
      		direnv allow .
      		```
-  2. Citeomatic uses the tensorflow framework to run its neural network models. It was tested on 
-NVIDIA GPUs (GeForce GTX 1080 and Tesla V100-SXM2). Please install the required GPU drivers for your GPU. Once the required drivers are installed, run: 
-		```bash
-		./env.sh
-		```
-		The script will setup a conda environment (`ai2-citeomatic`), the citeomatic package and its dependencies. Verify that you now have the `ai2-citeomatic` conda environment installed and activated. If not activated, `source activate ai2-citeomatic`.
+  3. Install GPU Drivers
+  
+  		Citeomatic uses the tensorflow framework to run its neural network models. It was tested on 
+NVIDIA GPUs (GeForce GTX 1080 and Tesla V100-SXM2). To use GPUs, install `CUDA` and `cudnn` compatible with your OS and GPU.
+
+      **NOTE**: Citeomatic can run without a GPU.  
+
+  4. Run: 
+		
+		`./env.sh`
+		
+		The script will setup a new conda environment named `ai2-citeomatic`. It will also install the required dependencies. Depending on whether a GPU is found, the script will install `tensorflow-gpu` or `tensorflow`. 
+		
+  5. Activate Conda Environment
+  
+  		`source activate ai2-citeomatic`.
 
 #### Common Installation Issues
   1. If you see this error when running any of our scripts:
@@ -60,11 +75,11 @@ please set the environment variable: `export LD_LIBRARY_PATH=/usr/local/cuda/lib
 
 ## <a name="download"></a>Download data
 ```
-./get-data.sh <location> 
+./get-data.sh data 
 ```
-The script downloads all the required data and trained models to the provided location and adds a symlink from a local `data` directory to the provided `<location>`. Alternatively, you can provide `data/` as the location to avoid the symlink.
+The script downloads all the required data (~75G) and trained models to `data`. Alternatively, if you provide a different `destination`, the script will create a symlink from `data` to the provided `<destination>`.
 
-**ATTENTION AI2 Internal Users**: If you have access to the AI2 Corp network, please contact one of the contributors for tips on how to avoid duplicating data.
+**ATTENTION AI2 Internal Users**: If you have access to the AI2 Corp network, please contact one of the contributors for tips on how to avoid downloading data.
 
 
 ## Citeomatic Evaluation
