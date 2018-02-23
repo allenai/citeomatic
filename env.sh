@@ -3,39 +3,34 @@
 CONDAENV=ai2-citeomatic
 
 if ! (which conda); then
-	echo "No `conda` installation found.  Installing..."
-	if [[ $(uname) == "Darwin" ]]; then
-	  wget --continue http://repo.continuum.io/archive/Anaconda3-4.3.1-MacOSX-x86_64.sh
-	  bash Anaconda3-4.3.1-MacOSX-x86_64.sh -b
-	else
-	  wget --continue http://repo.continuum.io/archive/Anaconda3-4.3.1-Linux-x86_64.sh
-	  bash Anaconda3-4.3.1-Linux-x86_64.sh -b
-	fi
+	echo "No conda installation found.  Install Conda or Miniconda for your OS."
+	exit 1;
 fi
 
-export PATH=$HOME/anaconda3/bin:$PATH
-
-source ~/anaconda3/bin/deactivate ${CONDAENV}
+source deactivate ${CONDAENV}
 
 conda remove -y --name ${CONDAENV} --all
 
-conda create -n ${CONDAENV} -y python==3.5.2 numpy scikit-learn notebook scikit-learn spacy pandas cython pytest || true
+conda create -n ${CONDAENV} -y python==3.5.2 numpy scikit-learn notebook scikit-learn spacy pandas cython pytest
 
 echo "Activating Conda Environment ----->"
-source ~/anaconda3/bin/activate ${CONDAENV}
+source activate ${CONDAENV}
 
 pip install -r requirements.in
 
 TF_VERSION=1.2.0
+if (which nvidia-smi); then
+    HAS_GPU=true
+fi
 
-if [ "$TEAM_CITY_AGENT" ]; then
-    pip install tensorflow==${TF_VERSION}
+if [ "$HAS_GPU" = true ]; then
+    pip install tensorflow-gpu==${TF_VERSION}
 else
-	pip install tensorflow-gpu==${TF_VERSION}
+	pip install tensorflow==${TF_VERSION}
 fi
 
 if [[ $(uname) == "Linux" ]]; then
-  sudo apt-get install protobuf-compiler
+  sudo apt-get install -y protobuf-compiler
 fi
 
 python -m spacy download en
