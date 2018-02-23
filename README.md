@@ -9,7 +9,7 @@ http://labs.semanticscholar.org/citeomatic/
 
 **Note**: The code for the demo is not currently part of this repo.  
 ## Paper
-[**Content-based Citation Recommendation**](https://arxiv.org/abs/) (NAACL 2018)
+**Content-based Citation Recommendation (NAACL 2018)**
 
   * Main Results
   ![alt text](citeomatic_results.png "Citeomatic Comparison")
