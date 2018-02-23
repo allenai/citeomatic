@@ -64,7 +64,7 @@ please set the environment variable: `export LD_LIBRARY_PATH=/usr/local/cuda/lib
 ```
 The script downloads all the required data and trained models to the provided location and adds a symlink from a local `data` directory to the provided `<location>`. Alternatively, you can provide `data/` as the location to avoid the symlink.
 
-**ATTENTION**: If you have access to the AI2 Corp network, you can set `location` to  `/net/nfs.corp/s2-research/citeomatic/public/` to avoid duplicating data.
+**ATTENTION AI2 Internal Users**: If you have access to the AI2 Corp network, please contact one of the contributors for tips on how to avoid duplicating data.
 
 
 ## Citeomatic Evaluation
