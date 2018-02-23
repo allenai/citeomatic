@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -x
+
 CONDAENV=ai2-citeomatic
 
 if ! (which conda); then
