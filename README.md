@@ -75,9 +75,9 @@ please set the environment variable: `export LD_LIBRARY_PATH=/usr/local/cuda/lib
 
 ## <a name="download"></a>Download data
 ```
-./get-data.sh data 
+./get-data.sh citeomatic_data 
 ```
-The script downloads all the required data (~75G) and trained models to `data`. Alternatively, if you provide a different `destination`, the script will create a symlink from `data` to the provided `<destination>`.
+The script downloads all the required data (~75G) and trained models to `citeomatic_data`. Alternatively, if you provide a different `destination`, the script will create a symlink from `data` to the provided `<destination>`.
 
 **ATTENTION AI2 Internal Users**: If you have access to the AI2 Corp network, please contact one of the contributors for tips on how to avoid downloading data.
 
