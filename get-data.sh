@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 set -x
+set -e
 
 LOC=$1
 
