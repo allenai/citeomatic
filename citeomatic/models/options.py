@@ -108,6 +108,9 @@ class ModelOptions(HasTraits):
     # Use both training and validation data for final training of model
     train_for_test_set = Bool(default_value=False)
 
+    enable_checkpoint = Bool(default_value=True)
+    checkpoint_save_dir = Unicode(default_value="/tmp/")
+
     def __repr__(self):
         return json.dumps(self._trait_values, indent=2, sort_keys=True)
 

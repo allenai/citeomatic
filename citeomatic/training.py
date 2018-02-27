@@ -24,6 +24,8 @@ from citeomatic.ranker import Ranker
 from citeomatic.serialization import model_from_directory
 from citeomatic.utils import import_from
 from citeomatic.eval_metrics import precision_recall_f1_at_ks, average_results, f1
+from keras.callbacks import ModelCheckpoint
+
 
 EVAL_KEYS = [1, 5, 10, 20, 50, 100, 1000]
 EVAL_DATASET_KEYS = {'dblp': 10,
@@ -219,6 +221,10 @@ def train_text_model(
                     verbose=1, patience=2, epsilon=0.01, min_lr=1e-6, factor=0.5
                 )
             )
+    if model_options.enable_checkpoint:
+        checkpointer = ModelCheckpoint(filepath=model_options.checkpoint_save_dir, verbose=1,
+                                       save_best_only=True)
+        callbacks_list.append(checkpointer)
 
     if models_ann_dir is None:
         ann_featurizer = featurizer
