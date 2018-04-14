@@ -34,8 +34,6 @@ class Evaluate(App):
     # ranker options
     citation_ranker_dir = Unicode(default_value=None, allow_none=True)
 
-    eval_venue = Unicode(default_value=None, allow_none=True)
-
     _embedder = None
     _ann = None
 
@@ -71,67 +69,72 @@ class Evaluate(App):
         else:
             corpus = Corpus.load(dp.get_db_path(self.dataset_type))
 
-        if self.ranker_type == 'none':
-            citation_ranker = NoneRanker()
-        elif self.ranker_type == 'neural':
-            assert self.citation_ranker_dir is not None
-            ranker_featurizer, ranker_models = model_from_directory(self.citation_ranker_dir,
-                                                                    on_cpu=True)
-            citation_ranker = Ranker(
-                corpus=corpus,
-                featurizer=ranker_featurizer,
-                citation_ranker=ranker_models['citeomatic'],
-                num_candidates_to_rank=100
-            )
-        else:
-            assert False
+        venues = [
+            "PloS one", "ArXiv", "Scientific reports", "Brain research", "The Journal of neuroscience : the official journal of the Society for Neuroscience", "Neuroscience letters", "Science", "Neuroscience", "Proceedings of the National Academy of Sciences of the United States of America", "ICASSP"
+        ]
 
-        candidate_results_map = {}
-        if self.num_candidates is None:
-            if self.dataset_type == 'oc':
-                num_candidates_list = [100]
-            else:
-                num_candidates_list = [1, 5, 10, 15, 25, 50, 75, 100]
-        else:
-            num_candidates_list = [self.num_candidates]
-
-        for num_candidates in num_candidates_list:
-
-            if self.candidate_selector_type == 'bm25':
-                index_path = dp.get_bm25_index_path(self.dataset_type)
-                candidate_selector = BM25CandidateSelector(
-                    corpus,
-                    index_path,
-                    num_candidates,
-                    False
+        for venue_filter in venues:
+            if self.ranker_type == 'none':
+                citation_ranker = NoneRanker()
+            elif self.ranker_type == 'neural':
+                assert self.citation_ranker_dir is not None
+                ranker_featurizer, ranker_models = model_from_directory(self.citation_ranker_dir,
+                                                                        on_cpu=True)
+                citation_ranker = Ranker(
+                    corpus=corpus,
+                    featurizer=ranker_featurizer,
+                    citation_ranker=ranker_models['citeomatic'],
+                    num_candidates_to_rank=100
                 )
-            elif self.candidate_selector_type == 'ann':
-                assert self.paper_embedder_dir is not None
-                featurizer, models = model_from_directory(self.paper_embedder_dir, on_cpu=True)
-                candidate_selector = self._make_ann_candidate_selector(corpus=corpus,
-                                                                       featurizer=featurizer,
-                                                                       embedding_model=models['embedding'],
-                                                                       num_candidates=num_candidates)
-            elif self.candidate_selector_type == 'oracle':
-                candidate_selector = OracleCandidateSelector(corpus)
             else:
                 assert False
 
-            results = eval_text_model(corpus, candidate_selector, citation_ranker,
-                                      papers_source=self.split, n_eval=self.n_eval,
-                                      eval_venue=self.eval_venue)
-            candidate_results_map[num_candidates] = results
+            candidate_results_map = {}
+            if self.num_candidates is None:
+                if self.dataset_type == 'oc':
+                    num_candidates_list = [100]
+                else:
+                    num_candidates_list = [1, 5, 10, 15, 25, 50, 75, 100]
+            else:
+                num_candidates_list = [self.num_candidates]
 
-        best_k = -1
-        best_metric = 0.0
-        metric_key = self.metric + "_1"
-        for k, v in candidate_results_map.items():
-            if best_metric < v[metric_key][EVAL_DATASET_KEYS[self.dataset_type]]:
-                best_k = k
-                best_metric = v[metric_key][EVAL_DATASET_KEYS[self.dataset_type]]
+            for num_candidates in num_candidates_list:
 
-        print(json.dumps(candidate_results_map, indent=4, sort_keys=True))
-        print(best_k)
-        print(best_metric)
+                if self.candidate_selector_type == 'bm25':
+                    index_path = dp.get_bm25_index_path(self.dataset_type)
+                    candidate_selector = BM25CandidateSelector(
+                        corpus,
+                        index_path,
+                        num_candidates,
+                        False
+                    )
+                elif self.candidate_selector_type == 'ann':
+                    assert self.paper_embedder_dir is not None
+                    featurizer, models = model_from_directory(self.paper_embedder_dir, on_cpu=True)
+                    candidate_selector = self._make_ann_candidate_selector(corpus=corpus,
+                                                                           featurizer=featurizer,
+                                                                           embedding_model=models['embedding'],
+                                                                           num_candidates=num_candidates)
+                elif self.candidate_selector_type == 'oracle':
+                    candidate_selector = OracleCandidateSelector(corpus)
+                else:
+                    assert False
+
+                results = eval_text_model(corpus, candidate_selector, citation_ranker,
+                                          papers_source=self.split, n_eval=self.n_eval,
+                                          eval_venue=venue_filter)
+                candidate_results_map[num_candidates] = results
+
+            best_k = -1
+            best_metric = 0.0
+            metric_key = self.metric + "_1"
+            for k, v in candidate_results_map.items():
+                if best_metric < v[metric_key][EVAL_DATASET_KEYS[self.dataset_type]]:
+                    best_k = k
+                    best_metric = v[metric_key][EVAL_DATASET_KEYS[self.dataset_type]]
+
+            print(json.dumps(candidate_results_map, indent=4, sort_keys=True))
+            print(best_k)
+            print(best_metric)
 
 Evaluate.run(__name__)
