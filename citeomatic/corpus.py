@@ -208,3 +208,4 @@ class Corpus(object):
         for paper_id in paper_ids:
             if self[paper_id].venue == venue:
                 filtered_paper_ids.append(paper_id)
+        return filtered_paper_ids
