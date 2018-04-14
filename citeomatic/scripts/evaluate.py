@@ -34,6 +34,8 @@ class Evaluate(App):
     # ranker options
     citation_ranker_dir = Unicode(default_value=None, allow_none=True)
 
+    eval_venue = Unicode(default_value=None, allow_none=True)
+
     _embedder = None
     _ann = None
 
@@ -116,7 +118,8 @@ class Evaluate(App):
                 assert False
 
             results = eval_text_model(corpus, candidate_selector, citation_ranker,
-                                      papers_source=self.split, n_eval=self.n_eval)
+                                      papers_source=self.split, n_eval=self.n_eval,
+                                      eval_venue=self.eval_venue)
             candidate_results_map[num_candidates] = results
 
         best_k = -1

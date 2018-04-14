@@ -202,3 +202,9 @@ class Corpus(object):
         # they indicate incorrect data
         return [cit_doc_id for cit_doc_id in out_citations if cit_doc_id in self._id_set and
                 self[cit_doc_id].year <= self[doc_id].year]
+
+    def filter_by_venue(self, paper_ids, venue):
+        filtered_paper_ids = []
+        for paper_id in paper_ids:
+            if self[paper_id].venue == venue:
+                filtered_paper_ids.append(paper_id)

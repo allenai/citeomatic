@@ -360,7 +360,8 @@ def eval_text_model(
         ranker: Ranker,
         papers_source='valid',
         min_citations=1,
-        n_eval=None
+        n_eval=None,
+        eval_venue=None
 ):
     if papers_source == 'valid':
         paper_ids_for_eval = corpus.valid_ids
@@ -372,6 +373,9 @@ def eval_text_model(
         logging.info("Using Test IDs")
         paper_ids_for_eval = corpus.test_ids
         candidate_ids_pool = corpus.train_ids + corpus.valid_ids + corpus.test_ids
+
+    if eval_venue is not None:
+        paper_ids_for_eval = corpus.filter_by_venue(paper_ids_for_eval, eval_venue)
 
     if corpus.corpus_type == 'dblp' or corpus.corpus_type == 'pubmed':
         # Hack to compare with previous work. BEWARE: do not do real experiments this way !!!
