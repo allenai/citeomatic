@@ -70,7 +70,7 @@ class Evaluate(App):
             corpus = Corpus.load(dp.get_db_path(self.dataset_type))
 
         venues = [
-            "PloS one", "ArXiv", "Scientific reports", "Brain research", "The Journal of neuroscience : the official journal of the Society for Neuroscience", "Neuroscience letters", "Science", "Neuroscience", "Proceedings of the National Academy of Sciences of the United States of America", "ICASSP"
+            "2", "12", "1", "15", "3", "7", "16", "5", "49", "217"
         ]
 
         for venue_filter in venues:
