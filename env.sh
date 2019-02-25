@@ -20,7 +20,7 @@ source activate ${CONDAENV}
 
 pip install -r requirements.in
 
-TF_VERSION=1.2.0
+TF_VERSION=1.12.0
 if (which nvidia-smi); then
     HAS_GPU=true
 fi

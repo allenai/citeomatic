@@ -9,7 +9,7 @@ honcho
 hyperopt
 luigi
 mmh3
-numpy==1.13.3
+numpy
 pandas
 pytest
 requests

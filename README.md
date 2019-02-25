@@ -48,7 +48,7 @@ git clone git@github.com:allenai/citeomatic.git
   3. Install GPU Drivers
   
   		Citeomatic uses the tensorflow framework to run its neural network models. It was tested on 
-NVIDIA GPUs (GeForce GTX 1080 and Tesla V100-SXM2). To use GPUs, install `CUDA` and `cudnn` compatible with your OS and GPU.
+NVIDIA GPUs (GeForce GTX 1080 and Tesla V100-SXM2). To use GPUs, install `CUDA` and `cudnn` compatible with your OS and GPU. The version of `tensorflow` used in this repo is 1.12, and requires CUDA 9.0.
 
       **NOTE**: Citeomatic can run without a GPU.  
 
@@ -65,7 +65,7 @@ NVIDIA GPUs (GeForce GTX 1080 and Tesla V100-SXM2). To use GPUs, install `CUDA` 
 #### Common Installation Issues
   1. If you see this error when running any of our scripts:
 ```
-ImportError: libcusolver.so.8.0: cannot open shared object file: No such file or directory
+ImportError: libcusolver.so.9.0: cannot open shared object file: No such file or directory
 ```
 please set the environment variable: `export LD_LIBRARY_PATH=/usr/local/cuda/lib64/`
 
