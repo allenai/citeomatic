@@ -4,10 +4,6 @@ A citation recommendation system that allows users to find relevant citations fo
 
 This repository contains code to train and evaluate citation recommendation models. We also include our trained models and steps to replicate our results in the NAACL paper.
 
-## Demo
-http://labs.semanticscholar.org/citeomatic/
-
-**Note**: The code for the demo is not currently part of this repo.  
 ## Paper
 [**Content-based Citation Recommendation (NAACL 2018)**](https://arxiv.org/abs/1802.08301)
 
