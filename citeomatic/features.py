@@ -58,11 +58,8 @@ def jaccard(featurizer, x, y):
     return float(len(c)) / (len(a) + len(b) - len(c))
 
 
-def _clean(text, text_pre_tokenized=True):
-    if not text_pre_tokenized:
-        return CLEAN_TEXT_RE.sub(' ', text.lower())
-    else:
-        return text
+def _clean(text):
+    return CLEAN_TEXT_RE.sub(' ', text.lower())
 
 
 class Featurizer(object):
