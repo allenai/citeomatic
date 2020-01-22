@@ -1,6 +1,6 @@
 <p align="center"><img width="30%" src="citeomatic_logo.png" /></p>
 
-A citation recommendation system that allows users to find relevant citations for their paper drafts. The tool is backed by [Semantic Scholar](https://www.semanticscholar.org/)'s [OpenCorpus](http://labs.semanticscholar.org/corpus/corpus/archive#) dataset (released on `2017-02-21`). 
+A citation recommendation system that allows users to find relevant citations for their paper drafts. The tool is backed by [Semantic Scholar](https://www.semanticscholar.org/)'s [OpenCorpus](https://api.semanticscholar.org/corpus/download/) dataset (released on `2017-02-21`). 
 
 This repository contains code to train and evaluate citation recommendation models. We also include our trained models and steps to replicate our results in the NAACL paper.
 
